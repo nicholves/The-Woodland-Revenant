@@ -109,15 +109,32 @@ void Game::InitEventHandlers(void){
 
 
 void Game::SetupResources(void){
-
-    // Create a simple object to represent the asteroids
-    resman_.CreateCone("SimpleObject", 2.0, 1.0, 10, 10);
-
+    std::string signVerticesFilepath = std::string(MATERIAL_DIRECTORY) + std::string("/sign.customv");
+    std::string signFacesFilepath = std::string(MATERIAL_DIRECTORY) + std::string("/sign.customf");
 
 
-    // Load material to be applied to asteroids
-    std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
+    resman_.LoadCustomResource(Mesh, "SignPost", signVerticesFilepath.c_str(), signFacesFilepath.c_str());
+    std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/car.obj");
+    resman_.LoadResource(Mesh, "Car", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/Cabin.obj");
+    resman_.LoadResource(Mesh, "Cabin", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
     resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_material");
+    resman_.LoadResource(Material, "TextureShader", filename.c_str());
+
+    // Load texture to be used on the object
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/Sign_tex.png");
+    resman_.LoadResource(Texture, "SignTexture", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/Car_tex.png");
+    resman_.LoadResource(Texture, "CarTexture", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/Cabin_tex.png");
+    resman_.LoadResource(Texture, "CabinTexture", filename.c_str());
 }
 
 
@@ -126,10 +143,26 @@ void Game::SetupScene(void){
     // Set background color for the scene
     scene_.SetBackgroundColor(viewport_background_color_g);
 
-    // Create asteroid field
-    CreateAsteroidField();
+    Resource* geom = resman_.GetResource("SignPost");
+    Resource* mat = resman_.GetResource("TextureShader");
+    Resource* text = resman_.GetResource("SignTexture");
+    sign_ = scene_.CreateNode("SignPost", geom, mat, text);
+    sign_->Scale(glm::vec3(100, 100, 100));
 
-	
+    geom = resman_.GetResource("Car");
+    mat = resman_.GetResource("TextureShader");
+    text = resman_.GetResource("CarTexture");
+    car_ = scene_.CreateNode("Car", geom, mat, text);
+    car_->Scale(glm::vec3(10, 10, 10));
+    car_->Translate(glm::vec3(0, 0, 50));
+
+    geom = resman_.GetResource("Cabin");
+    mat = resman_.GetResource("TextureShader");
+    text = resman_.GetResource("CabinTexture");
+    cabin_ = scene_.CreateNode("Cabin", geom, mat, text);
+    cabin_->Scale(glm::vec3(100, 100, 100));
+    cabin_->Translate(glm::vec3(0, 0, 1000));
+
 
 }
 
@@ -177,8 +210,8 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
     }
 
     // View control
-    float rot_factor(glm::pi<float>() / 180); // amount the ship turns per keypress
-    float trans_factor = 1.0; // amount the ship steps forward per keypress
+    float rot_factor(2 * glm::pi<float>() / 180); // amount the ship turns per keypress
+    float trans_factor = 10.0; // amount the ship steps forward per keypress
     if (key == GLFW_KEY_UP){
         game->camera_.Pitch(rot_factor);
     }
@@ -231,48 +264,6 @@ void Game::ResizeCallback(GLFWwindow* window, int width, int height){
 Game::~Game(){
     
     glfwTerminate();
-}
-
-
-Asteroid *Game::CreateAsteroidInstance(std::string entity_name, std::string object_name, std::string material_name){
-
-    // Get resources
-    Resource *geom = resman_.GetResource(object_name);
-    if (!geom){
-        throw(GameException(std::string("Could not find resource \"")+object_name+std::string("\"")));
-    }
-
-    Resource *mat = resman_.GetResource(material_name);
-    if (!mat){
-        throw(GameException(std::string("Could not find resource \"")+material_name+std::string("\"")));
-    }
-
-    // Create asteroid instance
-    Asteroid *ast = new Asteroid(entity_name, geom, mat);
-    scene_.AddNode(ast);
-    return ast;
-}
-
-
-void Game::CreateAsteroidField(int num_asteroids){
-
-    // Create a number of asteroid instances
-    for (int i = 0; i < num_asteroids; i++){
-        // Create instance name
-        std::stringstream ss;
-        ss << i;
-        std::string index = ss.str();
-        std::string name = "AsteroidInstance" + index;
-
-        // Create asteroid instance
-        Asteroid *ast = CreateAsteroidInstance(name, "SimpleObject", "ObjectMaterial");
-
-        // Set attributes of asteroid: random position, orientation, and
-        // angular momentum
-        ast->SetPosition(glm::vec3(-300.0 + 600.0*((float) rand() / RAND_MAX), -300.0 + 600.0*((float) rand() / RAND_MAX), 600.0*((float) rand() / RAND_MAX)));
-        ast->SetOrientation(glm::normalize(glm::angleAxis(glm::pi<float>()*((float) rand() / RAND_MAX), glm::vec3(((float) rand() / RAND_MAX), ((float) rand() / RAND_MAX), ((float) rand() / RAND_MAX)))));
-        ast->SetAngM(glm::normalize(glm::angleAxis(0.05f*glm::pi<float>()*((float) rand() / RAND_MAX), glm::vec3(((float) rand() / RAND_MAX), ((float) rand() / RAND_MAX), ((float) rand() / RAND_MAX)))));
-    }
 }
 
 

@@ -16,37 +16,37 @@ namespace game {
     // Class that manages all the objects in a scene
     class SceneGraph {
 
-        private:
-            // Background color
-            glm::vec3 background_color_;
+    private:
+        // Background color
+        glm::vec3 background_color_;
 
-            // Scene nodes to render
-            std::vector<SceneNode *> node_;
+        // Scene nodes to render
+        std::vector<SceneNode*> node_;
 
-        public:
-            // Constructor and destructor
-            SceneGraph(void);
-            ~SceneGraph();
+    public:
+        // Constructor and destructor
+        SceneGraph(void);
+        ~SceneGraph();
 
-            // Background color
-            void SetBackgroundColor(glm::vec3 color);
-            glm::vec3 GetBackgroundColor(void) const;
-            
-            // Create a scene node from the specified resources
-            SceneNode *CreateNode(std::string node_name, Resource *geometry, Resource *material);
-            // Add an already-created node
-            void AddNode(SceneNode *node);
-            // Find a scene node with a specific name
-            SceneNode *GetNode(std::string node_name) const;
-            // Get node const iterator
-            std::vector<SceneNode *>::const_iterator begin() const;
-            std::vector<SceneNode *>::const_iterator end() const;
+        // Background color
+        void SetBackgroundColor(glm::vec3 color);
+        glm::vec3 GetBackgroundColor(void) const;
 
-            // Draw the entire scene
-            void Draw(Camera *camera);
+        // Create a scene node from the specified resources
+        SceneNode* CreateNode(std::string node_name, Resource* geometry, Resource* material, Resource* texture = NULL);
+        // Add an already-created node
+        void AddNode(SceneNode* node);
+        // Find a scene node with a specific name
+        SceneNode* GetNode(std::string node_name) const;
+        // Get node const iterator
+        std::vector<SceneNode*>::const_iterator begin() const;
+        std::vector<SceneNode*>::const_iterator end() const;
 
-            // Update entire scene
-            void Update(void);
+        // Draw the entire scene
+        void Draw(Camera* camera);
+
+        // Update entire scene
+        void Update(void);
 
     }; // class SceneGraph
 

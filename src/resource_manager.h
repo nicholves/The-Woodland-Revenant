@@ -27,6 +27,10 @@ namespace game {
             void AddResource(ResourceType type, const std::string name, GLuint array_buffer, GLuint element_array_buffer, GLsizei size);
             // Load a resource from a file, according to the specified type
             void LoadResource(ResourceType type, const std::string name, const char *filename);
+            void LoadCustomResource(ResourceType type, const std::string name, const char* verticesFilepath, const char* facesFilepath);
+
+            GLuint ParseVertices(const std::string& verticesText);
+            GLuint ParseFaces(const std::string& facesText, GLsizei& faceSize);
             // Get the resource with the specified name
             Resource *GetResource(const std::string name) const;
 
@@ -52,6 +56,10 @@ namespace game {
             void LoadMaterial(const std::string name, const char *prefix);
             // Load a text file into memory (could be source code)
             std::string LoadTextFile(const char *filename);
+            // Load a texture from an image file: png, jpg, etc.
+            void LoadTexture(const std::string name, const char* filename);
+            // Loads a mesh in obj format
+            void LoadMesh(const std::string name, const char* filename);
 
     }; // class ResourceManager
 

@@ -48,6 +48,11 @@ namespace game {
             // Scene graph containing all nodes to render
             SceneGraph scene_;
 
+            // TODO: get rid of these
+            SceneNode* sign_;
+            SceneNode* car_;
+            SceneNode* cabin_;
+
             // Resources available to the game
             ResourceManager resman_;
 

@@ -10,91 +10,91 @@
 
 namespace game {
 
-SceneGraph::SceneGraph(void){
+    SceneGraph::SceneGraph(void) {
 
-    background_color_ = glm::vec3(0.0, 0.0, 0.0);
-}
-
-
-SceneGraph::~SceneGraph(){
-}
+        background_color_ = glm::vec3(0.0, 0.0, 0.0);
+    }
 
 
-void SceneGraph::SetBackgroundColor(glm::vec3 color){
-
-    background_color_ = color;
-}
+    SceneGraph::~SceneGraph() {
+    }
 
 
-glm::vec3 SceneGraph::GetBackgroundColor(void) const {
+    void SceneGraph::SetBackgroundColor(glm::vec3 color) {
 
-    return background_color_;
-}
- 
-
-SceneNode *SceneGraph::CreateNode(std::string node_name, Resource *geometry, Resource *material){
-
-    // Create scene node with the specified resources
-    SceneNode *scn = new SceneNode(node_name, geometry, material);
-
-    // Add node to the scene
-    node_.push_back(scn);
-
-    return scn;
-}
+        background_color_ = color;
+    }
 
 
-void SceneGraph::AddNode(SceneNode *node){
+    glm::vec3 SceneGraph::GetBackgroundColor(void) const {
 
-    node_.push_back(node);
-}
+        return background_color_;
+    }
 
 
-SceneNode *SceneGraph::GetNode(std::string node_name) const {
+    SceneNode* SceneGraph::CreateNode(std::string node_name, Resource* geometry, Resource* material, Resource* texture) {
 
-    // Find node with the specified name
-    for (int i = 0; i < node_.size(); i++){
-        if (node_[i]->GetName() == node_name){
-            return node_[i];
+        // Create scene node with the specified resources
+        SceneNode* scn = new SceneNode(node_name, geometry, material, texture);
+
+        // Add node to the scene
+        node_.push_back(scn);
+
+        return scn;
+    }
+
+
+    void SceneGraph::AddNode(SceneNode* node) {
+
+        node_.push_back(node);
+    }
+
+
+    SceneNode* SceneGraph::GetNode(std::string node_name) const {
+
+        // Find node with the specified name
+        for (int i = 0; i < node_.size(); i++) {
+            if (node_[i]->GetName() == node_name) {
+                return node_[i];
+            }
+        }
+        return NULL;
+
+    }
+
+
+    std::vector<SceneNode*>::const_iterator SceneGraph::begin() const {
+
+        return node_.begin();
+    }
+
+
+    std::vector<SceneNode*>::const_iterator SceneGraph::end() const {
+
+        return node_.end();
+    }
+
+
+    void SceneGraph::Draw(Camera* camera) {
+
+        // Clear background
+        glClearColor(background_color_[0],
+            background_color_[1],
+            background_color_[2], 0.0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Draw all scene nodes
+        for (int i = 0; i < node_.size(); i++) {
+            node_[i]->Draw(camera);
         }
     }
-    return NULL;
-
-}
 
 
-std::vector<SceneNode *>::const_iterator SceneGraph::begin() const {
+    void SceneGraph::Update(void) {
 
-    return node_.begin();
-}
-
-
-std::vector<SceneNode *>::const_iterator SceneGraph::end() const {
-
-    return node_.end();
-}
-
-
-void SceneGraph::Draw(Camera *camera){
-
-    // Clear background
-    glClearColor(background_color_[0], 
-                 background_color_[1],
-                 background_color_[2], 0.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // Draw all scene nodes
-    for (int i = 0; i < node_.size(); i++){
-        node_[i]->Draw(camera);
+        for (int i = 0; i < node_.size(); i++) {
+            node_[i]->Update();
+        }
     }
-}
-
-
-void SceneGraph::Update(void){
-
-    for (int i = 0; i < node_.size(); i++){
-        node_[i]->Update();
-    }
-}
 
 } // namespace game
