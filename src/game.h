@@ -55,6 +55,7 @@ namespace game {
             SceneNode* rock1_;
             SceneNode* rock2_;
             SceneNode* rock3_;
+            SceneNode* gravestone_;
 
             // Resources available to the game
             ResourceManager resman_;

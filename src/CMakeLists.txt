@@ -26,8 +26,8 @@ target_link_libraries(${PROJ_NAME} ${OPENGL_gl_LIBRARY})
 
 # Other libraries needed
 #set(LIBRARY_PATH C:\Users\nicho\Libraries)
-set(LIBRARY_PATH C:/Users/hikel/Desktop/University/Fall\ 2023/COMP\ 3501A/Libraries)
-
+#set(LIBRARY_PATH C:/Users/hikel/Desktop/University/Fall\ 2023/COMP\ 3501A/Libraries)
+set(LIBRARY_PATH C:\Users\kevin\OneDrive\Carleton\YEAR3\FALL\COMP3501\Libraries)
 include_directories(${LIBRARY_PATH}/include)
 if(NOT WIN32)
     find_library(GLEW_LIBRARY GLEW)

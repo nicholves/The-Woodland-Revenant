@@ -134,6 +134,18 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/rock3.obj");
     resman_.LoadResource(Mesh, "Rock_3", filename.c_str());
 
+    //Gravestone
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/gravestoneRound.obj");
+    resman_.LoadResource(Mesh, "Gravestone", filename.c_str());
+
+    //Fence
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/fence.obj");
+    resman_.LoadResource(Mesh, "Fence", filename.c_str());
+
+    //Key
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/key.obj");
+    resman_.LoadResource(Mesh, "Key", filename.c_str());
+
     //-------------------------------- Texture --------------------------------
     // Load texture to be used on the object
     //Sign Texture
@@ -161,6 +173,17 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/rock4_tex.png");
     resman_.LoadResource(Texture, "Rock_4Texture", filename.c_str());
 
+    //Gravestone Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/gravestone_tex.jpg");
+    resman_.LoadResource(Texture, "GravestoneTexture", filename.c_str());
+
+    //Fence Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/fence_tex.jpg");
+    resman_.LoadResource(Texture, "FenceTexture", filename.c_str());
+
+    //Key Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/key_tex.jpeg");
+    resman_.LoadResource(Texture, "KeyTexture", filename.c_str());
 
     //-------------------------------Materials-----------------------------
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
@@ -225,6 +248,29 @@ void Game::SetupScene(void){
     rock2_->Scale(glm::vec3(2, 2, 2));
     rock2_->Translate(glm::vec3(275, 0, 10));
 
+    //Gravestone
+    geom = resman_.GetResource("Gravestone");
+    mat = resman_.GetResource("TextureShader");
+    text = resman_.GetResource("GravestoneTexture");
+    gravestone_ = scene_.CreateNode("Gravestone1", geom, mat, text);
+    gravestone_->Scale(glm::vec3(300, 300, 300));
+    gravestone_->Translate(glm::vec3(100, 0, -100));
+
+    //Fence
+    geom = resman_.GetResource("Fence");
+    mat = resman_.GetResource("TextureShader");
+    text = resman_.GetResource("FenceTexture");
+    gravestone_ = scene_.CreateNode("Fence1", geom, mat, text);
+    gravestone_->Scale(glm::vec3(300, 300, 300));
+    gravestone_->Translate(glm::vec3(-100, 0, -200));
+
+    //Key
+    geom = resman_.GetResource("Key");
+    mat = resman_.GetResource("TextureShader");
+    text = resman_.GetResource("KeyTexture");
+    gravestone_ = scene_.CreateNode("Key1", geom, mat, text);
+    gravestone_->Scale(glm::vec3(150, 150, 150));
+    gravestone_->Translate(glm::vec3(-100, 0, -200));
 }
 
 
