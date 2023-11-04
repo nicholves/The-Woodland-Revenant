@@ -113,28 +113,62 @@ void Game::SetupResources(void){
     std::string signFacesFilepath = std::string(MATERIAL_DIRECTORY) + std::string("/sign.customf");
 
 
+    //----------------------------------- Meshes ------------------------------------
     resman_.LoadCustomResource(Mesh, "SignPost", signVerticesFilepath.c_str(), signFacesFilepath.c_str());
+
+    //Car Mesh
     std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/car.obj");
     resman_.LoadResource(Mesh, "Car", filename.c_str());
 
+    //Cabin Mesh
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/Cabin.obj");
     resman_.LoadResource(Mesh, "Cabin", filename.c_str());
 
+    //Rock Meshes
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/rock1.obj");
+    resman_.LoadResource(Mesh, "Rock_1", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/rock2.obj");
+    resman_.LoadResource(Mesh, "Rock_2", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/rock3.obj");
+    resman_.LoadResource(Mesh, "Rock_3", filename.c_str());
+
+    //-------------------------------- Texture --------------------------------
+    // Load texture to be used on the object
+    //Sign Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/Sign_tex.png");
+    resman_.LoadResource(Texture, "SignTexture", filename.c_str());
+
+    //Car Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/Car_tex.png");
+    resman_.LoadResource(Texture, "CarTexture", filename.c_str());
+
+    //Cabin Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/Cabin_tex.png");
+    resman_.LoadResource(Texture, "CabinTexture", filename.c_str());
+
+    //rock textures
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/rock1_tex.jpg");
+    resman_.LoadResource(Texture, "Rock_1Texture", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/rock2_tex.png");
+    resman_.LoadResource(Texture, "Rock_2Texture", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/rock3_tex.jpg");
+    resman_.LoadResource(Texture, "Rock_3Texture", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/rock4_tex.png");
+    resman_.LoadResource(Texture, "Rock_4Texture", filename.c_str());
+
+
+    //-------------------------------Materials-----------------------------
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
     resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
 
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_material");
     resman_.LoadResource(Material, "TextureShader", filename.c_str());
 
-    // Load texture to be used on the object
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/Sign_tex.png");
-    resman_.LoadResource(Texture, "SignTexture", filename.c_str());
-
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/Car_tex.png");
-    resman_.LoadResource(Texture, "CarTexture", filename.c_str());
-
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/Cabin_tex.png");
-    resman_.LoadResource(Texture, "CabinTexture", filename.c_str());
 }
 
 
@@ -143,12 +177,14 @@ void Game::SetupScene(void){
     // Set background color for the scene
     scene_.SetBackgroundColor(viewport_background_color_g);
 
+    //SignPost
     Resource* geom = resman_.GetResource("SignPost");
     Resource* mat = resman_.GetResource("TextureShader");
     Resource* text = resman_.GetResource("SignTexture");
     sign_ = scene_.CreateNode("SignPost", geom, mat, text);
     sign_->Scale(glm::vec3(100, 100, 100));
 
+    //Car
     geom = resman_.GetResource("Car");
     mat = resman_.GetResource("TextureShader");
     text = resman_.GetResource("CarTexture");
@@ -156,6 +192,7 @@ void Game::SetupScene(void){
     car_->Scale(glm::vec3(10, 10, 10));
     car_->Translate(glm::vec3(0, 0, 50));
 
+    //Cabin
     geom = resman_.GetResource("Cabin");
     mat = resman_.GetResource("TextureShader");
     text = resman_.GetResource("CabinTexture");
@@ -163,6 +200,30 @@ void Game::SetupScene(void){
     cabin_->Scale(glm::vec3(100, 100, 100));
     cabin_->Translate(glm::vec3(0, 0, 1000));
 
+    //Rock1
+    geom = resman_.GetResource("Rock_1");
+    mat = resman_.GetResource("TextureShader");
+    text = resman_.GetResource("Rock_1Texture");
+    rock1_ = scene_.CreateNode("Rock1", geom, mat, text);
+    rock1_->Scale(glm::vec3(1, 1, 1));
+    rock1_->Translate(glm::vec3(175, 0, 0));
+    
+
+    //Rock2
+    geom = resman_.GetResource("Rock_2");
+    mat = resman_.GetResource("TextureShader");
+    text = resman_.GetResource("Rock_2Texture");
+    rock2_ = scene_.CreateNode("Rock2", geom, mat, text);
+    rock2_->Scale(glm::vec3(20, 20, 20));
+    rock2_->Translate(glm::vec3(300, 0, 0));
+    
+    //Rock3
+    geom = resman_.GetResource("Rock_3");
+    mat = resman_.GetResource("TextureShader");
+    text = resman_.GetResource("Rock_3Texture");
+    rock2_ = scene_.CreateNode("Rock3", geom, mat, text);
+    rock2_->Scale(glm::vec3(2, 2, 2));
+    rock2_->Translate(glm::vec3(275, 0, 10));
 
 }
 
@@ -171,6 +232,9 @@ void Game::MainLoop(void){
 
     // Loop while the user did not close the window
     while (!glfwWindowShouldClose(window_)){
+
+        checkKeys();
+
         // Animate the scene
         if (animating_){
             static double last_time = 0;
@@ -200,7 +264,7 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
     Game *game = (Game *) ptr;
 
     // Quit game if 'q' is pressed
-    if (key == GLFW_KEY_Q && action == GLFW_PRESS){
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
         glfwSetWindowShouldClose(window, true);
     }
 
@@ -213,40 +277,54 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
     float rot_factor(2 * glm::pi<float>() / 180); // amount the ship turns per keypress
     float trans_factor = 10.0; // amount the ship steps forward per keypress
     if (key == GLFW_KEY_UP){
-        game->camera_.Pitch(rot_factor);
-    }
-    if (key == GLFW_KEY_DOWN){
-        game->camera_.Pitch(-rot_factor);
-    }
-    if (key == GLFW_KEY_LEFT){
-        game->camera_.Yaw(rot_factor);
-    }
-    if (key == GLFW_KEY_RIGHT){
-        game->camera_.Yaw(-rot_factor);
-    }
-    if (key == GLFW_KEY_S){
-        game->camera_.Roll(-rot_factor);
-    }
-    if (key == GLFW_KEY_X){
-        game->camera_.Roll(rot_factor);
-    }
-    if (key == GLFW_KEY_A){
         game->camera_.Translate(game->camera_.GetForward()*trans_factor);
     }
-    if (key == GLFW_KEY_Z){
+    if (key == GLFW_KEY_DOWN){
         game->camera_.Translate(-game->camera_.GetForward()*trans_factor);
     }
-    if (key == GLFW_KEY_J){
+    if (key == GLFW_KEY_RIGHT){
         game->camera_.Translate(-game->camera_.GetSide()*trans_factor);
     }
-    if (key == GLFW_KEY_L){
+    if (key == GLFW_KEY_LEFT){
         game->camera_.Translate(game->camera_.GetSide()*trans_factor);
     }
-    if (key == GLFW_KEY_I){
+    if (key == GLFW_KEY_Z){
         game->camera_.Translate(game->camera_.GetUp()*trans_factor);
     }
-    if (key == GLFW_KEY_K){
+    if (key == GLFW_KEY_X){
         game->camera_.Translate(-game->camera_.GetUp()*trans_factor);
+    }
+}
+
+void Game::checkKeys() {
+    // Check the state of keys for smooth input
+    bool isWKeyPressed = glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS;
+    bool isSKeyPressed = glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS;
+    bool isAKeyPressed = glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS;
+    bool isDKeyPressed = glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS;
+    bool isQKeyPressed = glfwGetKey(window_, GLFW_KEY_Q) == GLFW_PRESS;
+    bool isEKeyPressed = glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS;
+
+    // Handle camera movement based on key states
+    //float rot_factor(glm::pi<float>() / 180);
+    float rot_factor = 0.005f;
+    if (isWKeyPressed) {
+        camera_.Pitch(rot_factor);
+    }
+    if (isSKeyPressed) {
+        camera_.Pitch(-rot_factor);
+    }
+    if (isAKeyPressed) {
+        camera_.Yaw(rot_factor);
+    }
+    if (isDKeyPressed) {
+        camera_.Yaw(-rot_factor);
+    }
+    if (isQKeyPressed) {
+        camera_.Roll(-rot_factor);
+    }
+    if (isEKeyPressed) {
+        camera_.Roll(rot_factor);
     }
 }
 

@@ -52,6 +52,9 @@ namespace game {
             SceneNode* sign_;
             SceneNode* car_;
             SceneNode* cabin_;
+            SceneNode* rock1_;
+            SceneNode* rock2_;
+            SceneNode* rock3_;
 
             // Resources available to the game
             ResourceManager resman_;
@@ -70,6 +73,9 @@ namespace game {
             // Methods to handle events
             static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
             static void ResizeCallback(GLFWwindow* window, int width, int height);
+
+            //keys
+            void checkKeys();
 
             // Asteroid field
             // Create instance of one asteroid
