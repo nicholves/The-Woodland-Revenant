@@ -37,8 +37,6 @@ namespace game {
         // Create scene node with the specified resources
         SceneNode* scn = new SceneNode(node_name, geometry, material, texture);
 
-        std::cout << node_name << std::endl;
-
         // Add node to the scene
         node_.push_back(scn);
 

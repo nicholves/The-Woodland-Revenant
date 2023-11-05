@@ -139,6 +139,10 @@ namespace game {
         // Set projection matrix in shader
         GLint projection_mat = glGetUniformLocation(program, "projection_mat");
         glUniformMatrix4fv(projection_mat, 1, GL_FALSE, glm::value_ptr(projection_matrix_));
+
+        glm::vec3 camera_pos = GetPosition();
+        GLint camera_position = glGetUniformLocation(program, "camera_position");
+        glUniform3f(camera_position, camera_pos.x, camera_pos.y, camera_pos.z);
     }
 
 

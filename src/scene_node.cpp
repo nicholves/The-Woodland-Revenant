@@ -168,9 +168,6 @@ namespace game {
     }
 
     glm::mat4 SceneNode::CalculateTransform(float current_time) const {
-        std::cout << std::to_string(position_.x) << std::endl;
-        std::cout << std::to_string(orbit_rotation.x) << std::endl;
-
         glm::quat adjusted_orbit = orbit_rotation;
         // Adjusting orbit to handle wind as well if its wind affected
         if (wind_affected) adjusted_orbit *= glm::normalize(glm::angleAxis(glm::sin(current_time) * wind_strength, glm::vec3(0, 0, 1)));
@@ -277,9 +274,24 @@ namespace game {
 
         // Transformations
         GLint world_mat = glGetUniformLocation(program, "world_mat");
-        glUniformMatrix4fv(world_mat, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0)));
-
         glUniformMatrix4fv(world_mat, 1, GL_FALSE, glm::value_ptr(CalculateTransform(current_time)));
+
+        // Specular Power
+        GLint specular_power = glGetUniformLocation(program, "specular_power");
+        glUniform1f(specular_power, 41);
+
+        // Light Position
+        glm::vec3 light_pos = glm::vec3(500, 1500, 500);
+        GLint light_position = glGetUniformLocation(program, "light_position");
+        glUniform3f(light_position, light_pos.x, light_pos.y, light_pos.z);
+
+        // Light Color
+        GLint light_color = glGetUniformLocation(program, "light_color");
+        glUniform4f(light_color, 1, 1, 1, 1);
+
+        // Object Color
+        GLint object_color = glGetUniformLocation(program, "object_color");
+        glUniform4f(object_color, 0.33, 0.19, 0.14, 1);
     }
 
 } // namespace game;

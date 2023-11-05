@@ -11,7 +11,7 @@ namespace game {
 // They are written here as global variables, but ideally they should be loaded from a configuration file
 
 // Main window settings
-const std::string window_title_g = "Asteroid Field";
+const std::string window_title_g = "The Woodland Revenant";
 const unsigned int window_width_g = 800;
 const unsigned int window_height_g = 600;
 const bool window_full_screen_g = false;
@@ -21,7 +21,7 @@ float camera_near_clip_distance_g = 0.01;
 float camera_far_clip_distance_g = 1000.0;
 float camera_fov_g = 60.0; // Field-of-view of camera (degrees)
 const glm::vec3 viewport_background_color_g(0.0, 0.0, 0.0);
-glm::vec3 camera_position_g(0.0, 0.0, 800.0);
+glm::vec3 camera_position_g(0.0, 0.0, 100.0);
 glm::vec3 camera_look_at_g(0.0, 0.0, 0.0);
 glm::vec3 camera_up_g(0.0, 1.0, 0.0);
 
@@ -135,7 +135,7 @@ void Game::SetupResources(void){
     resman_.LoadResource(Mesh, "Rock_3", filename.c_str());
 
     //Tree
-    resman_.CreateCylinder("BranchObject", 4.0, 1.0, 10, 10);
+    resman_.CreateCylinder("BranchObject", 4.0, 0.5, 10, 10);
 
     //Gravestone
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/gravestoneRound.obj");
@@ -188,12 +188,22 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/key_tex.jpeg");
     resman_.LoadResource(Texture, "KeyTexture", filename.c_str());
 
+    // Tree Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/tree_tex.png");
+    resman_.LoadResource(Texture, "TreeTexture", filename.c_str());
+
     //-------------------------------Materials-----------------------------
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
     resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
 
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_material");
     resman_.LoadResource(Material, "TextureShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/lit_textured_material");
+    resman_.LoadResource(Material, "LitTextureShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/lit_color");
+    resman_.LoadResource(Material, "LitColorShader", filename.c_str());
 }
 
 
@@ -202,24 +212,28 @@ void Game::SetupScene(void){
     // Set background color for the scene
     scene_.SetBackgroundColor(viewport_background_color_g);
 
+    // Move the camera up a bit so its like its the players head
+    camera_.Translate(camera_.GetUp() * 20.0f);
+
     //SignPost
     Resource* geom = resman_.GetResource("SignPost");
-    Resource* mat = resman_.GetResource("TextureShader");
+    Resource* mat = resman_.GetResource("LitTextureShader");
     Resource* text = resman_.GetResource("SignTexture");
     sign_ = scene_.CreateNode("SignPost", geom, mat, text);
-    sign_->Scale(glm::vec3(100, 100, 100));
+    sign_->Scale(glm::vec3(20, 20, 20));
 
     //Car
     geom = resman_.GetResource("Car");
-    mat = resman_.GetResource("TextureShader");
+    mat = resman_.GetResource("LitTextureShader");
     text = resman_.GetResource("CarTexture");
     car_ = scene_.CreateNode("Car", geom, mat, text);
     car_->Scale(glm::vec3(10, 10, 10));
-    car_->Translate(glm::vec3(0, 0, 50));
+    car_->Translate(glm::vec3(-200, 0, 50));
+    car_->Rotate(glm::normalize(glm::angleAxis(glm::pi<float>() / 2, glm::vec3(0, 1, 0))));
 
     //Cabin
     geom = resman_.GetResource("Cabin");
-    mat = resman_.GetResource("TextureShader");
+    mat = resman_.GetResource("LitTextureShader");
     text = resman_.GetResource("CabinTexture");
     cabin_ = scene_.CreateNode("Cabin", geom, mat, text);
     cabin_->Scale(glm::vec3(100, 100, 100));
@@ -227,7 +241,7 @@ void Game::SetupScene(void){
 
     //Rock1
     geom = resman_.GetResource("Rock_1");
-    mat = resman_.GetResource("TextureShader");
+    mat = resman_.GetResource("LitTextureShader");
     text = resman_.GetResource("Rock_1Texture");
     rock1_ = scene_.CreateNode("Rock1", geom, mat, text);
     rock1_->Scale(glm::vec3(1, 1, 1));
@@ -236,7 +250,7 @@ void Game::SetupScene(void){
 
     //Rock2
     geom = resman_.GetResource("Rock_2");
-    mat = resman_.GetResource("TextureShader");
+    mat = resman_.GetResource("LitTextureShader");
     text = resman_.GetResource("Rock_2Texture");
     rock2_ = scene_.CreateNode("Rock2", geom, mat, text);
     rock2_->Scale(glm::vec3(20, 20, 20));
@@ -244,7 +258,7 @@ void Game::SetupScene(void){
     
     //Rock3
     geom = resman_.GetResource("Rock_3");
-    mat = resman_.GetResource("TextureShader");
+    mat = resman_.GetResource("LitTextureShader");
     text = resman_.GetResource("Rock_3Texture");
     rock2_ = scene_.CreateNode("Rock3", geom, mat, text);
     rock2_->Scale(glm::vec3(2, 2, 2));
@@ -252,23 +266,23 @@ void Game::SetupScene(void){
 
     //Gravestone
     geom = resman_.GetResource("Gravestone");
-    mat = resman_.GetResource("TextureShader");
+    mat = resman_.GetResource("LitTextureShader");
     text = resman_.GetResource("GravestoneTexture");
     gravestone_ = scene_.CreateNode("Gravestone1", geom, mat, text);
-    gravestone_->Scale(glm::vec3(300, 300, 300));
+    gravestone_->Scale(glm::vec3(30, 30, 30));
     gravestone_->Translate(glm::vec3(100, 0, -100));
 
     //Fence
     geom = resman_.GetResource("Fence");
-    mat = resman_.GetResource("TextureShader");
+    mat = resman_.GetResource("LitTextureShader");
     text = resman_.GetResource("FenceTexture");
     gravestone_ = scene_.CreateNode("Fence1", geom, mat, text);
-    gravestone_->Scale(glm::vec3(300, 300, 300));
+    gravestone_->Scale(glm::vec3(50, 50, 50));
     gravestone_->Translate(glm::vec3(-100, 0, -200));
 
     //Key
     geom = resman_.GetResource("Key");
-    mat = resman_.GetResource("TextureShader");
+    mat = resman_.GetResource("LitTextureShader");
     text = resman_.GetResource("KeyTexture");
     gravestone_ = scene_.CreateNode("Key1", geom, mat, text);
     gravestone_->Scale(glm::vec3(150, 150, 150));
@@ -279,10 +293,11 @@ void Game::SetupScene(void){
     SetupTree("Tree2");
 
     SceneNode* tree1 = scene_.GetNode("Tree1_branch0");
-    tree1->Scale(glm::vec3(50, 50, 50));
+    tree1->Scale(glm::vec3(5, 5, 5));
     tree1->Translate(glm::vec3(-200, 0, -200));
     SceneNode* tree2 = scene_.GetNode("Tree2_branch0");
     tree2->Scale(glm::vec3(5, 5, 5));
+    tree2->Translate(glm::vec3(-300, 0, -250));
 }
 
 
@@ -330,28 +345,6 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS){
         game->animating_ = (game->animating_ == true) ? false : true;
     }
-
-    // View control
-    float rot_factor(2 * glm::pi<float>() / 180); // amount the ship turns per keypress
-    float trans_factor = 10.0; // amount the ship steps forward per keypress
-    if (key == GLFW_KEY_UP){
-        game->camera_.Translate(game->camera_.GetForward()*trans_factor);
-    }
-    if (key == GLFW_KEY_DOWN){
-        game->camera_.Translate(-game->camera_.GetForward()*trans_factor);
-    }
-    if (key == GLFW_KEY_RIGHT){
-        game->camera_.Translate(-game->camera_.GetSide()*trans_factor);
-    }
-    if (key == GLFW_KEY_LEFT){
-        game->camera_.Translate(game->camera_.GetSide()*trans_factor);
-    }
-    if (key == GLFW_KEY_Z){
-        game->camera_.Translate(game->camera_.GetUp()*trans_factor);
-    }
-    if (key == GLFW_KEY_X){
-        game->camera_.Translate(-game->camera_.GetUp()*trans_factor);
-    }
 }
 
 void Game::checkKeys() {
@@ -360,29 +353,27 @@ void Game::checkKeys() {
     bool isSKeyPressed = glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS;
     bool isAKeyPressed = glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS;
     bool isDKeyPressed = glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS;
-    bool isQKeyPressed = glfwGetKey(window_, GLFW_KEY_Q) == GLFW_PRESS;
-    bool isEKeyPressed = glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS;
+
+    bool isUpKeyPressed = glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS;
+    bool isDownKeyPressed = glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS;
+    bool isLeftKeyPressed = glfwGetKey(window_, GLFW_KEY_LEFT) == GLFW_PRESS;
+    bool isRightKeyPressed = glfwGetKey(window_, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
     // Handle camera movement based on key states
-    //float rot_factor(glm::pi<float>() / 180);
-    float rot_factor = 0.005f;
-    if (isWKeyPressed) {
-        camera_.Pitch(rot_factor);
+    float trans_factor = 0.5f;
+    float rot_factor = 0.01f;
+
+    if (isWKeyPressed || isUpKeyPressed) {
+        camera_.Translate(camera_.GetForward() * trans_factor);
     }
-    if (isSKeyPressed) {
-        camera_.Pitch(-rot_factor);
+    if (isSKeyPressed || isDownKeyPressed) {
+        camera_.Translate(-camera_.GetForward() * trans_factor);
     }
-    if (isAKeyPressed) {
+    if (isAKeyPressed || isLeftKeyPressed) {
         camera_.Yaw(rot_factor);
     }
-    if (isDKeyPressed) {
+    if (isDKeyPressed || isRightKeyPressed) {
         camera_.Yaw(-rot_factor);
-    }
-    if (isQKeyPressed) {
-        camera_.Roll(-rot_factor);
-    }
-    if (isEKeyPressed) {
-        camera_.Roll(rot_factor);
     }
 }
 
@@ -472,13 +463,15 @@ SceneNode* Game::CreateBranch(const std::string& name) {
         throw(GameException(std::string("Could not find branch resource")));
     }
 
-    Resource* mat = resman_.GetResource("ObjectMaterial");
+    Resource* mat = resman_.GetResource("LitTextureShader");
     if (!mat) {
         throw(GameException(std::string("Could not find object material")));
     }
 
+    Resource* text = resman_.GetResource("TreeTexture");
+
     // Create asteroid instance
-    SceneNode* node = new SceneNode(name, geom, mat);
+    SceneNode* node = new SceneNode(name, geom, mat, text);
     scene_.AddNode(node);
     return node;
 }
