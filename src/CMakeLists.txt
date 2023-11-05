@@ -24,6 +24,10 @@ find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 target_link_libraries(${PROJ_NAME} ${OPENGL_gl_LIBRARY})
 
+# Source Directory
+add_compile_definitions(CMAKE_PROJ_DIRECTORY="${CMAKE_SOURCE_DIR}/..")
+add_compile_definitions(CMAKE_SOURCE_DIRECTORY="${CMAKE_SOURCE_DIR}")
+
 # Other libraries needed
 #set(LIBRARY_PATH C:\Users\nicho\Libraries)
 #set(LIBRARY_PATH C:/Users/hikel/Desktop/University/Fall\ 2023/COMP\ 3501A/Libraries)
