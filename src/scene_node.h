@@ -55,6 +55,15 @@ namespace game {
         GLuint GetElementArrayBuffer(void) const;
         GLsizei GetSize(void) const;
         GLuint GetMaterial(void) const;
+        glm::vec3 GetOrbitTranslation(void) const;
+        glm::quat GetOrbitRotation(void) const;
+
+        void SetParent(SceneNode*);
+        void SetOrbitTranslation(const glm::vec3);
+        void SetOrbitRotation(const glm::quat);
+        void SetWindAffected(const bool);
+
+        glm::mat4 CalculateTransform(float) const;
 
     private:
         std::string name_; // Name of the scene node
@@ -67,6 +76,12 @@ namespace game {
         glm::vec3 position_; // Position of node
         glm::quat orientation_; // Orientation of node
         glm::vec3 scale_; // Scale of node
+
+        SceneNode* parent_ = NULL;
+        bool wind_affected; // Whether to make it move with the wind
+        glm::vec3 orbit_translation = glm::vec3(0, 0, 0);
+        glm::quat orbit_rotation = glm::quat(0, 0, 0, 0);
+        float wind_strength = 0.05f; // The amount the wind moves the tree
 
         // Set matrices that transform the node in a shader program
         void SetupShader(GLuint program);

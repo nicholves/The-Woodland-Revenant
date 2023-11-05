@@ -1,3 +1,0 @@
-C:/Users/kevin/source/repos/The-Woodland-Revenant/src/out/build/x86-Debug/CMakeFiles/CameraDemo.dir
-C:/Users/kevin/source/repos/The-Woodland-Revenant/src/out/build/x86-Debug/CMakeFiles/edit_cache.dir
-C:/Users/kevin/source/repos/The-Woodland-Revenant/src/out/build/x86-Debug/CMakeFiles/rebuild_cache.dir

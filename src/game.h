@@ -78,11 +78,10 @@ namespace game {
             //keys
             void checkKeys();
 
-            // Asteroid field
-            // Create instance of one asteroid
-            Asteroid *CreateAsteroidInstance(std::string entity_name, std::string object_name, std::string material_name);
-            // Create entire random asteroid field
-            void CreateAsteroidField(int num_asteroids = 1500);
+            // Setting up tree
+            void SetupTree(const std::string&);
+            SceneNode* CreateBranch(const std::string&);
+            SceneNode* CreateLeaf(const std::string&);
 
 
     }; // class Game

@@ -143,6 +143,50 @@ namespace game {
         return material_;
     }
 
+    void SceneNode::SetOrbitTranslation(const glm::vec3 tr) {
+        orbit_translation = tr;
+    }
+
+    void SceneNode::SetOrbitRotation(const glm::quat rot) {
+        orbit_rotation = rot;
+    }
+
+    glm::vec3 SceneNode::GetOrbitTranslation(void) const {
+        return orbit_translation;
+    }
+
+    glm::quat SceneNode::GetOrbitRotation(void) const {
+        return orbit_rotation;
+    }
+
+    void SceneNode::SetParent(SceneNode* parent) {
+        parent_ = parent;
+    }
+
+    void SceneNode::SetWindAffected(const bool wind) {
+        wind_affected = wind;
+    }
+
+    glm::mat4 SceneNode::CalculateTransform(float current_time) const {
+        std::cout << std::to_string(position_.x) << std::endl;
+        std::cout << std::to_string(orbit_rotation.x) << std::endl;
+
+        glm::quat adjusted_orbit = orbit_rotation;
+        // Adjusting orbit to handle wind as well if its wind affected
+        if (wind_affected) adjusted_orbit *= glm::normalize(glm::angleAxis(glm::sin(current_time) * wind_strength, glm::vec3(0, 0, 1)));
+
+        glm::mat4 orbit = glm::inverse(glm::translate(glm::mat4(1.0), orbit_translation)) * glm::mat4_cast(adjusted_orbit) * glm::translate(glm::mat4(1.0), orbit_translation);
+        glm::mat4 scaling = glm::scale(glm::mat4(1.0), scale_);
+        glm::mat4 rotation = glm::mat4_cast(orientation_);
+        glm::mat4 translation = glm::translate(glm::mat4(1.0), position_);
+        glm::mat4 transf = translation * rotation * orbit * scaling;
+
+        if (parent_) {
+            transf = parent_->CalculateTransform(current_time) * transf; // Affect the transform based on the parent transform
+        }
+
+        return transf;
+    }
 
     void SceneNode::Draw(Camera* camera) {
 
@@ -205,9 +249,6 @@ namespace game {
         glm::mat4 orbit = glm::mat4(1.0); // identity -- left out for now
         glm::mat4 transf = translation * orbit * rotation * scaling;
 
-        GLint world_mat = glGetUniformLocation(program, "world_mat");
-        glUniformMatrix4fv(world_mat, 1, GL_FALSE, glm::value_ptr(transf));
-
         // Normal matrix
         glm::mat4 normal_matrix = glm::transpose(glm::inverse(transf));
         GLint normal_mat = glGetUniformLocation(program, "normal_mat");
@@ -233,6 +274,12 @@ namespace game {
         GLint timer_var = glGetUniformLocation(program, "timer");
         double current_time = glfwGetTime();
         glUniform1f(timer_var, (float)current_time);
+
+        // Transformations
+        GLint world_mat = glGetUniformLocation(program, "world_mat");
+        glUniformMatrix4fv(world_mat, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0)));
+
+        glUniformMatrix4fv(world_mat, 1, GL_FALSE, glm::value_ptr(CalculateTransform(current_time)));
     }
 
 } // namespace game;

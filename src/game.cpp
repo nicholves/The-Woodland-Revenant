@@ -134,6 +134,9 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/rock3.obj");
     resman_.LoadResource(Mesh, "Rock_3", filename.c_str());
 
+    //Tree
+    resman_.CreateCylinder("BranchObject", 4.0, 1.0, 10, 10);
+
     //Gravestone
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/gravestoneRound.obj");
     resman_.LoadResource(Mesh, "Gravestone", filename.c_str());
@@ -191,7 +194,6 @@ void Game::SetupResources(void){
 
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_material");
     resman_.LoadResource(Material, "TextureShader", filename.c_str());
-
 }
 
 
@@ -271,6 +273,16 @@ void Game::SetupScene(void){
     gravestone_ = scene_.CreateNode("Key1", geom, mat, text);
     gravestone_->Scale(glm::vec3(150, 150, 150));
     gravestone_->Translate(glm::vec3(-100, 0, -200));
+
+    // Trees
+    SetupTree("Tree1");
+    SetupTree("Tree2");
+
+    SceneNode* tree1 = scene_.GetNode("Tree1_branch0");
+    tree1->Scale(glm::vec3(50, 50, 50));
+    tree1->Translate(glm::vec3(-200, 0, -200));
+    SceneNode* tree2 = scene_.GetNode("Tree2_branch0");
+    tree2->Scale(glm::vec3(5, 5, 5));
 }
 
 
@@ -390,5 +402,103 @@ Game::~Game(){
     glfwTerminate();
 }
 
+void Game::SetupTree(const std::string& tree_name) {
+    int parts[50]; // Value of 1 = split and go diagonally, 2 = Go diagonally, 3 = split and go straight
+    std::string parents[50];
+    std::string names[50];
+
+    parts[0] = 1;
+    int j = 1;
+
+    // Create Branches
+    for (int i = 0; i < 30; ++i) {
+        std::string name = tree_name + "_branch" + std::to_string(i);
+        SceneNode* branch = CreateBranch(name);
+        SceneNode* parent = scene_.GetNode(parents[i]);
+        branch->SetParent(parent);
+        names[i] = name;
+
+        if (i != 0) {
+            branch->SetPosition(glm::vec3(0, 3.5f, 0));
+        }
+
+
+        if (parts[i] == 1) { // Aim to the left and split to have two children (1 and 2)
+            parts[j] = 1; // Append 1 and 2 to the part array for part behaviour
+            parts[j + 1] = 2;
+            parents[j] = name; // Set the parent of the indexes the part behaviour was set to to be this
+            parents[j + 1] = name;
+            j += 2;
+
+            if (i != 0) {
+                // Translate so orbiting around the bottom of the branch
+                branch->SetOrbitTranslation(glm::vec3(0, 2, 0));
+                // Orbit to the left
+                branch->SetOrbitRotation(glm::normalize(glm::angleAxis(glm::pi<float>() / 8, glm::vec3(0, 0, 1))));
+                branch->SetWindAffected(true); // Only this part is affected by wind
+            }
+        }
+        else if (parts[i] == 2) { // Aim to the right and have one child that goes straight (3)
+            parts[j] = 3; // Append 3 to the part array for part behaviour
+            parents[j] = name; // Set the parent of the indexes the part behaviour was set to to be this
+            j += 1;
+
+            if (i != 0) {
+                // Translate so orbiting around the bottom of the branch
+                branch->SetOrbitTranslation(glm::vec3(0, 2, 0));
+                // Orbit to the right
+                branch->SetOrbitRotation(glm::normalize(glm::angleAxis(glm::pi<float>() / 8, glm::vec3(0, 0, -1))));
+            }
+        }
+        else { // Aim straight and split to have two children (1 and 2)
+            parts[j] = 1; // Append 1 and 2 to the part array for part behaviour
+            parts[j + 1] = 2;
+            parents[j] = name; // Set the parent of the indexes the part behaviour was set to to be this
+            parents[j + 1] = name;
+            j += 2;
+
+            if (i != 0) {
+                branch->SetOrbitTranslation(glm::vec3(0, 0, 0)); // Set orbit to 0 to make it not orbit at all (and stay straight)
+                branch->SetOrbitRotation(glm::normalize(glm::angleAxis(0.0f, glm::vec3(0, 0, 0))));
+            }
+        }
+    }
+}
+
+SceneNode* Game::CreateBranch(const std::string& name) {
+    // Get resources
+    Resource* geom = resman_.GetResource("BranchObject");
+    if (!geom) {
+        throw(GameException(std::string("Could not find branch resource")));
+    }
+
+    Resource* mat = resman_.GetResource("ObjectMaterial");
+    if (!mat) {
+        throw(GameException(std::string("Could not find object material")));
+    }
+
+    // Create asteroid instance
+    SceneNode* node = new SceneNode(name, geom, mat);
+    scene_.AddNode(node);
+    return node;
+}
+
+SceneNode* Game::CreateLeaf(const std::string& name) {
+    // Get resources
+    Resource* geom = resman_.GetResource("LeafObject");
+    if (!geom) {
+        throw(GameException(std::string("Could not find branch resource")));
+    }
+
+    Resource* mat = resman_.GetResource("ObjectMaterial");
+    if (!mat) {
+        throw(GameException(std::string("Could not find object material")));
+    }
+
+    // Create asteroid instance
+    SceneNode* node = new SceneNode(name, geom, mat);
+    scene_.AddNode(node);
+    return node;
+}
 
 } // namespace game
