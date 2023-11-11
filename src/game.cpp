@@ -196,6 +196,10 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/grass_tex.png");
     resman_.LoadResource(Texture, "GrassTexture", filename.c_str());
 
+    // Moon Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/moon_texture.jpg");
+    resman_.LoadResource(Texture, "MoonTexture", filename.c_str());
+
     //-------------------------------Materials-----------------------------
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
     resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
@@ -227,10 +231,11 @@ void Game::SetupScene(void){
     Resource* geom = resman_.GetResource("TerrainMesh");
     Resource* mat  = resman_.GetResource("TerrainShader");
     Resource* text = resman_.GetResource("GrassTexture");
+    Resource* mtext = resman_.GetResource("MoonTexture");
     
-    SceneNode* terrain = scene_.CreateNode("Terrain", geom, mat, text);
-    constexpr int bumpyNess = 1; // at 1 the terrain will vary between 1 and -1 in the y. Increasing this causes more jagged terrain
-    terrain->SetScale(glm::vec3(100.0f, 1.0f, 100.0f));
+    SceneNode* terrain = scene_.CreateNode("Terrain", geom, mat, mtext);
+    constexpr int bumpyNess = 2; // at 1 the terrain will vary between 1 and -1 in the y. Increasing this causes more jagged terrain
+    terrain->SetScale(glm::vec3(100.0f, 25.0f, 100.0f));
 
 
     //SignPost
