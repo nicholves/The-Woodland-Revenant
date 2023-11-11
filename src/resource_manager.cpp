@@ -96,6 +96,150 @@ void ResourceManager::LoadCustomResource(ResourceType type, const std::string na
     AddResource(Mesh, name, vbo, ebo, faceSize);
 }
 
+void ResourceManager::LoadTerrainReseource(ResourceType type, const std::string name, const char* terrainFilePath) {
+    constexpr float sizeOfQuad = 0.1f;
+
+
+    // first create the vertices from heightfield data
+    std::string fileContent = LoadTextFile(terrainFilePath);
+    std::vector<std::string> lines = StringSplit(fileContent, '\n');
+    const int width = StringSplit(lines[0], ' ').size();
+
+    const int vertex_att = 11; // 11 attributes per vertex: 3D position (3), normal vector (3), tangent vector (3), 2D texture coordinates (2)
+    const int height = lines.size();
+    const int vertexNum = width * height;
+
+    GLfloat* vertices = new GLfloat[vertex_att * (width * height)];
+
+    assert(width % 2 == 0);
+    assert(height % 2 == 0);
+
+    int rowCtr = 0;
+    for (const std::string& line : lines) {
+        std::vector<std::string> verticesStrings = StringSplit(line, ' ');
+
+        int columnCtr = 0;
+        for (const std::string& vertex : verticesStrings) {
+            std::vector<std::string> inputNums = StringSplit(vertex, ',');
+
+            float zpos = -((height >> 2) - rowCtr) * sizeOfQuad;
+            float xpos = -((width >> 2) - columnCtr) * sizeOfQuad;
+            float ypos = atof(inputNums[0].c_str());
+            float textCordu = atof(inputNums[1].c_str());
+            float textCordv = atof(inputNums[2].c_str());
+
+            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 0] = xpos;
+            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1] = ypos;
+            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 2] = zpos;
+
+            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 9] = textCordu;
+            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 10] = textCordv;
+
+            columnCtr++;
+        }
+        rowCtr++;
+    }
+
+    // now fill in the normal and tangent vectors
+
+    /*
+        I'm not sure this is correct but basically what I am doing is having all normal vectors point directly up and
+        having all tangent vectors be tangential to the next vertex to the right, or down based on what's possible.
+        This might give poor estimations for the surface normals when doing normal mapping but i'm not currently sure how to do
+        better without duplicating vertices that aren't in the corners.
+
+        For this assignment we aren't doing normal mapping yet so it might not matter
+
+        NV
+    */
+
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            vertices[width * i * vertex_att + j * vertex_att + 3] = 0.0;
+            vertices[width * i * vertex_att + j * vertex_att + 4] = 1.0;
+            vertices[width * i * vertex_att + j * vertex_att + 5] = 0.0;
+
+            glm::vec3 vertexPos = glm::vec3(vertices[width * i * vertex_att + j * vertex_att + 0],
+                vertices[width * i * vertex_att + j * vertex_att + 1], vertices[width * i * vertex_att + j * vertex_att + 2]);
+
+            glm::vec3 comparisonVertex;
+            if (j != width - 1) {
+                comparisonVertex = glm::vec3(vertices[width * i * vertex_att + (j + 1) * vertex_att + 0],
+                    vertices[width * i * vertex_att + (j + 1) * vertex_att + 1], vertices[width * i * vertex_att + (j + 1) * vertex_att + 2]);
+            }
+            else if (i != height - 1) {
+                comparisonVertex = glm::vec3(vertices[width * (i + 1) * vertex_att + j * vertex_att + 0],
+                    vertices[width * (i + 1) * vertex_att + j * vertex_att + 1], vertices[width * (i + 1) * vertex_att + j * vertex_att + 2]);
+            }
+            // we're in the bottom right corner
+            else {
+                comparisonVertex = glm::vec3(vertices[width * (i - 1) * vertex_att + j * vertex_att + 0],
+                    vertices[width * (i - 1) * vertex_att + j * vertex_att + 1], vertices[width * (i - 1) * vertex_att + j * vertex_att + 2]);
+            }
+
+            glm::vec3 differenceVector = vertexPos - comparisonVertex;
+
+            vertices[width * i * vertex_att + j * vertex_att + 6] = differenceVector.x;
+            vertices[width * i * vertex_att + j * vertex_att + 7] = differenceVector.y;
+            vertices[width * i * vertex_att + j * vertex_att + 8] = differenceVector.z;
+        }
+    }
+
+
+    // Create OpenGL buffer for vertices
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertexNum * vertex_att * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+
+
+    // now let's do faces
+    const int numQuads = (width - 1) * height;
+    const int numFaces = numQuads * 2;
+
+    const int face_att = 3; // Vertex indices (3)
+    GLuint* indexes = new GLuint[numFaces * face_att];
+
+    int quadCtr = 0;
+    for (int i = 0; i < numFaces * face_att; i += 6) {
+        if ((quadCtr - 99) % 100 == 0 && quadCtr != 0) {
+        quadCtr++;
+        continue;
+    }
+
+        GLuint vertex1 = quadCtr;
+        GLuint vertex2 = quadCtr + 1;
+
+        GLuint vertex3 = quadCtr + width;
+        GLuint vertex4 = quadCtr + width + 1;
+
+        // triangle 1
+        indexes[i] = vertex1;
+        indexes[i + 1] = vertex2;
+        indexes[i + 2] = vertex4;
+
+        // triangle 2
+        indexes[i + 3] = vertex1;
+        indexes[i + 4] = vertex3;
+        indexes[i + 5] = vertex4;
+
+        quadCtr++;
+    }
+
+    // Create OpenGL buffer for faces
+    GLuint ebo;
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, numFaces * face_att * sizeof(GLuint), indexes, GL_STATIC_DRAW);
+
+
+    // Free data buffers
+    delete[] vertices;
+    delete[] indexes;
+
+    AddResource(ResourceType::Mesh, name, vbo, ebo, numFaces * face_att);
+}
+
 GLuint ResourceManager::ParseVertices(const std::string& verticesText) {
     std::vector<std::string> vertexLinesWithBlanks = StringSplit(verticesText, '\n');
     std::vector<std::string> vertexLines;
