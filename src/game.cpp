@@ -213,7 +213,7 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/lit_color");
     resman_.LoadResource(Material, "LitColorShader", filename.c_str());
 
-    resman_.LoadTerrainReseource(Type::Mesh, "TerrainMesh", MATERIAL_DIRECTORY "/terrain.heightfield");
+    camera_.SetTerrainGrid(resman_.LoadTerrainResource(Type::Mesh, "TerrainMesh", MATERIAL_DIRECTORY "/terrain.heightfield"));
 
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/terrain");
     resman_.LoadResource(Material, "TerrainShader", filename.c_str());

@@ -96,9 +96,10 @@ void ResourceManager::LoadCustomResource(ResourceType type, const std::string na
     AddResource(Mesh, name, vbo, ebo, faceSize);
 }
 
-void ResourceManager::LoadTerrainReseource(ResourceType type, const std::string name, const char* terrainFilePath) {
+std::vector<std::vector<float>> ResourceManager::LoadTerrainResource(ResourceType type, const std::string name, const char* terrainFilePath) {
     constexpr float sizeOfQuad = 0.1f;
-
+    
+    std::vector<std::vector<float>> terrain_grid;
 
     // first create the vertices from heightfield data
     std::string fileContent = LoadTextFile(terrainFilePath);
@@ -117,6 +118,9 @@ void ResourceManager::LoadTerrainReseource(ResourceType type, const std::string 
     int rowCtr = 0;
     for (const std::string& line : lines) {
         std::vector<std::string> verticesStrings = StringSplit(line, ' ');
+        std::vector<float> row;
+
+        terrain_grid.push_back(row);
 
         int columnCtr = 0;
         for (const std::string& vertex : verticesStrings) {
@@ -135,8 +139,11 @@ void ResourceManager::LoadTerrainReseource(ResourceType type, const std::string 
             vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 9] = textCordu;
             vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 10] = textCordv;
 
+            terrain_grid[rowCtr].push_back(ypos);
+
             columnCtr++;
         }
+
         rowCtr++;
     }
 
@@ -238,6 +245,8 @@ void ResourceManager::LoadTerrainReseource(ResourceType type, const std::string 
     delete[] indexes;
 
     AddResource(ResourceType::Mesh, name, vbo, ebo, numFaces * face_att);
+
+    return terrain_grid;
 }
 
 GLuint ResourceManager::ParseVertices(const std::string& verticesText) {

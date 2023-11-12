@@ -40,10 +40,52 @@ namespace game {
         orientation_ = orientation;
     }
 
+    void Camera::SetTerrainGrid(std::vector<std::vector<float>> grid) {
+        terrain_grid_ = grid;
+    }
 
     void Camera::Translate(glm::vec3 trans) {
+        constexpr float sizeOfQuad = 0.1f;
+        const int coord_offset = 250; // This is to avoid negative indices, seems to be the right value
+        const float player_height = 20.0f;
+        const float height_scalar = 25.0f;
 
-        position_ += trans;
+        glm::vec3 temp_pos = position_ + trans;
+
+        // Get indices in the grid for all 4 points
+        int x1 = glm::floor((temp_pos.x + coord_offset) * sizeOfQuad);
+        int x2 = glm::ceil((temp_pos.x + coord_offset) * sizeOfQuad);
+        int z1 = glm::floor((temp_pos.z + coord_offset) * sizeOfQuad);
+        int z2 = glm::ceil((temp_pos.z + coord_offset) * sizeOfQuad);
+
+        /*std::cout << x1 << std::endl;
+        std::cout << x2 << std::endl;
+        std::cout << z1 << std::endl;
+        std::cout << z2 << std::endl;*/
+
+        glm::vec3 p1 = glm::vec3(x1, terrain_grid_[x1][z1], z1);
+        glm::vec3 p2 = glm::vec3(x1, terrain_grid_[x1][z2], z2);
+        glm::vec3 p3 = glm::vec3(x2, terrain_grid_[x2][z1], z1);
+        glm::vec3 p4 = glm::vec3(x2, terrain_grid_[x2][z2], z2);
+
+        /*std::cout << p1.y << std::endl;
+        std::cout << p2.y << std::endl;
+        std::cout << p3.y << std::endl;
+        std::cout << p4.y << std::endl;*/
+
+        // Interpolate the y position
+
+        float t = (temp_pos.x + coord_offset) * sizeOfQuad - x1;
+        float s = (temp_pos.z + coord_offset) * sizeOfQuad - z1;
+
+        /*std::cout << t << std::endl;
+        std::cout << s << std::endl;*/
+
+        temp_pos.y = ((1 - t) * ((1 - s) * p1 + s * p2) + t * ((1 - s) * p3 + s * p4)).y * height_scalar + player_height;
+
+        //std::cout << temp_pos.y << std::endl;
+
+        position_ = temp_pos;
     }
 
     void Camera::MoveForward(float amount) {
@@ -147,6 +189,8 @@ namespace game {
 
 
     void Camera::SetupViewMatrix(void) {
+
+        //std::cout << position_.y << std::endl;
 
         //view_matrix_ = glm::lookAt(position, look_at, up);
 

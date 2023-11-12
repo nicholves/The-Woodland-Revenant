@@ -1,8 +1,8 @@
-# Install script for directory: C:/Users/hikel/Desktop/University/Fall 2023/COMP 3501A/Assignments/Assignment 6/The-Woodland-Revenant-HeightFieldAssignment/src
+# Install script for directory: C:/Users/kevin/source/repos/The-Woodland-Revenant/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Users/hikel/Desktop/University/Fall 2023/COMP 3501A/Assignments/Assignment 6/The-Woodland-Revenant-HeightFieldAssignment/src/out/install/x86-Debug")
+  set(CMAKE_INSTALL_PREFIX "C:/Users/kevin/source/repos/The-Woodland-Revenant/src/out/install/x86-Debug")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -40,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/hikel/Desktop/University/Fall 2023/COMP 3501A/Assignments/Assignment 6/The-Woodland-Revenant-HeightFieldAssignment/src/out/build/x86-Debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/kevin/source/repos/The-Woodland-Revenant/src/out/build/x86-Debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
