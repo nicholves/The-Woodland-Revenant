@@ -31,5 +31,5 @@
 *.app
 
 .vs
-src/out
-src/.vs
+src/out*
+src/.vs*
