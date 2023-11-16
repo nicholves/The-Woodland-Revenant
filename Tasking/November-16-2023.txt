@@ -1,0 +1,10 @@
+Ghost model, ai - Kelvin
+
+2 particle systems. (ghost particles like magic, item pickup particles like stars) - Kevin
+
+Lighting dark aesthetic plus flashlight - Nick
+
+title and game over screen, camera mouse control, rest of models - Ben
+
+
+music
