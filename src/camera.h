@@ -27,6 +27,9 @@ namespace game {
         // Set terrain grid
         void SetTerrainGrid(std::vector<std::vector<float>>);
 
+        // Updates y position
+        void UpdateYPos();
+
         // Perform global transformations of camera
         void Translate(glm::vec3 trans);
         void MoveForward(float amount);
