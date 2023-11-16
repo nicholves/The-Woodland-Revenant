@@ -44,8 +44,24 @@ namespace game {
         terrain_grid_ = grid;
     }
 
+    void Camera::SetImpassableCells(std::vector<std::vector<bool>> grid) {
+        impassable_cells_ = grid;
+    }
+
     void Camera::Translate(glm::vec3 trans) {
         constexpr float sizeOfQuad = 0.1f;
+        const int coord_offset = 250; // This is to avoid negative indices, seems to be the right value
+
+        // Get indices in the grid for all 4 points
+        int x1 = glm::floor((position_.x + trans.x + coord_offset) * sizeOfQuad);
+        int z1 = glm::floor((position_.z + trans.z + coord_offset) * sizeOfQuad);
+
+        if (impassable_cells_[x1][z1]) {
+            return;
+        }
+
+
+        /*constexpr float sizeOfQuad = 0.1f;
         const int coord_offset = 250; // This is to avoid negative indices, seems to be the right value
 
         // Get indices in the grid for all 4 points
@@ -63,7 +79,7 @@ namespace game {
 
         if (glm::max(glm::max(glm::abs(terrain_grid_[z1][x1] - terrain_grid_[z1][x2]), glm::abs(terrain_grid_[z2][x1] - terrain_grid_[z2][x2])), glm::max(glm::abs(terrain_grid_[z1][x1] - terrain_grid_[z2][x1]), glm::abs(terrain_grid_[z1][x2] - terrain_grid_[z2][x2]))) > 0.1) { // If exceeds slope threshold for cell in new position then dont move to it
             return;
-        }
+        }*/
 
         position_ += trans;
         UpdateYPos();

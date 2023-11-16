@@ -96,6 +96,32 @@ void ResourceManager::LoadCustomResource(ResourceType type, const std::string na
     AddResource(Mesh, name, vbo, ebo, faceSize);
 }
 
+std::vector<std::vector<bool>> ResourceManager::GetImpassableCells(const char* impassableFilePath, std::vector<std::vector<float>> terrain) {
+    constexpr float sizeOfQuad = 0.1f;
+
+    std::vector<std::vector<bool>> impassable_cells;
+
+    // Get the impassable data from the impassable file. 1 means that cell is impassable
+    std::string fileContent = LoadTextFile(impassableFilePath);
+    std::vector<std::string> lines = StringSplit(fileContent, '\n');
+
+    const int width = StringSplit(lines[0], ',').size();
+    const int height = lines.size();
+
+    for (const std::string& line : lines) {
+        std::vector<std::string> cells = StringSplit(line, ',');
+        std::vector<bool> row;
+
+        for (const std::string& cell : cells) {
+            row.push_back(cell == "1");
+        }
+
+        impassable_cells.push_back(row);
+    }
+
+    return impassable_cells;
+}
+
 std::vector<std::vector<float>> ResourceManager::LoadTerrainResource(ResourceType type, const std::string name, const char* terrainFilePath) {
     constexpr float sizeOfQuad = 0.1f;
     
