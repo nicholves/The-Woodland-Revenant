@@ -192,10 +192,6 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/tree_tex.png");
     resman_.LoadResource(Texture, "TreeTexture", filename.c_str());
 
-    // Grass Texture
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/grass_tex.png");
-    resman_.LoadResource(Texture, "GrassTexture", filename.c_str());
-
     // Moon Texture
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/moon_texture.jpg");
     resman_.LoadResource(Texture, "MoonTexture", filename.c_str());
