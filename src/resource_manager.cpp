@@ -98,6 +98,7 @@ void ResourceManager::LoadCustomResource(ResourceType type, const std::string na
 
 std::vector<std::vector<bool>> ResourceManager::GetImpassableCells(const char* impassableFilePath, std::vector<std::vector<float>> terrain) {
     constexpr float sizeOfQuad = 0.1f;
+    const int coord_offset = 250; // This is to avoid negative indices, seems to be the right value
 
     std::vector<std::vector<bool>> impassable_cells;
 
@@ -117,6 +118,25 @@ std::vector<std::vector<bool>> ResourceManager::GetImpassableCells(const char* i
         }
 
         impassable_cells.push_back(row);
+    }
+
+    // Set a cell to impassable if the maximum horizontal or vertical slope is greater than a threshold
+    const float tall_slope_threshold = 0.1f;
+
+    // Loop through all cells and get the max slope of each. Then compare against threshold
+    for (int i = 0; i < width; ++i) {
+        for (int j = 0; j < height; ++j) {
+            float maxHorizontalSlope = glm::max(glm::abs(terrain[i][j] - terrain[i][j+1]), glm::abs(terrain[i+1][j] - terrain[i+1][j+1]));
+            float maxVerticalSlope = glm::max(glm::abs(terrain[i][j] - terrain[i+1][j]), glm::abs(terrain[i][j+1] - terrain[i+1][j+1]));
+            
+            float maxSlope = glm::max(maxHorizontalSlope, maxVerticalSlope);
+
+            std::cout << maxSlope << std::endl;
+
+            if (maxSlope > tall_slope_threshold) {
+                impassable_cells[i][j] = true;
+            }
+        }
     }
 
     return impassable_cells;
