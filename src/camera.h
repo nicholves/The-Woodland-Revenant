@@ -63,6 +63,7 @@ namespace game {
         glm::mat4 view_matrix_; // View matrix
         glm::mat4 projection_matrix_; // Projection matrix
         std::vector<std::vector<float>> terrain_grid_; // 2D vector of y positions
+        std::vector<std::vector<float>> passable_area;
 
         // Create view matrix from current camera parameters
         void SetupViewMatrix(void);

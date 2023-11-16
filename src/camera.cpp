@@ -45,6 +45,26 @@ namespace game {
     }
 
     void Camera::Translate(glm::vec3 trans) {
+        constexpr float sizeOfQuad = 0.1f;
+        const int coord_offset = 250; // This is to avoid negative indices, seems to be the right value
+
+        // Get indices in the grid for all 4 points
+        int x1 = glm::floor((position_.x + trans.x + coord_offset) * sizeOfQuad);
+        int x2 = glm::ceil((position_.x + trans.x + coord_offset) * sizeOfQuad);
+        int z1 = glm::floor((position_.z + trans.z + coord_offset) * sizeOfQuad);
+        int z2 = glm::ceil((position_.z + trans.z + coord_offset) * sizeOfQuad);
+
+        glm::vec3 p1 = glm::vec3(x1, terrain_grid_[z1][x1], z1);
+        glm::vec3 p2 = glm::vec3(x1, terrain_grid_[z1][x2], z2);
+        glm::vec3 p3 = glm::vec3(x2, terrain_grid_[z2][x1], z1);
+        glm::vec3 p4 = glm::vec3(x2, terrain_grid_[z2][x2], z2);
+
+        std::cout << terrain_grid_[z1][x1] - terrain_grid_[z1][x2] << std::endl;
+
+        if (glm::max(glm::max(glm::abs(terrain_grid_[z1][x1] - terrain_grid_[z1][x2]), glm::abs(terrain_grid_[z2][x1] - terrain_grid_[z2][x2])), glm::max(glm::abs(terrain_grid_[z1][x1] - terrain_grid_[z2][x1]), glm::abs(terrain_grid_[z1][x2] - terrain_grid_[z2][x2]))) > 0.1) { // If exceeds slope threshold for cell in new position then dont move to it
+            return;
+        }
+
         position_ += trans;
         UpdateYPos();
     }
@@ -65,6 +85,8 @@ namespace game {
         std::cout << x2 << std::endl;
         std::cout << z1 << std::endl;
         std::cout << z2 << std::endl;*/
+
+        //std::cout << terrain_grid_[0][0] << " " << terrain_grid_[0][1] << " " << terrain_grid_[0][2] << std::endl;
 
         glm::vec3 p1 = glm::vec3(x1, terrain_grid_[z1][x1], z1);
         glm::vec3 p2 = glm::vec3(x1, terrain_grid_[z1][x2], z2);

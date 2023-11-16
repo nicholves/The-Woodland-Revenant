@@ -1,1 +1,2 @@
-# The-Woodland-Revenant
+Kelvin Jeon, Nicholas Veselskiy, Kevin Benitez, Benjamin Barbeau
+Assignment 6
