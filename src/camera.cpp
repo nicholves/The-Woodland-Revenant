@@ -52,7 +52,7 @@ namespace game {
         constexpr float sizeOfQuad = 0.1f;
         const int coord_offset = 250; // This is to avoid negative indices, seems to be the right value
 
-        // Get the lower x and z value of the cell (corresponds to the coordinates of the cell)
+        // Get the lower x and z value of the cell for the terrain grid (corresponds to the coordinates of the cell in the impassable cell grid)
         int x1 = glm::floor((position_.x + trans.x + coord_offset) * sizeOfQuad);
         int z1 = glm::floor((position_.z + trans.z + coord_offset) * sizeOfQuad);
 
