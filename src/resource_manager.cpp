@@ -131,7 +131,7 @@ std::vector<std::vector<bool>> ResourceManager::GetImpassableCells(const char* i
             
             float maxSlope = glm::max(maxHorizontalSlope, maxVerticalSlope);
 
-            std::cout << maxSlope << std::endl;
+            //std::cout << maxSlope << std::endl;
 
             if (maxSlope > tall_slope_threshold) {
                 impassable_cells[i][j] = true;
