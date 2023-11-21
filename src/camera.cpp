@@ -7,6 +7,10 @@
 
 #include "camera.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+#define FLASHLIGHT_ANGLE_DEGREES 25.0f
+
 namespace game {
 
     Camera::Camera(void) {
@@ -202,19 +206,18 @@ namespace game {
 
         GLint flashlight_pos = glGetUniformLocation(program, "flashlight_pos");
         GLint flashlight_dir = glGetUniformLocation(program, "flashlight_dir");
+        GLint cutoff = glGetUniformLocation(program, "cutoff");
 
         if (flashlight_pos && flashlight_dir) {
-            glm::vec3 flashlight_offset = (GetUp() * -0.2f) + (GetSide() * 0.2f);
-            glm::vec3 flashlight_pos_vec = position_ + flashlight_offset;
+            //glm::vec3 flashlight_offset = (GetUp() * -10.0f) + (GetSide() * 5.0f) + (GetForward() * 0.01f);
+            glm::vec3 flashlight_pos_vec = position_;// +flashlight_offset;
 
             glm::vec3 flashlight_dir_vec = GetForward();
 
-            // put these in projected space
-            flashlight_dir_vec = glm::vec3(projection_matrix_ * view_matrix_ * glm::vec4(flashlight_dir_vec, 1.0f));
-            flashlight_pos_vec = glm::vec3(projection_matrix_ * view_matrix_ * glm::vec4(flashlight_pos_vec, 1.0f));
-
             glUniform3fv(flashlight_pos, 1, glm::value_ptr(flashlight_pos_vec));
             glUniform3fv(flashlight_dir, 1, glm::value_ptr(flashlight_dir_vec));
+
+            glUniform1f(cutoff, cos(FLASHLIGHT_ANGLE_DEGREES * (M_PI / 180)));
         }
 
         glm::vec3 camera_pos = GetPosition();

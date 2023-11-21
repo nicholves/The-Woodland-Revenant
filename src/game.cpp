@@ -228,7 +228,7 @@ void Game::SetupScene(void){
     
     Resource* geom = resman_.GetResource("TerrainMesh");
     Resource* mat  = resman_.GetResource("TerrainShader");
-    Resource* text = resman_.GetResource("GrassTexture");
+    Resource* text;
     Resource* mtext = resman_.GetResource("MoonTexture");
     
     SceneNode* terrain = scene_.CreateNode("Terrain", geom, mat, mtext);
@@ -236,31 +236,40 @@ void Game::SetupScene(void){
     terrain->SetScale(glm::vec3(100.0f, 25.0f, 100.0f));
 
 
-    //SignPost
-    geom = resman_.GetResource("SignPost");
+    //Rock1
+    geom = resman_.GetResource("Rock_1");
     mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("SignTexture");
-    sign_ = scene_.CreateNode("SignPost", geom, mat, text);
-    sign_->Scale(glm::vec3(20, 20, 20));
+    text = resman_.GetResource("Rock_1Texture");
+    rock1_ = scene_.CreateNode("Rock1", geom, mat, text);
+    rock1_->Scale(glm::vec3(1, 1, 1));
+    rock1_->Translate(glm::vec3(175, 0, 0));
+
+    // Trees
+    SetupTree("Tree1");
+    SetupTree("Tree2");
+
+    SceneNode* tree1 = scene_.GetNode("Tree1_branch0");
+    tree1->Scale(glm::vec3(5, 5, 5));
+    tree1->Translate(glm::vec3(-200, 0, -200));
+    SceneNode* tree2 = scene_.GetNode("Tree2_branch0");
+    tree2->Scale(glm::vec3(5, 5, 5));
+    tree2->Translate(glm::vec3(-300, 0, -250));
 }
 
 
 void Game::MainLoop(void){
 
     // Loop while the user did not close the window
+    double lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window_)){
+        double currTime = glfwGetTime();
+        double deltaTime = currTime - lastTime;
+        lastTime = currTime;
 
-        checkKeys();
 
-        // Animate the scene
-        if (animating_){
-            static double last_time = 0;
-            double current_time = glfwGetTime();
-            if ((current_time - last_time) > 0.05){
-                scene_.Update();
-                last_time = current_time;
-            }
-        }
+        checkKeys(deltaTime);
+
+        scene_.Update();
 
         // Draw the scene
         scene_.Draw(&camera_);
@@ -291,7 +300,7 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
     }
 }
 
-void Game::checkKeys() {
+void Game::checkKeys(double deltaTime) {
     // Check the state of keys for smooth input
     bool isWKeyPressed = glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS;
     bool isSKeyPressed = glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS;
@@ -307,8 +316,8 @@ void Game::checkKeys() {
     bool isXKeyPressed = glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS;
 
     // Handle camera movement based on key states
-    float trans_factor = 1.5f;
-    float rot_factor = 0.01f;
+    float trans_factor = 200.0f * deltaTime;
+    float rot_factor = 8.0f * deltaTime;
 
     if (isWKeyPressed || isUpKeyPressed) {
         camera_.Translate(camera_.GetForward() * trans_factor);
@@ -317,10 +326,10 @@ void Game::checkKeys() {
         camera_.Translate(-camera_.GetForward() * trans_factor);
     }
     if (isZKeyPressed) {
-        camera_.Translate(-camera_.GetUp() * trans_factor);
+        camera_.Translate(-camera_.GetSide() * trans_factor);
     }
     if (isXKeyPressed) {
-        camera_.Translate(camera_.GetUp() * trans_factor);
+        camera_.Translate(camera_.GetSide() * trans_factor);
     }
     if (isAKeyPressed || isLeftKeyPressed) {
         camera_.Yaw(rot_factor);

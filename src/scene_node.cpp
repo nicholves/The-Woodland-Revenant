@@ -7,6 +7,11 @@
 
 #include "scene_node.h"
 
+#define RGB(A, B, C, D) 255 / A, 255 / B, 255 / C, 255 / D
+
+// smaller number falls off faster
+#define LIGHT_FALLOFF_RATE 2
+
 namespace game {
 
     SceneNode::SceneNode(const std::string name, const Resource* geometry, const Resource* material, const Resource* texture) {
@@ -280,14 +285,17 @@ namespace game {
         GLint specular_power = glGetUniformLocation(program, "specular_power");
         glUniform1f(specular_power, 41);
 
-        // Light Position
-        glm::vec3 light_pos = glm::vec3(500, 1500, 500);
-        GLint light_position = glGetUniformLocation(program, "light_position");
-        glUniform3f(light_position, light_pos.x, light_pos.y, light_pos.z);
-
         // Light Color
         GLint light_color = glGetUniformLocation(program, "light_color");
-        glUniform4f(light_color, 1, 1, 1, 1);
+        glUniform4f(light_color, 1, 1, 0.4f, 1);
+
+        // Ambient Light Color
+        GLint amb_light_color = glGetUniformLocation(program, "ambient_light_color");
+        glUniform4f(amb_light_color, RGB(176, 224, 230, 255));
+
+        // Flashlight Fade out Rate
+        GLint falloff_rate = glGetUniformLocation(program, "falloffRate");
+        glUniform1f(falloff_rate, LIGHT_FALLOFF_RATE);
 
         // Object Color
         GLint object_color = glGetUniformLocation(program, "object_color");

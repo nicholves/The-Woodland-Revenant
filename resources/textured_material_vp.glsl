@@ -18,6 +18,7 @@ out vec3 normal_interp;
 out vec4 color_interp;
 out vec2 uv_interp;
 out vec3 light_pos;
+out vec3 fragPos;
 
 // Material attributes (constants)
 uniform vec3 light_position = vec3(-0.5, -0.5, 1.5);

@@ -76,7 +76,7 @@ namespace game {
             static void ResizeCallback(GLFWwindow* window, int width, int height);
 
             //keys
-            void checkKeys();
+            void checkKeys(double deltaTime);
 
             // Setting up tree
             void SetupTree(const std::string&);
