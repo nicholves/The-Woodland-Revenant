@@ -140,6 +140,23 @@ namespace game {
         GLint projection_mat = glGetUniformLocation(program, "projection_mat");
         glUniformMatrix4fv(projection_mat, 1, GL_FALSE, glm::value_ptr(projection_matrix_));
 
+        GLint flashlight_pos = glGetUniformLocation(program, "flashlight_pos");
+        GLint flashlight_dir = glGetUniformLocation(program, "flashlight_dir");
+
+        if (flashlight_pos && flashlight_dir) {
+            glm::vec3 flashlight_offset = (GetUp() * -0.2f) + (GetSide() * 0.2f);
+            glm::vec3 flashlight_pos_vec = position_ + flashlight_offset;
+
+            glm::vec3 flashlight_dir_vec = GetForward();
+
+            // put these in projected space
+            flashlight_dir_vec = glm::vec3(projection_matrix_ * view_matrix_ * glm::vec4(flashlight_dir_vec, 1.0f));
+            flashlight_pos_vec = glm::vec3(projection_matrix_ * view_matrix_ * glm::vec4(flashlight_pos_vec, 1.0f));
+
+            glUniform3fv(flashlight_pos, 1, glm::value_ptr(flashlight_pos_vec));
+            glUniform3fv(flashlight_dir, 1, glm::value_ptr(flashlight_dir_vec));
+        }
+
         glm::vec3 camera_pos = GetPosition();
         GLint camera_position = glGetUniformLocation(program, "camera_position");
         glUniform3f(camera_position, camera_pos.x, camera_pos.y, camera_pos.z);

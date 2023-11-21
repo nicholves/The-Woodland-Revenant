@@ -12,6 +12,8 @@ uniform vec3 light_position;
 uniform vec4 light_color;
 uniform float specular_power;
 uniform vec3 camera_position;
+uniform vec3 flashlight_pos;
+uniform vec3 flashlight_dir;
 
 void main() 
 {
@@ -31,7 +33,7 @@ void main()
 	float specular = max(0.0,dot(V,R)); 
 	specular = pow(specular,specular_power); 
 
-	float amb = 0.4; // ambient coefficient
+	float amb = 0.01; // ambient coefficient
 
     gl_FragColor = 
 		diffuse * pixel * light_color            // Diffuse Component
