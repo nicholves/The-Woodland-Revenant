@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-
+#include <vector>
 
 namespace game {
 
@@ -23,6 +23,15 @@ namespace game {
         // Set global camera attributes
         void SetPosition(glm::vec3 position);
         void SetOrientation(glm::quat orientation);
+
+        // Set terrain grid
+        void SetTerrainGrid(std::vector<std::vector<float>>);
+
+        // Set passable cells
+        void SetImpassableCells(std::vector<std::vector<bool>>);
+
+        // Updates y position
+        void UpdateYPos();
 
         // Perform global transformations of camera
         void Translate(glm::vec3 trans);
@@ -56,6 +65,8 @@ namespace game {
         glm::vec3 side_; // Initial side vector
         glm::mat4 view_matrix_; // View matrix
         glm::mat4 projection_matrix_; // Projection matrix
+        std::vector<std::vector<float>> terrain_grid_; // 2D vector of y positions
+        std::vector<std::vector<bool>> impassable_cells_;
 
         // Create view matrix from current camera parameters
         void SetupViewMatrix(void);

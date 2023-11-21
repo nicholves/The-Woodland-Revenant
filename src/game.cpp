@@ -11,7 +11,7 @@ namespace game {
 // They are written here as global variables, but ideally they should be loaded from a configuration file
 
 // Main window settings
-const std::string window_title_g = "The Woodland Revenant";
+const std::string window_title_g = "Assignment 6 - Terrain";
 const unsigned int window_width_g = 800;
 const unsigned int window_height_g = 600;
 const bool window_full_screen_g = false;
@@ -192,6 +192,10 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/tree_tex.png");
     resman_.LoadResource(Texture, "TreeTexture", filename.c_str());
 
+    // Moon Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/moon_texture.jpg");
+    resman_.LoadResource(Texture, "MoonTexture", filename.c_str());
+
     //-------------------------------Materials-----------------------------
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
     resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
@@ -204,6 +208,13 @@ void Game::SetupResources(void){
 
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/lit_color");
     resman_.LoadResource(Material, "LitColorShader", filename.c_str());
+
+    std::vector<std::vector<float>> terrain = resman_.LoadTerrainResource(Type::Mesh, "TerrainMesh", MATERIAL_DIRECTORY "/terrain.heightfield");
+    camera_.SetTerrainGrid(terrain);
+    camera_.SetImpassableCells(resman_.GetImpassableCells(MATERIAL_DIRECTORY "/impassable.csv", terrain));
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/terrain");
+    resman_.LoadResource(Material, "TerrainShader", filename.c_str());
 }
 
 
@@ -214,90 +225,23 @@ void Game::SetupScene(void){
 
     // Move the camera up a bit so its like its the players head
     camera_.Translate(camera_.GetUp() * 20.0f);
+    
+    Resource* geom = resman_.GetResource("TerrainMesh");
+    Resource* mat  = resman_.GetResource("TerrainShader");
+    Resource* text = resman_.GetResource("GrassTexture");
+    Resource* mtext = resman_.GetResource("MoonTexture");
+    
+    SceneNode* terrain = scene_.CreateNode("Terrain", geom, mat, mtext);
+    constexpr int bumpyNess = 2; // at 1 the terrain will vary between 1 and -1 in the y. Increasing this causes more jagged terrain
+    terrain->SetScale(glm::vec3(100.0f, 25.0f, 100.0f));
+
 
     //SignPost
-    Resource* geom = resman_.GetResource("SignPost");
-    Resource* mat = resman_.GetResource("LitTextureShader");
-    Resource* text = resman_.GetResource("SignTexture");
+    geom = resman_.GetResource("SignPost");
+    mat = resman_.GetResource("LitTextureShader");
+    text = resman_.GetResource("SignTexture");
     sign_ = scene_.CreateNode("SignPost", geom, mat, text);
     sign_->Scale(glm::vec3(20, 20, 20));
-
-    //Car
-    geom = resman_.GetResource("Car");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("CarTexture");
-    car_ = scene_.CreateNode("Car", geom, mat, text);
-    car_->Scale(glm::vec3(10, 10, 10));
-    car_->Translate(glm::vec3(-200, 0, 50));
-    car_->Rotate(glm::normalize(glm::angleAxis(glm::pi<float>() / 2, glm::vec3(0, 1, 0))));
-
-    //Cabin
-    geom = resman_.GetResource("Cabin");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("CabinTexture");
-    cabin_ = scene_.CreateNode("Cabin", geom, mat, text);
-    cabin_->Scale(glm::vec3(100, 100, 100));
-    cabin_->Translate(glm::vec3(0, 0, 1000));
-
-    //Rock1
-    geom = resman_.GetResource("Rock_1");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("Rock_1Texture");
-    rock1_ = scene_.CreateNode("Rock1", geom, mat, text);
-    rock1_->Scale(glm::vec3(1, 1, 1));
-    rock1_->Translate(glm::vec3(175, 0, 0));
-    
-
-    //Rock2
-    geom = resman_.GetResource("Rock_2");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("Rock_2Texture");
-    rock2_ = scene_.CreateNode("Rock2", geom, mat, text);
-    rock2_->Scale(glm::vec3(20, 20, 20));
-    rock2_->Translate(glm::vec3(300, 0, 0));
-    
-    //Rock3
-    geom = resman_.GetResource("Rock_3");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("Rock_3Texture");
-    rock2_ = scene_.CreateNode("Rock3", geom, mat, text);
-    rock2_->Scale(glm::vec3(2, 2, 2));
-    rock2_->Translate(glm::vec3(275, 0, 10));
-
-    //Gravestone
-    geom = resman_.GetResource("Gravestone");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("GravestoneTexture");
-    gravestone_ = scene_.CreateNode("Gravestone1", geom, mat, text);
-    gravestone_->Scale(glm::vec3(30, 30, 30));
-    gravestone_->Translate(glm::vec3(100, 0, -100));
-
-    //Fence
-    geom = resman_.GetResource("Fence");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("FenceTexture");
-    gravestone_ = scene_.CreateNode("Fence1", geom, mat, text);
-    gravestone_->Scale(glm::vec3(50, 50, 50));
-    gravestone_->Translate(glm::vec3(-100, 0, -200));
-
-    //Key
-    geom = resman_.GetResource("Key");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("KeyTexture");
-    gravestone_ = scene_.CreateNode("Key1", geom, mat, text);
-    gravestone_->Scale(glm::vec3(150, 150, 150));
-    gravestone_->Translate(glm::vec3(-100, 0, -200));
-
-    // Trees
-    SetupTree("Tree1");
-    SetupTree("Tree2");
-
-    SceneNode* tree1 = scene_.GetNode("Tree1_branch0");
-    tree1->Scale(glm::vec3(5, 5, 5));
-    tree1->Translate(glm::vec3(-200, 0, -200));
-    SceneNode* tree2 = scene_.GetNode("Tree2_branch0");
-    tree2->Scale(glm::vec3(5, 5, 5));
-    tree2->Translate(glm::vec3(-300, 0, -250));
 }
 
 
@@ -359,8 +303,11 @@ void Game::checkKeys() {
     bool isLeftKeyPressed = glfwGetKey(window_, GLFW_KEY_LEFT) == GLFW_PRESS;
     bool isRightKeyPressed = glfwGetKey(window_, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
+    bool isZKeyPressed = glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS;
+    bool isXKeyPressed = glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS;
+
     // Handle camera movement based on key states
-    float trans_factor = 0.5f;
+    float trans_factor = 1.5f;
     float rot_factor = 0.01f;
 
     if (isWKeyPressed || isUpKeyPressed) {
@@ -368,6 +315,12 @@ void Game::checkKeys() {
     }
     if (isSKeyPressed || isDownKeyPressed) {
         camera_.Translate(-camera_.GetForward() * trans_factor);
+    }
+    if (isZKeyPressed) {
+        camera_.Translate(-camera_.GetUp() * trans_factor);
+    }
+    if (isXKeyPressed) {
+        camera_.Translate(camera_.GetUp() * trans_factor);
     }
     if (isAKeyPressed || isLeftKeyPressed) {
         camera_.Yaw(rot_factor);

@@ -28,6 +28,8 @@ namespace game {
             // Load a resource from a file, according to the specified type
             void LoadResource(ResourceType type, const std::string name, const char *filename);
             void LoadCustomResource(ResourceType type, const std::string name, const char* verticesFilepath, const char* facesFilepath);
+            std::vector<std::vector<float>> LoadTerrainResource(ResourceType type, const std::string name, const char* terrainFilePath);
+            std::vector<std::vector<bool>> ResourceManager::GetImpassableCells(const char* impassableFilePath, std::vector<std::vector<float>> terrain);
 
             GLuint ParseVertices(const std::string& verticesText);
             GLuint ParseFaces(const std::string& facesText, GLsizei& faceSize);
