@@ -9,8 +9,7 @@
 
 #define RGB(A, B, C, D) 255 / A, 255 / B, 255 / C, 255 / D
 
-// smaller number falls off faster
-#define LIGHT_FALLOFF_RATE 2
+
 
 namespace game {
 
@@ -292,10 +291,6 @@ namespace game {
         // Ambient Light Color
         GLint amb_light_color = glGetUniformLocation(program, "ambient_light_color");
         glUniform4f(amb_light_color, RGB(176, 224, 230, 255));
-
-        // Flashlight Fade out Rate
-        GLint falloff_rate = glGetUniformLocation(program, "falloffRate");
-        glUniform1f(falloff_rate, LIGHT_FALLOFF_RATE);
 
         // Object Color
         GLint object_color = glGetUniformLocation(program, "object_color");

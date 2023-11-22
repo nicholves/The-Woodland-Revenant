@@ -11,6 +11,12 @@
 #include <math.h>
 #define FLASHLIGHT_ANGLE_DEGREES 25.0f
 
+// smaller number falls off faster with angle
+#define LIGHT_FALLOFF_RATE 2
+
+// bigger number falls off faster with distance
+#define DISTANCE_FACTOR 0.0002f
+
 namespace game {
 
     Camera::Camera(void) {
@@ -207,8 +213,10 @@ namespace game {
         GLint flashlight_pos = glGetUniformLocation(program, "flashlight_pos");
         GLint flashlight_dir = glGetUniformLocation(program, "flashlight_dir");
         GLint cutoff = glGetUniformLocation(program, "cutoff");
+        GLint falloff_rate = glGetUniformLocation(program, "falloffRate");
+        GLint distanceFactor = glGetUniformLocation(program, "distanceFactor");
 
-        if (flashlight_pos && flashlight_dir) {
+        if (flashlight_pos && flashlight_dir && falloff_rate) {
             //glm::vec3 flashlight_offset = (GetUp() * -10.0f) + (GetSide() * 5.0f) + (GetForward() * 0.01f);
             glm::vec3 flashlight_pos_vec = position_;// +flashlight_offset;
 
@@ -218,6 +226,12 @@ namespace game {
             glUniform3fv(flashlight_dir, 1, glm::value_ptr(flashlight_dir_vec));
 
             glUniform1f(cutoff, cos(FLASHLIGHT_ANGLE_DEGREES * (M_PI / 180)));
+
+            // Flashlight Fade out Rate with angle
+            glUniform1f(falloff_rate, LIGHT_FALLOFF_RATE);
+
+            // Flashlight Fade out Rate with Distance
+            glUniform1f(distanceFactor, DISTANCE_FACTOR);
         }
 
         glm::vec3 camera_pos = GetPosition();
