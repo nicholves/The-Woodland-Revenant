@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
 # Name of project
-set(PROJ_NAME "CameraDemo")
+set(PROJ_NAME "The Woodland Revenant")
 project(${PROJ_NAME})
 
 # Specify project files: header files and source files

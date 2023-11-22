@@ -11,7 +11,7 @@ namespace game {
 // They are written here as global variables, but ideally they should be loaded from a configuration file
 
 // Main window settings
-const std::string window_title_g = "Assignment 6 - Terrain";
+const std::string window_title_g = "The Woodland Revenant";
 const unsigned int window_width_g = 800;
 const unsigned int window_height_g = 600;
 const bool window_full_screen_g = false;
