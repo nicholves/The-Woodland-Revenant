@@ -74,6 +74,7 @@ namespace game {
             // Methods to handle events
             static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
             static void ResizeCallback(GLFWwindow* window, int width, int height);
+            static void MouseCallback(GLFWwindow* window, double xpos, double ypos);
 
             //keys
             void checkKeys(double deltaTime);
@@ -82,6 +83,9 @@ namespace game {
             void SetupTree(const std::string&);
             SceneNode* CreateBranch(const std::string&);
             SceneNode* CreateLeaf(const std::string&);
+
+            // Mouse position
+            glm::vec2 lastMousePos_;
 
 
     }; // class Game

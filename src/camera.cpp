@@ -149,24 +149,21 @@ namespace game {
 
 
     void Camera::Pitch(float angle) {
-        // put the proper functionality in here
-        glm::quat rotation = glm::angleAxis(angle, GetSide());
+        glm::quat rotation = glm::angleAxis(angle, GetSide()); // Rotate around Side For Pitch 
         orientation_ = rotation * orientation_;
         orientation_ = glm::normalize(orientation_);
     }
 
 
     void Camera::Yaw(float angle) {
-
-        glm::quat rotation = glm::angleAxis(angle, GetUp());
+        glm::quat rotation = glm::angleAxis(angle, GetUp()); // Rotate around Up For Yaw 
         orientation_ = rotation * orientation_;
         orientation_ = glm::normalize(orientation_);
     }
 
 
     void Camera::Roll(float angle) {
-
-        glm::quat rotation = glm::angleAxis(angle, GetForward());
+        glm::quat rotation = glm::angleAxis(angle, GetForward()); // Rotate around Forward For Roll 
         orientation_ = rotation * orientation_; // update the orientation
         orientation_ = glm::normalize(orientation_);
     }

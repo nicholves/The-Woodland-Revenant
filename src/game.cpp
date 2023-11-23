@@ -44,6 +44,7 @@ void Game::Init(void){
 
     // Set variables
     animating_ = true;
+    lastMousePos_ = glm::vec2(window_width_g / 2, window_height_g / 2);
 }
 
        
@@ -102,9 +103,13 @@ void Game::InitEventHandlers(void){
     // Set event callbacks
     glfwSetKeyCallback(window_, KeyCallback);
     glfwSetFramebufferSizeCallback(window_, ResizeCallback);
+    glfwSetCursorPosCallback(window_, MouseCallback);
 
     // Set pointer to game object, so that callbacks can access it
     glfwSetWindowUserPointer(window_, (void *) this);
+
+    // Hide the cursor 
+    glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 
@@ -300,6 +305,24 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
     }
 }
 
+void Game::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
+    void* ptr = glfwGetWindowUserPointer(window);
+    Game* game = (Game*)ptr;
+
+    float xOffset = xpos - game->lastMousePos_.x;
+    float yOffset = ypos - game->lastMousePos_.y;
+    game->lastMousePos_.x = xpos;
+    game->lastMousePos_.y = ypos;
+
+    const float sensitivity = 0.002f;
+
+    xOffset *= sensitivity;
+    yOffset *= sensitivity;
+
+    game->camera_.Pitch(-yOffset);
+    game->camera_.Rotate(glm::normalize(glm::angleAxis(-xOffset, glm::vec3(0, 1, 0))));
+}
+
 void Game::checkKeys(double deltaTime) {
     // Check the state of keys for smooth input
     bool isWKeyPressed = glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS;
@@ -312,12 +335,8 @@ void Game::checkKeys(double deltaTime) {
     bool isLeftKeyPressed = glfwGetKey(window_, GLFW_KEY_LEFT) == GLFW_PRESS;
     bool isRightKeyPressed = glfwGetKey(window_, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
-    bool isZKeyPressed = glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS;
-    bool isXKeyPressed = glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS;
-
     // Handle camera movement based on key states
     float trans_factor = 200.0f * deltaTime;
-    float rot_factor = 8.0f * deltaTime;
 
     if (isWKeyPressed || isUpKeyPressed) {
         camera_.Translate(camera_.GetForward() * trans_factor);
@@ -325,17 +344,11 @@ void Game::checkKeys(double deltaTime) {
     if (isSKeyPressed || isDownKeyPressed) {
         camera_.Translate(-camera_.GetForward() * trans_factor);
     }
-    if (isZKeyPressed) {
+    if (isAKeyPressed || isLeftKeyPressed) {
         camera_.Translate(-camera_.GetSide() * trans_factor);
     }
-    if (isXKeyPressed) {
-        camera_.Translate(camera_.GetSide() * trans_factor);
-    }
-    if (isAKeyPressed || isLeftKeyPressed) {
-        camera_.Yaw(rot_factor);
-    }
     if (isDKeyPressed || isRightKeyPressed) {
-        camera_.Yaw(-rot_factor);
+        camera_.Translate(camera_.GetSide() * trans_factor);
     }
 }
 
