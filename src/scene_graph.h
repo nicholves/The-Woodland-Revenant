@@ -46,7 +46,8 @@ namespace game {
         void Draw(Camera* camera);
 
         // Update entire scene
-        void Update(void);
+        //void Update(void);
+        void Update(Camera* camera, float deltaTime);
 
     }; // class SceneGraph
 

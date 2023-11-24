@@ -276,4 +276,20 @@ namespace game {
         view_matrix_ *= trans;
     }
 
+    bool Camera::getImmune() {
+        return isImmune;
+    }
+
+    float Camera::getTimer() {
+        return immuneTimer;
+    }
+
+    void Camera::setImmune(bool immune) {
+        isImmune = immune;
+    }
+
+    void Camera::setTimer(float timer) {
+        immuneTimer = timer;
+    }
+
 } // namespace game

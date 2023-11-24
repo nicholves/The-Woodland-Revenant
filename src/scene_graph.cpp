@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "scene_graph.h"
+#include "ghost.h"
 
 namespace game {
 
@@ -90,10 +91,20 @@ namespace game {
     }
 
 
-    void SceneGraph::Update(void) {
+    void SceneGraph::Update(Camera* camera, float deltaTime) {
 
         for (int i = 0; i < node_.size(); i++) {
-            node_[i]->Update();
+            // Check if the current node is a Ghost
+            Ghost* ghostNode = dynamic_cast<Ghost*>(node_[i]);
+
+            if (ghostNode) {
+                // If it's a Ghost, pass the camera to its Update function
+                ghostNode->Update(camera, deltaTime);
+            }
+            else {
+                node_[i]->Update();
+            }
+
         }
     }
 

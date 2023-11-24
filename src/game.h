@@ -12,6 +12,8 @@
 #include "camera.h"
 #include "asteroid.h"
 
+#include "ghost.h"
+
 namespace game {
 
     // Exception type for the game
@@ -48,6 +50,8 @@ namespace game {
             // Scene graph containing all nodes to render
             SceneGraph scene_;
 
+            int hp = 3;
+
             // TODO: get rid of these
             SceneNode* sign_;
             SceneNode* car_;
@@ -56,6 +60,7 @@ namespace game {
             SceneNode* rock2_;
             SceneNode* rock3_;
             SceneNode* gravestone_;
+            Ghost* ghost;
 
             // Resources available to the game
             ResourceManager resman_;
@@ -87,6 +92,9 @@ namespace game {
             // Mouse position
             glm::vec2 lastMousePos_;
 
+            //collision with ghost
+            void ghostContact();
+            void playerImmunity(float deltaTime);
 
     }; // class Game
 
