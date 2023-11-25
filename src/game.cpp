@@ -158,6 +158,9 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/ghost2.obj");
     resman_.LoadResource(Mesh, "Ghost", filename.c_str());
 
+    //SphereParticles
+    resman_.CreateSphereParticles("SphereParticles", 20);
+
     //-------------------------------- Texture --------------------------------
     // Load texture to be used on the object
     //Sign Texture
@@ -209,6 +212,14 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/whiteCloth_tex.png");
     resman_.LoadResource(Texture, "ClothTexture", filename.c_str());
 
+    // Sparkle Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/sparkle_tex.png");
+    resman_.LoadResource(Texture, "SparkleTexture", filename.c_str());
+
+    // Cloud Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/cloud_tex.png");
+    resman_.LoadResource(Texture, "CloudTexture", filename.c_str());
+
     //-------------------------------Materials-----------------------------
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
     resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
@@ -221,6 +232,9 @@ void Game::SetupResources(void){
 
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/lit_color");
     resman_.LoadResource(Material, "LitColorShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_particle");
+    resman_.LoadResource(Material, "Particle", filename.c_str());
 
     std::vector<std::vector<float>> terrain = resman_.LoadTerrainResource(Type::Mesh, "TerrainMesh", MATERIAL_DIRECTORY "/terrain.heightfield");
     camera_.SetTerrainGrid(terrain);
@@ -279,6 +293,24 @@ void Game::SetupScene(void){
     ghost->Scale(glm::vec3(0.3, 0.3, 0.3));
     ghost->Translate(glm::vec3(0, 35, 0));
     scene_.AddNode(ghost);
+
+    //Sparkles
+    geom = resman_.GetResource("SphereParticles");
+    mat = resman_.GetResource("Particle");
+    text = resman_.GetResource("SparkleTexture");
+
+    SceneNode* particles = scene_.CreateNode("TestSparkles1", geom, mat, text);
+    particles->SetBlending(true);
+    particles->Translate(glm::vec3(0, 30, 100));
+
+    //Clouds
+    geom = resman_.GetResource("SphereParticles");
+    mat = resman_.GetResource("Particle");
+    text = resman_.GetResource("CloudTexture");
+
+    particles = scene_.CreateNode("TestSparkles2", geom, mat, text);
+    particles->SetBlending(true);
+    particles->Translate(glm::vec3(0, 30, 110));
 }
 
 
@@ -290,6 +322,10 @@ void Game::MainLoop(void){
         double currTime = glfwGetTime();
         double deltaTime = currTime - lastTime;
         lastTime = currTime;
+
+        /*std::cout << camera_.GetPosition().x << std::endl;
+        std::cout << camera_.GetPosition().y << std::endl;
+        std::cout << camera_.GetPosition().z << std::endl;*/
 
 
         checkKeys(deltaTime);
@@ -309,6 +345,9 @@ void Game::MainLoop(void){
 
         // Update other events like input handling
         glfwPollEvents();
+
+        // Enable writing to depth buffer
+        glDepthMask(GL_TRUE);
     }
 }
 

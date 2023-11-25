@@ -46,6 +46,9 @@ namespace game {
         // variable
         virtual void Draw(Camera* camera);
 
+        // Set blending mode
+        void SetBlending(bool blending);
+
         // Update the node
         virtual void Update(void);
 
@@ -76,6 +79,7 @@ namespace game {
         glm::vec3 position_; // Position of node
         glm::quat orientation_; // Orientation of node
         glm::vec3 scale_; // Scale of node
+        bool blending_;
 
         SceneNode* parent_ = NULL;
         bool wind_affected; // Whether to make it move with the wind
