@@ -236,6 +236,25 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_particle");
     resman_.LoadResource(Material, "Particle", filename.c_str());
 
+    // Load material for screen-space effect
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/night_vision");
+    resman_.LoadResource(Material, "NightVisionShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/wavering");
+    resman_.LoadResource(Material, "WaveringShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/pixelated");
+    resman_.LoadResource(Material, "PixelatedShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/drunk");
+    resman_.LoadResource(Material, "DrunkShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/blur");
+    resman_.LoadResource(Material, "BlurShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/bloody");
+    resman_.LoadResource(Material, "BloodyShader", filename.c_str());
+
     std::vector<std::vector<float>> terrain = resman_.LoadTerrainResource(Type::Mesh, "TerrainMesh", MATERIAL_DIRECTORY "/terrain.heightfield");
     camera_.SetTerrainGrid(terrain);
     camera_.SetImpassableCells(resman_.GetImpassableCells(MATERIAL_DIRECTORY "/impassable.csv", terrain));
@@ -311,6 +330,10 @@ void Game::SetupScene(void){
     particles = scene_.CreateNode("TestSparkles2", geom, mat, text);
     particles->SetBlending(true);
     particles->Translate(glm::vec3(0, 30, 110));
+
+    // Setup drawing to texture
+    scene_.SetupDrawToTexture();
+    use_screen_space_effects_ = true;
 }
 
 
@@ -338,16 +361,28 @@ void Game::MainLoop(void){
         playerImmunity(deltaTime);
 
         // Draw the scene
-        scene_.Draw(&camera_);
+        // Enable writing to depth buffer
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+        glDepthFunc(GL_LESS);
+        if (!use_screen_space_effects_) {
+            scene_.Draw(&camera_);
+        }
+        else {
+            // enable these if using the drunk filter
+            /*
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            */
+            scene_.DrawToTexture(&camera_);
+            scene_.DisplayTexture(resman_.GetResource("BloodyShader")->GetResource());
+        }
 
         // Push buffer drawn in the background onto the display
         glfwSwapBuffers(window_);
 
         // Update other events like input handling
         glfwPollEvents();
-
-        // Enable writing to depth buffer
-        glDepthMask(GL_TRUE);
     }
 }
 
@@ -393,6 +428,7 @@ void Game::checkKeys(double deltaTime) {
     bool isSKeyPressed = glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS;
     bool isAKeyPressed = glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS;
     bool isDKeyPressed = glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS;
+    bool isFKeyPressed = glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS;
 
     bool isUpKeyPressed = glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS;
     bool isDownKeyPressed = glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS;
@@ -413,6 +449,9 @@ void Game::checkKeys(double deltaTime) {
     }
     if (isDKeyPressed || isRightKeyPressed) {
         camera_.Translate(camera_.GetSide() * trans_factor);
+    }
+    if (isFKeyPressed) {
+        glfwMaximizeWindow(window_);
     }
 }
 

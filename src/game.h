@@ -70,6 +70,9 @@ namespace game {
 
             // Flag to turn animation on/off
             bool animating_;
+            
+            // Flag to use screen space effects or not
+            bool use_screen_space_effects_ = false;
 
             // Methods to initialize the game
             void InitWindow(void);
