@@ -44,6 +44,20 @@ namespace game {
         return scn;
     }
 
+    InteractableNode* SceneGraph::CreateInteractableNode(std::string node_name, Resource* geometry, Resource* material, Resource* texture) {
+
+        // Create scene node with the specified resources
+        InteractableNode* scn = new InteractableNode(node_name, geometry, material, texture);
+
+        // Add node to list of interactable nodes
+        interactable_nodes_.push_back(scn);
+
+        // Add node to the scene
+        node_.push_back((SceneNode*)scn);
+
+        return scn;
+    }
+
 
     void SceneGraph::AddNode(SceneNode* node) {
 
@@ -61,6 +75,22 @@ namespace game {
         }
         return NULL;
 
+    }
+
+
+    void SceneGraph::DeleteNode(std::string node_name) {
+        // Find node with the specified name
+        for (int i = 0; i < node_.size(); i++) {
+            if (node_[i]->GetName() == node_name) {
+                delete node_[i];
+                node_.erase(node_.begin() + i);
+            }
+        }
+    }
+
+    
+    std::vector<InteractableNode*> SceneGraph::GetInteractableNodes() {
+        return interactable_nodes_;
     }
 
 

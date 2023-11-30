@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include "scene_node.h"
+#include "interactable_node.h"
 #include "resource.h"
 #include "camera.h"
 
@@ -32,6 +33,9 @@ namespace game {
         // Scene nodes to render
         std::vector<SceneNode*> node_;
 
+        // Interactable nodes
+        std::vector<InteractableNode*> interactable_nodes_;
+
     public:
         // Constructor and destructor
         SceneGraph(void);
@@ -43,10 +47,15 @@ namespace game {
 
         // Create a scene node from the specified resources
         SceneNode* CreateNode(std::string node_name, Resource* geometry, Resource* material, Resource* texture = NULL);
+        InteractableNode* CreateInteractableNode(std::string node_name, Resource* geometry, Resource* material, Resource* texture = NULL);
         // Add an already-created node
         void AddNode(SceneNode* node);
         // Find a scene node with a specific name
         SceneNode* GetNode(std::string node_name) const;
+        // Delete a node in the scenegraph
+        void DeleteNode(std::string node_name);
+        // Retrieve the vector of interactable nodes
+        std::vector<InteractableNode*> GetInteractableNodes();
         // Get node const iterator
         std::vector<SceneNode*>::const_iterator begin() const;
         std::vector<SceneNode*>::const_iterator end() const;
