@@ -11,6 +11,7 @@
 #include "resource_manager.h"
 #include "camera.h"
 #include "asteroid.h"
+#include "scene_graph.h"
 
 namespace game {
 
@@ -86,6 +87,9 @@ namespace game {
 
             // Mouse position
             glm::vec2 lastMousePos_;
+
+            // Game Phase
+            GamePhase gamePhase_ = title;
 
 
     }; // class Game

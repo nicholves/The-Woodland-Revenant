@@ -13,6 +13,15 @@
 
 namespace game {
 
+    // Game Phases
+    enum GamePhase
+    {
+        title,
+        gameplay,
+        gameLost,
+        gameWon,
+    };
+
     // Class that manages all the objects in a scene
     class SceneGraph {
 
@@ -43,7 +52,7 @@ namespace game {
         std::vector<SceneNode*>::const_iterator end() const;
 
         // Draw the entire scene
-        void Draw(Camera* camera);
+        void Draw(Camera* camera, GamePhase gamePhase_);
 
         // Update entire scene
         void Update(void);
