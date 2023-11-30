@@ -1,0 +1,10 @@
+Finish placing trees and game objects, BorderWall of Trees - Ben
+Finish screens textures (game over, victory) - Ben
+River, Road and plank logic - Kevin
+Collisions / resizeing if needed - Kelvin
+
+Models that aren't done
+Hp Visualization (SSE)
+Ghost combative mechanics (somehow)
+Music / Sound
+Skybox
