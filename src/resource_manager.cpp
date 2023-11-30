@@ -124,7 +124,7 @@ std::vector<std::vector<bool>> ResourceManager::GetImpassableCells(const char* i
     const float tall_slope_threshold = 0.1f;
 
     // Loop through all cells and get the max slope of each. Then compare against threshold
-    for (int i = 0; i < width; ++i) {
+    /*for (int i = 0; i < width; ++i) {
         for (int j = 0; j < height; ++j) {
             float maxHorizontalSlope = glm::max(glm::abs(terrain[i][j] - terrain[i][j+1]), glm::abs(terrain[i+1][j] - terrain[i+1][j+1]));
             float maxVerticalSlope = glm::max(glm::abs(terrain[i][j] - terrain[i+1][j]), glm::abs(terrain[i][j+1] - terrain[i+1][j+1]));
@@ -137,7 +137,7 @@ std::vector<std::vector<bool>> ResourceManager::GetImpassableCells(const char* i
                 impassable_cells[i][j] = true;
             }
         }
-    }
+    }*/
 
     return impassable_cells;
 }

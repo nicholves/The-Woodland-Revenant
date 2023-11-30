@@ -22,7 +22,7 @@ float camera_far_clip_distance_g = 1000.0;
 float camera_fov_g = 60.0; // Field-of-view of camera (degrees)
 const glm::vec3 viewport_background_color_g(0.0, 0.0, 0.0);
 glm::vec3 camera_position_g(0.0, 0.0, 100.0);
-glm::vec3 camera_look_at_g(0.0, 0.0, 0.0);
+glm::vec3 camera_look_at_g(0.0, 0.0, 110.0);
 glm::vec3 camera_up_g(0.0, 1.0, 0.0);
 
 // Materials 
@@ -95,6 +95,8 @@ void Game::InitView(void){
     camera_.SetView(camera_position_g, camera_look_at_g, camera_up_g);
     // Set projection
     camera_.SetProjection(camera_fov_g, camera_near_clip_distance_g, camera_far_clip_distance_g, width, height);
+
+    
 }
 
 
@@ -251,7 +253,8 @@ void Game::SetupScene(void){
     scene_.SetBackgroundColor(viewport_background_color_g);
 
     // Move the camera up a bit so its like its the players head
-    camera_.Translate(camera_.GetUp() * 20.0f);
+    //camera_.Translate(camera_.GetUp() * 20.0f);
+    
     
     Resource* geom = resman_.GetResource("TerrainMesh");
     Resource* mat  = resman_.GetResource("TerrainShader");
@@ -260,7 +263,9 @@ void Game::SetupScene(void){
     
     SceneNode* terrain = scene_.CreateNode("Terrain", geom, mat, mtext);
     constexpr int bumpyNess = 2; // at 1 the terrain will vary between 1 and -1 in the y. Increasing this causes more jagged terrain
-    terrain->SetScale(glm::vec3(100.0f, 25.0f, 100.0f));
+    int terrain_offset = 100;
+    terrain->SetScale(glm::vec3(100.0f + terrain_offset, 25.0f, 100.0f + terrain_offset));
+    terrain->SetPosition(glm::vec3(terrain_offset * 2, 0, terrain_offset * 2));
 
 
     //Rock1
@@ -281,6 +286,14 @@ void Game::SetupScene(void){
     SceneNode* tree2 = scene_.GetNode("Tree2_branch0");
     tree2->Scale(glm::vec3(5, 5, 5));
     tree2->Translate(glm::vec3(-300, 0, -250));
+
+    // Car
+    geom = resman_.GetResource("Car");
+    mat = resman_.GetResource("TextureShader");
+    text = resman_.GetResource("CarTexture");
+    car_ = scene_.CreateNode("Car", geom, mat, text);
+    car_->Scale(glm::vec3(3, 3, 3));
+    car_->Translate(glm::vec3(-200, 30, -250));
 
     //Ghost
     geom = resman_.GetResource("Ghost");
@@ -311,6 +324,10 @@ void Game::SetupScene(void){
     particles = scene_.CreateNode("TestSparkles2", geom, mat, text);
     particles->SetBlending(true);
     particles->Translate(glm::vec3(0, 30, 110));
+
+    // Camera
+    camera_.SetPosition(glm::vec3(-230, 0, -230)); // Initialize to start position
+    camera_.UpdateYPos();
 }
 
 
@@ -380,6 +397,8 @@ void Game::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     void* ptr = glfwGetWindowUserPointer(window);
     Game* game = (Game*)ptr;
 
+    std::cout << xpos << " " << game->lastMousePos_.x << std::endl;
+
     float xOffset = xpos - game->lastMousePos_.x;
     float yOffset = ypos - game->lastMousePos_.y;
     
@@ -421,7 +440,7 @@ void Game::checkKeys(double deltaTime) {
     bool isRightKeyPressed = glfwGetKey(window_, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
     // Handle camera movement based on key states
-    float trans_factor = 200.0f * deltaTime;
+    float trans_factor = 60.0f * deltaTime;
 
     if (isWKeyPressed || isUpKeyPressed) {
         camera_.Translate(camera_.GetForward() * trans_factor);

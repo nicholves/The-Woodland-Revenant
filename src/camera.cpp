@@ -66,7 +66,7 @@ namespace game {
         int x1 = glm::floor((position_.x + trans.x + coord_offset) * sizeOfQuad);
         int z1 = glm::floor((position_.z + trans.z + coord_offset) * sizeOfQuad);
 
-        if (impassable_cells_[x1][z1]) {
+        if (impassable_cells_[x1/2][z1/2]) {
             return;
         }
 
@@ -92,11 +92,12 @@ namespace game {
         std::cout << z2 << std::endl;*/
 
         //std::cout << terrain_grid_[0][0] << " " << terrain_grid_[0][1] << " " << terrain_grid_[0][2] << std::endl;
+        std::cout << z1 / 2 << " " << x1 / 2 << std::endl;
 
-        glm::vec3 p1 = glm::vec3(x1, terrain_grid_[z1][x1], z1);
-        glm::vec3 p2 = glm::vec3(x1, terrain_grid_[z1][x2], z2);
-        glm::vec3 p3 = glm::vec3(x2, terrain_grid_[z2][x1], z1);
-        glm::vec3 p4 = glm::vec3(x2, terrain_grid_[z2][x2], z2);
+        glm::vec3 p1 = glm::vec3(x1, terrain_grid_[z1 / 2][x1 / 2], z1);
+        glm::vec3 p2 = glm::vec3(x1, terrain_grid_[z1 / 2][x2 / 2], z2);
+        glm::vec3 p3 = glm::vec3(x2, terrain_grid_[z2 / 2][x1 / 2], z1);
+        glm::vec3 p4 = glm::vec3(x2, terrain_grid_[z2 / 2][x2 / 2], z2);
 
         /*std::cout << p1.y << std::endl;
         std::cout << p2.y << std::endl;
@@ -113,7 +114,9 @@ namespace game {
 
         position_.y = ((1 - t) * ((1 - s) * p1 + s * p2) + t * ((1 - s) * p3 + s * p4)).y * height_scalar + player_height;
 
-        //std::cout << temp_pos.y << std::endl;
+       
+
+        //std::cout << position_.y << std::endl;
     }
 
     void Camera::MoveForward(float amount) {
@@ -238,8 +241,6 @@ namespace game {
 
 
     void Camera::SetupViewMatrix(void) {
-
-        //std::cout << position_.y << std::endl;
 
         //view_matrix_ = glm::lookAt(position, look_at, up);
 
