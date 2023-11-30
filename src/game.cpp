@@ -333,10 +333,13 @@ void Game::SetupScene(void){
     particles->SetBlending(true);
     particles->Translate(glm::vec3(0, 30, 110));
 
+    
+    particles->Translate(glm::vec3(0, 30, 110));*/
+
     // Camera
     camera_.SetPosition(glm::vec3(-230, 0, -230)); // Initialize to start position
     camera_.UpdateYPos();
-    particles->Translate(glm::vec3(0, 30, 110));*/
+
 
     // Test interactable geometry
     // Create 3 keys
