@@ -11,6 +11,7 @@
 #include "resource_manager.h"
 #include "camera.h"
 #include "asteroid.h"
+#include "scene_graph.h"
 
 #include "ghost.h"
 
@@ -102,6 +103,9 @@ namespace game {
 
             // Mouse position
             glm::vec2 lastMousePos_;
+
+            // Game Phase
+            GamePhase gamePhase_ = title;
 
             //collision with ghost
             void ghostContact();

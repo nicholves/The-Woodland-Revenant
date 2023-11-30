@@ -106,7 +106,14 @@ namespace game {
     }
 
 
-    void SceneGraph::Draw(Camera* camera) {
+    void SceneGraph::Draw(Camera* camera, GamePhase gamePhase_) {
+
+        if (gamePhase_ == title) {
+            // Lose Screen (Red fill)
+            glClearColor(0.5f, 0, 0, 1);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            return;
+        } 
 
         // Clear background
         glClearColor(background_color_[0],

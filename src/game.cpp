@@ -390,7 +390,7 @@ void Game::MainLoop(void){
         playerImmunity(deltaTime);
 
         // Draw the scene
-        scene_.Draw(&camera_);
+        scene_.Draw(&camera_, gamePhase_);
 
         // Push buffer drawn in the background onto the display
         glfwSwapBuffers(window_);
@@ -410,14 +410,21 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
     void* ptr = glfwGetWindowUserPointer(window);
     Game *game = (Game *) ptr;
 
-    // Quit game if 'q' is pressed
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
-        glfwSetWindowShouldClose(window, true);
+    // Handle UI key presses
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+        if(game->gamePhase_ == title) {
+            // Start game
+            game->gamePhase_ = gameplay;
+        }
+        else if (game->gamePhase_ == gameLost || game->gamePhase_ == gameWon) {
+            // Quit game now that the game is over
+            glfwSetWindowShouldClose(window, true);
+        }
     }
 
-    // Stop animation if space bar is pressed
-    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS){
-        game->animating_ = (game->animating_ == true) ? false : true;
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        // Quit game early
+        glfwSetWindowShouldClose(window, true);
     }
 }
 
@@ -427,11 +434,25 @@ void Game::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
 
     float xOffset = xpos - game->lastMousePos_.x;
     float yOffset = ypos - game->lastMousePos_.y;
+    
+    // Prevent the player from seeing behind them from the bottom
+    if (yOffset > 0 && ypos > 1200) {
+        glfwSetCursorPos(window, xpos, 1200);
+        yOffset = 0;
+        ypos = 1200;
+    }
+
+    // Prevent the player from seeing behind them from the top
+    else if (yOffset < 0 && ypos < -1200) {
+        glfwSetCursorPos(window, xpos, -1200);
+        yOffset = 0;
+        ypos = -1200;
+    }
+
     game->lastMousePos_.x = xpos;
     game->lastMousePos_.y = ypos;
 
     const float sensitivity = 0.002f;
-
     xOffset *= sensitivity;
     yOffset *= sensitivity;
 
