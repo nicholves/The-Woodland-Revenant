@@ -48,6 +48,9 @@ namespace game {
             // Create the geometry for a cone
             void CreateCone(std::string object_name, float height = 1.0, float radius = 0.6, int num_samples_theta = 90, int num_samples_phi = 45);
 
+            // Create a singular vertex, used to represent the camera's position
+            void CreateVertex(std::string object_name);
+
             // Create particles distributed over a sphere
             void CreateSphereParticles(std::string object_name, int num_particles = 20000);
 			

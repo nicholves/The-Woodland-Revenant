@@ -14,6 +14,10 @@
 
 #include "ghost.h"
 
+// Interaction related constants
+#define INTERACT_COOLDOWN 2
+#define INTERACT_RADIUS 40.0
+
 namespace game {
 
     // Exception type for the game
@@ -62,6 +66,9 @@ namespace game {
             SceneNode* gravestone_;
             Ghost* ghost;
 
+            // Held interactable item
+            InteractableNode* held_item_ = NULL;
+
             // Resources available to the game
             ResourceManager resman_;
 
@@ -83,6 +90,10 @@ namespace game {
 
             //keys
             void checkKeys(double deltaTime);
+
+            // Interaction
+            double last_interacted_;
+            void OnInteract();
 
             // Setting up tree
             void SetupTree(const std::string&);

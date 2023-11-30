@@ -1037,6 +1037,62 @@ void ResourceManager::CreateSphere(std::string object_name, float radius, int nu
     AddResource(Mesh, object_name, vbo, ebo, face_num * face_att);
 }
 
+
+void ResourceManager::CreateVertex(std::string object_name) {
+    // Create a singular, invisible vertex
+
+    // Number of vertices and faces to be created
+    const GLuint vertex_num = 1;
+    const GLuint face_num = 0;
+
+    // Number of attributes for vertices and faces
+    const int vertex_att = 11;
+    const int face_att = 3;
+
+    // Data buffers 
+    GLfloat* vertex = NULL;
+    GLuint* face = NULL;
+
+    // Allocate memory for buffers
+    try {
+        vertex = new GLfloat[vertex_num * vertex_att]; // 11 attributes per vertex: 3D position (3), 3D normal (3), RGB color (3), 2D texture coordinates (2)
+        face = new GLuint[face_num * face_att]; // 3 indices per face
+    }
+    catch (std::exception& e) {
+        throw e;
+    }
+
+    // Create vertex
+    glm::vec3 pos = glm::vec3(0, 0, 0);
+    glm::vec3 norm = glm::vec3(0, 1, 0);
+    glm::vec3 color = glm::vec3(1, 1, 1);
+
+    for (int i = 0; i < 3; ++i) {
+        vertex[i] = pos[i];
+        vertex[i + 3] = norm[i];
+        vertex[i + 6] = color[i];
+    }
+    vertex[9] = 0;
+    vertex[10] = 0;
+
+    GLuint vbo, ebo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertex_num * vertex_att * sizeof(GLfloat), vertex, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, face_num * face_att * sizeof(GLuint), face, GL_STATIC_DRAW);
+
+    // Free data buffers
+    delete[] vertex;
+    delete[] face;
+
+    // Create resource
+    AddResource(Mesh, object_name, vbo, ebo, face_num * face_att);
+}
+
+
 void ResourceManager::LoadTexture(const std::string name, const char* filename) {
 
     // Load texture from file
@@ -1327,7 +1383,7 @@ void ResourceManager::CreateSphereParticles(std::string object_name, int num_par
     }
 
     float trad = 0.2; // Defines the starting point of the particles along the normal
-    float maxspray = 10; // This is how much we allow the points to deviate from the sphere
+    float maxspray = 1; // This is how much we allow the points to deviate from the sphere
     float u, v, w, theta, phi, spray; // Work variables
 
     for (int i = 0; i < num_particles; i++) {

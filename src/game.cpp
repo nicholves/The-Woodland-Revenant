@@ -45,6 +45,7 @@ void Game::Init(void){
     // Set variables
     animating_ = true;
     lastMousePos_ = glm::vec2(window_width_g / 2, window_height_g / 2);
+    last_interacted_ = glfwGetTime();
 }
 
        
@@ -161,6 +162,9 @@ void Game::SetupResources(void){
     //SphereParticles
     resman_.CreateSphereParticles("SphereParticles", 20);
 
+    //Invisible vertex that follows camera
+    resman_.CreateVertex("CameraVertex");
+
     //-------------------------------- Texture --------------------------------
     // Load texture to be used on the object
     //Sign Texture
@@ -252,7 +256,7 @@ void Game::SetupScene(void){
 
     // Move the camera up a bit so its like its the players head
     camera_.Translate(camera_.GetUp() * 20.0f);
-    
+
     Resource* geom = resman_.GetResource("TerrainMesh");
     Resource* mat  = resman_.GetResource("TerrainShader");
     Resource* text;
@@ -262,6 +266,10 @@ void Game::SetupScene(void){
     constexpr int bumpyNess = 2; // at 1 the terrain will vary between 1 and -1 in the y. Increasing this causes more jagged terrain
     terrain->SetScale(glm::vec3(100.0f, 25.0f, 100.0f));
 
+    // Vertex that follows camera
+    geom = resman_.GetResource("CameraVertex");
+    mat = resman_.GetResource("ObjectMaterial");
+    SceneNode* cam_vertex = scene_.CreateNode("CameraVertex", geom, mat);
 
     //Rock1
     geom = resman_.GetResource("Rock_1");
@@ -295,22 +303,63 @@ void Game::SetupScene(void){
     scene_.AddNode(ghost);
 
     //Sparkles
-    geom = resman_.GetResource("SphereParticles");
+    /*geom = resman_.GetResource("SphereParticles");
     mat = resman_.GetResource("Particle");
     text = resman_.GetResource("SparkleTexture");
 
     SceneNode* particles = scene_.CreateNode("TestSparkles1", geom, mat, text);
     particles->SetBlending(true);
-    particles->Translate(glm::vec3(0, 30, 100));
+    particles->Translate(glm::vec3(0, 30, 100));*/
 
     //Clouds
-    geom = resman_.GetResource("SphereParticles");
+    /*geom = resman_.GetResource("SphereParticles");
     mat = resman_.GetResource("Particle");
     text = resman_.GetResource("CloudTexture");
 
     particles = scene_.CreateNode("TestSparkles2", geom, mat, text);
     particles->SetBlending(true);
-    particles->Translate(glm::vec3(0, 30, 110));
+    particles->Translate(glm::vec3(0, 30, 110));*/
+
+    // Test interactable geometry
+    // Create 3 keys
+    geom = resman_.GetResource("Key");
+    mat = resman_.GetResource("LitTextureShader");
+    text = resman_.GetResource("KeyTexture");
+
+    glm::vec3 key_held_pos = glm::vec3(3, -1, -8);
+    glm::vec3 key_held_scale = glm::vec3(12, 12, 12);
+    glm::quat key_held_orientation = glm::angleAxis(glm::radians(100.0f), glm::vec3(0, 1, 0));
+
+    InteractableNode* obj1 = scene_.CreateInteractableNode("Interactable1", geom, mat, text);
+    obj1->Translate(glm::vec3(0,30,0));
+    obj1->Scale(glm::vec3(35, 35, 35));
+    obj1->SetPositioning(key_held_pos, key_held_scale, key_held_orientation, obj1->GetScale(), obj1->GetOrientation());
+
+    InteractableNode* obj2 = scene_.CreateInteractableNode("Interactable2", geom, mat, text);
+    obj2->Translate(glm::vec3(0, 30, 40));
+    obj2->Scale(glm::vec3(35, 35, 35));
+    obj2->SetPositioning(key_held_pos, key_held_scale, key_held_orientation, obj2->GetScale(), obj2->GetOrientation());
+
+    InteractableNode* obj3 = scene_.CreateInteractableNode("Interactable3", geom, mat, text);
+    obj3->Translate(glm::vec3(0, 30, -40));
+    obj3->Scale(glm::vec3(35, 35, 35));
+    obj3->SetPositioning(key_held_pos, key_held_scale, key_held_orientation, obj3->GetScale(), obj3->GetOrientation());
+
+    // Create starting particles for the keys
+    geom = resman_.GetResource("SphereParticles");
+    mat = resman_.GetResource("Particle");
+    text = resman_.GetResource("SparkleTexture");
+
+    SceneNode* particles1 = scene_.CreateNode("Sparkles1", geom, mat, text);
+    particles1->SetBlending(true);
+    SceneNode* particles2 = scene_.CreateNode("Sparkles2", geom, mat, text);
+    particles2->SetBlending(true);
+    SceneNode* particles3 = scene_.CreateNode("Sparkles3", geom, mat, text);
+    particles3->SetBlending(true);
+
+    obj1->SetParticles(particles1);
+    obj2->SetParticles(particles2);
+    obj3->SetParticles(particles3);
 }
 
 
@@ -327,10 +376,13 @@ void Game::MainLoop(void){
         std::cout << camera_.GetPosition().y << std::endl;
         std::cout << camera_.GetPosition().z << std::endl;*/
 
-
         checkKeys(deltaTime);
 
         scene_.Update(&camera_, deltaTime);
+
+        SceneNode* cam_vertex = scene_.GetNode("CameraVertex");
+        cam_vertex->SetPosition(camera_.GetPosition() - glm::vec3(0,3.5,0));
+        cam_vertex->SetOrientation(camera_.GetOrientation());
 
         //check if contact with player has been made
         ghostContact();
@@ -399,6 +451,8 @@ void Game::checkKeys(double deltaTime) {
     bool isLeftKeyPressed = glfwGetKey(window_, GLFW_KEY_LEFT) == GLFW_PRESS;
     bool isRightKeyPressed = glfwGetKey(window_, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
+    bool isEKeyPressed = glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS;
+
     // Handle camera movement based on key states
     float trans_factor = 200.0f * deltaTime;
 
@@ -413,6 +467,74 @@ void Game::checkKeys(double deltaTime) {
     }
     if (isDKeyPressed || isRightKeyPressed) {
         camera_.Translate(camera_.GetSide() * trans_factor);
+    }
+
+    // Handle interaction
+    if (isEKeyPressed) {
+        OnInteract();
+    }
+}
+
+
+void Game::OnInteract() {
+    double curr_time = glfwGetTime();
+    if (curr_time >= last_interacted_ + INTERACT_COOLDOWN) {
+
+        if (held_item_) { // Drop currently held item
+            //std::cout << "Dropping held item" << std::endl;
+
+            Resource* geom = resman_.GetResource("SphereParticles");
+            Resource* mat = resman_.GetResource("Particle");
+            Resource* text = resman_.GetResource("SparkleTexture");
+            SceneNode* new_particles = scene_.CreateNode(held_item_->GetName() + "Sparkles", geom, mat, text);
+            new_particles->SetBlending(true);
+
+            held_item_->SetParticles(new_particles);
+            held_item_->SetParent(NULL);
+            held_item_->SetPosition(camera_.GetPosition() + 10.0f*camera_.GetForward() - glm::vec3(0, 6, 0));
+            held_item_->SetOrientation(held_item_->GetWorldOrientation());
+            held_item_->SetScale(held_item_->GetWorldScale());
+
+            held_item_ = NULL;
+        }
+        else { // Find nearest valid interactable
+            //std::cout << "Attempting to pick up an item" << std::endl;
+
+            InteractableNode* chosen_interactable = NULL;
+
+            std::vector<InteractableNode*> nodes = scene_.GetInteractableNodes();
+
+            for (int i = 0; i < nodes.size(); ++i) { // Search through all interactables; find closest one within range
+                if (chosen_interactable) {
+                    float dist_to_chosen = glm::length(camera_.GetPosition() - chosen_interactable->GetPosition());
+                    float dist_to_new = glm::length(camera_.GetPosition() - nodes[i]->GetPosition());
+                    if (dist_to_new < dist_to_chosen) {
+                        chosen_interactable = nodes[i];
+                    }
+                }
+                else {
+                    float dist_to_new = glm::length(camera_.GetPosition() - nodes[i]->GetPosition());
+                    //std::cout << dist_to_new << std::endl;
+                    if (dist_to_new < INTERACT_RADIUS) {
+                        chosen_interactable = nodes[i];
+                    }
+                }
+            }
+
+            if (chosen_interactable) {
+                scene_.DeleteNode(chosen_interactable->GetParticles()->GetName());
+                held_item_ = chosen_interactable;
+                held_item_->SetParent(scene_.GetNode("CameraVertex"));
+                held_item_->SetPosition(held_item_->GetHeldPos());
+                held_item_->SetScale(held_item_->GetHeldScale());
+                held_item_->SetOrientation(held_item_->GetHeldOrientation());
+            }
+            else {
+                //std::cout << "No valid interactable found near player" << std::endl;
+            }
+        }
+
+        last_interacted_ = curr_time;
     }
 }
 

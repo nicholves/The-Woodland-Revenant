@@ -18,7 +18,7 @@ out float particle_id;
 // Simulation parameters (constants)
 uniform vec3 up_vec = vec3(0.0, 1.0, 0.0); // Up direction
 float accel = 1; // An acceleration applied to the particles coming from some attraction force
-float speed = 0.98; // Control the speed of the motion
+float speed = 0.5; // Control the speed of the motion
 
 // Define some useful constants
 const float pi = 3.1415926536;
