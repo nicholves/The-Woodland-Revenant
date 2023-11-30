@@ -1,0 +1,7 @@
+Screen space effects (blur feedback on hits, bloody screen, nvgs) - Nick
+
+Collision Detection / scaling of models, ghost gameplay mechanics - Kelvin
+
+The gameplay elements to win the game in place (placement of pickupable items, picking up items, completing bringing the key to where it needs to be, winning the game), river - Kevin
+
+Building the game world placing trees, rocks. adjust terrain (bigger play area) - Ben

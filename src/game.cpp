@@ -154,6 +154,13 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/key.obj");
     resman_.LoadResource(Mesh, "Key", filename.c_str());
 
+    //Ghost 
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/ghost2.obj");
+    resman_.LoadResource(Mesh, "Ghost", filename.c_str());
+
+    //SphereParticles
+    resman_.CreateSphereParticles("SphereParticles", 20);
+
     //-------------------------------- Texture --------------------------------
     // Load texture to be used on the object
     //Sign Texture
@@ -201,6 +208,18 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/moon_texture.jpg");
     resman_.LoadResource(Texture, "MoonTexture", filename.c_str());
 
+    // Cloth Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/whiteCloth_tex.png");
+    resman_.LoadResource(Texture, "ClothTexture", filename.c_str());
+
+    // Sparkle Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/sparkle_tex.png");
+    resman_.LoadResource(Texture, "SparkleTexture", filename.c_str());
+
+    // Cloud Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/cloud_tex.png");
+    resman_.LoadResource(Texture, "CloudTexture", filename.c_str());
+
     //-------------------------------Materials-----------------------------
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
     resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
@@ -213,6 +232,9 @@ void Game::SetupResources(void){
 
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/lit_color");
     resman_.LoadResource(Material, "LitColorShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_particle");
+    resman_.LoadResource(Material, "Particle", filename.c_str());
 
     std::vector<std::vector<float>> terrain = resman_.LoadTerrainResource(Type::Mesh, "TerrainMesh", MATERIAL_DIRECTORY "/terrain.heightfield");
     camera_.SetTerrainGrid(terrain);
@@ -259,6 +281,36 @@ void Game::SetupScene(void){
     SceneNode* tree2 = scene_.GetNode("Tree2_branch0");
     tree2->Scale(glm::vec3(5, 5, 5));
     tree2->Translate(glm::vec3(-300, 0, -250));
+
+    //Ghost
+    geom = resman_.GetResource("Ghost");
+    mat = resman_.GetResource("LitTextureShader");
+    //text = resman_.GetResource("Rock_1Texture");
+    text = resman_.GetResource("ClothTexture");
+
+    ghost = new Ghost("Ghost", geom, mat, text);
+    //ghost->Scale(glm::vec3(0.2, 0.2, 0.2));
+    ghost->Scale(glm::vec3(0.3, 0.3, 0.3));
+    ghost->Translate(glm::vec3(0, 35, 0));
+    scene_.AddNode(ghost);
+
+    //Sparkles
+    geom = resman_.GetResource("SphereParticles");
+    mat = resman_.GetResource("Particle");
+    text = resman_.GetResource("SparkleTexture");
+
+    SceneNode* particles = scene_.CreateNode("TestSparkles1", geom, mat, text);
+    particles->SetBlending(true);
+    particles->Translate(glm::vec3(0, 30, 100));
+
+    //Clouds
+    geom = resman_.GetResource("SphereParticles");
+    mat = resman_.GetResource("Particle");
+    text = resman_.GetResource("CloudTexture");
+
+    particles = scene_.CreateNode("TestSparkles2", geom, mat, text);
+    particles->SetBlending(true);
+    particles->Translate(glm::vec3(0, 30, 110));
 }
 
 
@@ -271,10 +323,19 @@ void Game::MainLoop(void){
         double deltaTime = currTime - lastTime;
         lastTime = currTime;
 
+        /*std::cout << camera_.GetPosition().x << std::endl;
+        std::cout << camera_.GetPosition().y << std::endl;
+        std::cout << camera_.GetPosition().z << std::endl;*/
+
 
         checkKeys(deltaTime);
 
-        scene_.Update();
+        scene_.Update(&camera_, deltaTime);
+
+        //check if contact with player has been made
+        ghostContact();
+
+        playerImmunity(deltaTime);
 
         // Draw the scene
         scene_.Draw(&camera_, gamePhase_);
@@ -284,6 +345,9 @@ void Game::MainLoop(void){
 
         // Update other events like input handling
         glfwPollEvents();
+
+        // Enable writing to depth buffer
+        glDepthMask(GL_TRUE);
     }
 }
 
@@ -488,6 +552,50 @@ SceneNode* Game::CreateLeaf(const std::string& name) {
     SceneNode* node = new SceneNode(name, geom, mat);
     scene_.AddNode(node);
     return node;
+}
+
+
+//collision with ghost
+void Game::ghostContact() {
+
+    //player contacted
+    if (ghost->getContacted() == true) {
+        hp -= 1;
+        //printf("Hp = %d", hp);
+
+        //do something when hp has run out
+        if (hp <= 0) {
+
+        }
+
+        //printf("warping num: %d", test);
+        // Generate random X and Z coordinates for the ghost to warp to after contact
+        float randomX = float(std::rand()) / float(RAND_MAX) * 800.0f - 5.0f; // Adjust the range as needed
+        float randomZ = float(std::rand()) / float(RAND_MAX) * 600.0f - 5.0f; // Adjust the range as needed
+
+        //warp ghost to random position
+        ghost->SetPosition(glm::vec3(randomX, 35, randomZ));
+
+        //set contact to false
+        ghost->setContacted(false);
+
+        camera_.setImmune(true);
+        camera_.setTimer(3.0f);
+    }
+}
+
+
+void Game::playerImmunity(float deltaTime) {
+    //player immunity
+    if (camera_.getImmune() == true) {
+        float time = camera_.getTimer() - deltaTime;
+        camera_.setTimer(time);
+
+        if (camera_.getTimer() <= 0.0f) {
+            // Immunity has expired after 3 seconds
+            camera_.setImmune(false);
+        }
+    }
 }
 
 } // namespace game

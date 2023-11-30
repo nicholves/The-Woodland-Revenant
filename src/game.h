@@ -13,6 +13,8 @@
 #include "asteroid.h"
 #include "scene_graph.h"
 
+#include "ghost.h"
+
 namespace game {
 
     // Exception type for the game
@@ -49,6 +51,8 @@ namespace game {
             // Scene graph containing all nodes to render
             SceneGraph scene_;
 
+            int hp = 3;
+
             // TODO: get rid of these
             SceneNode* sign_;
             SceneNode* car_;
@@ -57,6 +61,7 @@ namespace game {
             SceneNode* rock2_;
             SceneNode* rock3_;
             SceneNode* gravestone_;
+            Ghost* ghost;
 
             // Resources available to the game
             ResourceManager resman_;
@@ -91,6 +96,9 @@ namespace game {
             // Game Phase
             GamePhase gamePhase_ = title;
 
+            //collision with ghost
+            void ghostContact();
+            void playerImmunity(float deltaTime);
 
     }; // class Game
 

@@ -12,6 +12,7 @@
 // Default extensions for different shader source files
 #define VERTEX_PROGRAM_EXTENSION "_vp.glsl"
 #define FRAGMENT_PROGRAM_EXTENSION "_fp.glsl"
+#define GEOMETRY_PROGRAM_EXTENSION "_gp.glsl"
 
 namespace game {
 
@@ -47,6 +48,8 @@ namespace game {
             // Create the geometry for a cone
             void CreateCone(std::string object_name, float height = 1.0, float radius = 0.6, int num_samples_theta = 90, int num_samples_phi = 45);
 
+            // Create particles distributed over a sphere
+            void CreateSphereParticles(std::string object_name, int num_particles = 20000);
 			
         private:
            

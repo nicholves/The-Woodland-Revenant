@@ -58,6 +58,13 @@ namespace game {
         // Set all camera-related variables in shader program
         void SetupShader(GLuint program);
 
+        //general get and set
+        bool getImmune();
+        float getTimer();
+
+        void setImmune(bool immune);
+        void setTimer(float timer);
+
     private:
         glm::vec3 position_; // Position of camera
         glm::quat orientation_; // Orientation of camera
@@ -70,6 +77,9 @@ namespace game {
 
         // Create view matrix from current camera parameters
         void SetupViewMatrix(void);
+
+        bool isImmune = false;
+        float immuneTimer = 0.0f;
 
     }; // class Camera
 
