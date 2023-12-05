@@ -66,6 +66,10 @@ namespace game {
             SceneNode* rock3_;
             SceneNode* gravestone_;
             Ghost* ghost;
+            SceneNode* gasCan_;
+            SceneNode* door_;
+            SceneNode* sWall_;
+            SceneNode* sWallBent_;
 
             // Held interactable item
             InteractableNode* held_item_ = NULL;

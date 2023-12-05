@@ -161,6 +161,22 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/ghost2.obj");
     resman_.LoadResource(Mesh, "Ghost", filename.c_str());
 
+    //GasCan 
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/gasCan.obj");
+    resman_.LoadResource(Mesh, "GasCan", filename.c_str());
+
+    //Door 
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/Door1.obj");
+    resman_.LoadResource(Mesh, "Door", filename.c_str());
+
+    //Ruin Wall 
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/stoneWall.obj");
+    resman_.LoadResource(Mesh, "StoneWall", filename.c_str());
+
+    //Ruin Wall Bent
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/stoneWallBent.obj");
+    resman_.LoadResource(Mesh, "StoneWallBent", filename.c_str());
+
     //SphereParticles
     resman_.CreateSphereParticles("SphereParticles", 20);
 
@@ -226,6 +242,19 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/cloud_tex.png");
     resman_.LoadResource(Texture, "CloudTexture", filename.c_str());
 
+    // GasCan Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/GasCan_tex.png");
+    resman_.LoadResource(Texture, "GasCanTex", filename.c_str());
+
+    // Door Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/door_tex.png");
+    resman_.LoadResource(Texture, "DoorTex", filename.c_str());
+
+    // Ruin Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/Ruin_tex.png");
+    resman_.LoadResource(Texture, "RuinTex", filename.c_str());
+
+
     //-------------------------------Materials-----------------------------
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
     resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
@@ -248,6 +277,8 @@ void Game::SetupResources(void){
 
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/terrain");
     resman_.LoadResource(Material, "TerrainShader", filename.c_str());
+
+
 }
 
 
@@ -314,6 +345,42 @@ void Game::SetupScene(void){
     ghost->Scale(glm::vec3(0.3, 0.3, 0.3));
     ghost->Translate(glm::vec3(0, 35, 0));
     scene_.AddNode(ghost);
+
+    //GasCan
+    geom = resman_.GetResource("GasCan");
+    mat = resman_.GetResource("LitTextureShader");
+    text = resman_.GetResource("GasCanTex");
+    gasCan_ = scene_.CreateNode("GasCan", geom, mat, text);
+    gasCan_->Scale(glm::vec3(5, 5, 5));
+    // Create a quaternion for a 90-degree rotation
+    glm::quat rotationQuat = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    gasCan_->Rotate(rotationQuat);
+    gasCan_->Translate(glm::vec3(-170, 35, -170));
+    scene_.AddNode(gasCan_);
+
+    //door
+    geom = resman_.GetResource("Door");
+    mat = resman_.GetResource("LitTextureShader");
+    text = resman_.GetResource("DoorTex");
+    door_ = scene_.CreateNode("Door", geom, mat, text);
+    door_->Scale(glm::vec3(0.15, 0.15, 0.15));
+    door_->Translate(glm::vec3(-135, 30, -165));
+
+    //Stone Wall for Ruin
+    geom = resman_.GetResource("StoneWall");
+    mat = resman_.GetResource("LitTextureShader");
+    text = resman_.GetResource("RuinTex");
+    sWall_ = scene_.CreateNode("StoneWall", geom, mat, text);
+    sWall_->Scale(glm::vec3(0.1, 0.1, 0.1));
+    sWall_->Translate(glm::vec3(-85, 30, -165));
+
+    //Stone Wall for Ruin
+    geom = resman_.GetResource("StoneWallBent");
+    mat = resman_.GetResource("LitTextureShader");
+    text = resman_.GetResource("RuinTex");
+    sWallBent_ = scene_.CreateNode("StoneWallBent", geom, mat, text);
+    sWallBent_->Scale(glm::vec3(0.2, 0.2, 0.2));
+    sWallBent_->Translate(glm::vec3(-85, 30, -130));
 
     //Sparkles
     /*geom = resman_.GetResource("SphereParticles");
