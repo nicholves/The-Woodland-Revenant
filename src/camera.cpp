@@ -76,7 +76,7 @@ namespace game {
 
     void Camera::UpdateYPos() {
         constexpr float sizeOfQuad = 0.1f;
-        const int coord_offset = 250; // This is to avoid negative indices, seems to be the right value
+        const int coord_offset = 300; // This is to avoid negative indices, seems to be the right value
         const float player_height = 20.0f;
         const float height_scalar = 25.0f;
 
