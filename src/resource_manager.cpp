@@ -180,13 +180,18 @@ std::vector<std::vector<float>> ResourceManager::LoadTerrainResource(ResourceTyp
             float textCordv = atof(inputNums[2].c_str());
 
             vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 0] = xpos;
-            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1] = ypos;
+            if (rowCtr > columnCtr - 3 && rowCtr < columnCtr + 3) {
+                vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1] = 0.1;
+            }
+            else {
+                vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1] = ypos;
+            }
             vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 2] = zpos;
 
             vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 9] = textCordu;
             vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 10] = textCordv;
 
-            terrain_grid[rowCtr].push_back(ypos);
+            terrain_grid[rowCtr].push_back(vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1]);
 
             columnCtr++;
         }

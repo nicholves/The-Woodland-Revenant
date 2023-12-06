@@ -433,9 +433,9 @@ void Game::SetupScene(void){
     mat = resman_.GetResource("LitTextureShader");
     text = resman_.GetResource("KeyTexture");
 
-    glm::vec3 key_held_pos = glm::vec3(3, -1, -8);
+    glm::vec3 key_held_pos = glm::vec3(-3, -1, 8);
     glm::vec3 key_held_scale = glm::vec3(12, 12, 12);
-    glm::quat key_held_orientation = glm::angleAxis(glm::radians(100.0f), glm::vec3(0, 1, 0));
+    glm::quat key_held_orientation = glm::angleAxis(glm::radians(-95.0f), glm::vec3(0, 1, 0));
 
     InteractableNode* obj1 = scene_.CreateInteractableNode("Interactable1", geom, mat, text);
     obj1->Translate(glm::vec3(0,30,0));
@@ -688,6 +688,7 @@ void Game::OnInteract() {
                 held_item_->SetPosition(held_item_->GetHeldPos());
                 held_item_->SetScale(held_item_->GetHeldScale());
                 held_item_->SetOrientation(held_item_->GetHeldOrientation());
+                //std::cout << "held_item_ pos: " + std::to_string(held_item_->GetPosition().x) + " " + std::to_string(held_item_->GetPosition().y) + " " + std::to_string(held_item_->GetPosition().z) << std::endl;
             }
             else {
                 //std::cout << "No valid interactable found near player" << std::endl;
