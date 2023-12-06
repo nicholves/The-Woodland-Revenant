@@ -12,7 +12,6 @@
 #include "resource.h"
 #include "camera.h"
 
-// is this correct?
 #define FRAME_BUFFER_WIDTH 1920
 #define FRAME_BUFFER_HEIGHT 1080
 
@@ -49,6 +48,10 @@ namespace game {
         std::vector<InteractableNode*> interactable_nodes_;
 
     public:
+        static int blurrSamples;
+        static float bloodFactor;
+        static float pixelSpacing;
+
         // Constructor and destructor
         SceneGraph(void);
         ~SceneGraph();

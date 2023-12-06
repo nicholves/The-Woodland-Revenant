@@ -6,6 +6,7 @@ in vec2 uv0;
 // Passed from outside
 uniform float timer;
 uniform sampler2D texture_map;
+uniform float pixelSpacing;
 
 void main() 
 {
@@ -14,8 +15,8 @@ void main()
 	pixel = texture(texture_map,uv0);
 
 	// tv blockiness
-	float spacing = 0.004;
-	float thick = 0.002;
+	float spacing = pixelSpacing;
+	float thick = spacing / 2;
 	if ((mod(uv0.y, spacing) < thick) || (mod(uv0.x,spacing) < thick))
 		pixel = vec4(0,0,0,1);
 	

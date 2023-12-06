@@ -61,7 +61,7 @@ namespace game {
  
             // Methods to load specific types of resources
             // Load shaders programs
-            void LoadMaterial(const std::string name, const char *prefix);
+            void LoadMaterial(const std::string name, const char *prefix, ResourceType type);
             // Load a text file into memory (could be source code)
             std::string LoadTextFile(const char *filename);
             // Load a texture from an image file: png, jpg, etc.

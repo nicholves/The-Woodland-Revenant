@@ -9,6 +9,7 @@
 
 #include "model_loader.h"
 #include "resource_manager.h"
+#include "path_config.h"
 
 namespace game {
 
@@ -70,8 +71,8 @@ void ResourceManager::AddResource(ResourceType type, const std::string name, GLu
 void ResourceManager::LoadResource(ResourceType type, const std::string name, const char *filename){
 
     // Call appropriate method depending on type of resource
-    if (type == Material) {
-        LoadMaterial(name, filename);
+    if (type == Material || type == SS_Material) {
+        LoadMaterial(name, filename, type);
     }
     else if (type == Texture) {
         LoadTexture(name, filename);
@@ -387,10 +388,20 @@ Resource *ResourceManager::GetResource(const std::string name) const {
 }
 
 
-void ResourceManager::LoadMaterial(const std::string name, const char* prefix) {
+void ResourceManager::LoadMaterial(const std::string name, const char* prefix, ResourceType type) {
 
     // Load vertex program source code
-    std::string filename = std::string(prefix) + std::string(VERTEX_PROGRAM_EXTENSION);
+    std::string filename;
+    if (type == Material) {
+        filename = std::string(prefix) + std::string(VERTEX_PROGRAM_EXTENSION);
+    }
+    else if (type == SS_Material) {
+        filename = SCREEN_SPACE_SHADERS_DIRECTORY "/ScreenSpace_vp.glsl";
+    }
+    else {
+        throw(std::ios_base::failure(std::string("Error Non Existant Material Type")));
+    }
+
     std::string vp = LoadTextFile(filename.c_str());
 
     // Load fragment program source code

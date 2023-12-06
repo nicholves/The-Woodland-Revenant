@@ -9,13 +9,16 @@
 #include "scene_graph.h"
 #include "ghost.h"
 
-// the higher this number the blurrier the scene will get but also the bigger the performance impact
-#define BLUR_SAMPLES 40
-
-// this should be between 0 and 1. Describes how bloody the screen gets. Bigger = more blood.
-#define BLOOD_FACTOR 0.2f
-
 namespace game {
+
+    // the higher this number the blurrier the scene will get but also the bigger the performance impact
+    int SceneGraph::blurrSamples = 40;
+
+    // this should be between 0 and 1. Describes how bloody the screen gets. Bigger = more blood.
+    float SceneGraph::bloodFactor = 0.2f;
+
+    // Lower number means smaller pixels
+    float SceneGraph::pixelSpacing = 0.004f;
 
     SceneGraph::SceneGraph(void) {
 
@@ -269,11 +272,14 @@ namespace game {
         glUniform1f(ratio_var, aspect_ratio);
 
         GLint blur_samples = glGetUniformLocation(program, "num_samples");
-        glUniform1i(blur_samples, BLUR_SAMPLES);
+        glUniform1i(blur_samples, blurrSamples);
 
         GLint blood_factor = glGetUniformLocation(program, "blood_factor");
         // 1 is fully bloody. 0 is no blood
-        glUniform1f(blood_factor, BLOOD_FACTOR);
+        glUniform1f(blood_factor, bloodFactor);
+
+        GLint pixel_spacing = glGetUniformLocation(program, "pixelSpacing");
+        glUniform1f(pixel_spacing, pixelSpacing);
 
         // Timer
         GLint timer_var = glGetUniformLocation(program, "timer");

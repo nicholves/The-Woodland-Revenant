@@ -85,6 +85,7 @@ namespace game {
             
             // Flag to use screen space effects or not
             bool use_screen_space_effects_ = false;
+            int screen_space_effect_index_ = 0;
 
             // Methods to initialize the game
             void InitWindow(void);

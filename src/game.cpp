@@ -254,46 +254,46 @@ void Game::SetupResources(void){
 
 
     //-------------------------------Materials-----------------------------
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
+    filename = std::string(SHADERS_DIRECTORY) + std::string("/material");
     resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
 
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_material");
+    filename = std::string(SHADERS_DIRECTORY) + std::string("/textured_material");
     resman_.LoadResource(Material, "TextureShader", filename.c_str());
 
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/lit_textured_material");
+    filename = std::string(SHADERS_DIRECTORY) + std::string("/lit_textured_material");
     resman_.LoadResource(Material, "LitTextureShader", filename.c_str());
 
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/lit_color");
+    filename = std::string(SHADERS_DIRECTORY) + std::string("/lit_color");
     resman_.LoadResource(Material, "LitColorShader", filename.c_str());
 
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_particle");
+    filename = std::string(SHADERS_DIRECTORY) + std::string("/textured_particle");
     resman_.LoadResource(Material, "Particle", filename.c_str());
 
-    // Load material for screen-space effect
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/night_vision");
-    resman_.LoadResource(Material, "NightVisionShader", filename.c_str());
+    filename = std::string(SHADERS_DIRECTORY) + std::string("/terrain");
+    resman_.LoadResource(Material, "TerrainShader", filename.c_str());
 
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/wavering");
-    resman_.LoadResource(Material, "WaveringShader", filename.c_str());
+    //-------------------------------Screen Space Material------------------
+    filename = std::string(SCREEN_SPACE_SHADERS_DIRECTORY) + std::string("/night_vision");
+    resman_.LoadResource(SS_Material, "NightVisionShader", filename.c_str());
 
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/pixelated");
-    resman_.LoadResource(Material, "PixelatedShader", filename.c_str());
+    filename = std::string(SCREEN_SPACE_SHADERS_DIRECTORY) + std::string("/wavering");
+    resman_.LoadResource(SS_Material, "WaveringShader", filename.c_str());
 
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/drunk");
-    resman_.LoadResource(Material, "DrunkShader", filename.c_str());
+    filename = std::string(SCREEN_SPACE_SHADERS_DIRECTORY) + std::string("/pixelated");
+    resman_.LoadResource(SS_Material, "PixelatedShader", filename.c_str());
 
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/blur");
-    resman_.LoadResource(Material, "BlurShader", filename.c_str());
+    filename = std::string(SCREEN_SPACE_SHADERS_DIRECTORY) + std::string("/drunk");
+    resman_.LoadResource(SS_Material, "DrunkShader", filename.c_str());
 
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/bloody");
-    resman_.LoadResource(Material, "BloodyShader", filename.c_str());
+    filename = std::string(SCREEN_SPACE_SHADERS_DIRECTORY) + std::string("/blur");
+    resman_.LoadResource(SS_Material, "BlurShader", filename.c_str());
+
+    filename = std::string(SCREEN_SPACE_SHADERS_DIRECTORY) + std::string("/bloody");
+    resman_.LoadResource(SS_Material, "BloodyShader", filename.c_str());
 
     std::vector<std::vector<float>> terrain = resman_.LoadTerrainResource(Type::Mesh, "TerrainMesh", MATERIAL_DIRECTORY "/terrain.heightfield");
     camera_.SetTerrainGrid(terrain);
     camera_.SetImpassableCells(resman_.GetImpassableCells(MATERIAL_DIRECTORY "/impassable.csv", terrain));
-
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/terrain");
-    resman_.LoadResource(Material, "TerrainShader", filename.c_str());
 }
 
 
@@ -471,6 +471,14 @@ void Game::SetupScene(void){
 
 
 void Game::MainLoop(void){
+    const char* ssShaders[] = {"None",
+                               "NightVisionShader",
+                               "WaveringShader",
+                               "PixelatedShader",
+                               "DrunkShader",
+                               "BlurShader",
+                               "BloodyShader"
+                               };
 
     // Loop while the user did not close the window
     double lastTime = glfwGetTime();
@@ -502,12 +510,18 @@ void Game::MainLoop(void){
         }
         else {
             // enable these if using the drunk filter
-            /*
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            */
+            if (screen_space_effect_index_ == 4) {
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            }
+            
             scene_.DrawToTexture(&camera_);
-            scene_.DisplayTexture(resman_.GetResource("BloodyShader")->GetResource());
+            scene_.DisplayTexture(resman_.GetResource(ssShaders[screen_space_effect_index_])->GetResource());
+
+            if (screen_space_effect_index_ == 4) {
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            }
         }
 
         // Push buffer drawn in the background onto the display
@@ -579,6 +593,9 @@ void Game::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 void Game::checkKeys(double deltaTime) {
+    // TODO: remove
+    static double lastTime = glfwGetTime();
+
     // Check the state of keys for smooth input
     bool isWKeyPressed = glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS;
     bool isSKeyPressed = glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS;
