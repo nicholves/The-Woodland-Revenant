@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "game.h"
+#include "skybox.h"
 #include "path_config.h"
 
 namespace game {
@@ -17,7 +18,7 @@ const unsigned int window_height_g = 600;
 const bool window_full_screen_g = false;
 
 // Viewport and camera settings
-float camera_near_clip_distance_g = 0.01;
+float camera_near_clip_distance_g = 0.01f;
 float camera_far_clip_distance_g = 1000.0;
 float camera_fov_g = 60.0; // Field-of-view of camera (degrees)
 const glm::vec3 viewport_background_color_g(0.0, 0.0, 0.0);
@@ -27,12 +28,6 @@ glm::vec3 camera_up_g(0.0, 1.0, 0.0);
 
 // Materials 
 const std::string material_directory_g = MATERIAL_DIRECTORY;
-
-
-Game::Game(void){
-
-    // Don't do work in the constructor, leave it for the Init() function
-}
 
 
 void Game::Init(void){
@@ -95,7 +90,7 @@ void Game::InitView(void){
     // Set current view
     camera_.SetView(camera_position_g, camera_look_at_g, camera_up_g);
     // Set projection
-    camera_.SetProjection(camera_fov_g, camera_near_clip_distance_g, camera_far_clip_distance_g, width, height);
+    camera_.SetProjection(camera_fov_g, camera_near_clip_distance_g, camera_far_clip_distance_g, static_cast<GLfloat>(width), static_cast<GLfloat>(height));
 }
 
 
@@ -291,6 +286,18 @@ void Game::SetupResources(void){
     filename = std::string(SCREEN_SPACE_SHADERS_DIRECTORY) + std::string("/bloody");
     resman_.LoadResource(SS_Material, "BloodyShader", filename.c_str());
 
+    // Skybox
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/skybox/");
+    resman_.LoadResource(SkyboxTexture, "SkyboxText", filename.c_str());
+
+    filename = std::string(SHADERS_DIRECTORY) + std::string("/skybox");
+    resman_.LoadResource(Material, "SkyboxProg", filename.c_str());
+
+    resman_.AddResource(Mesh, "SkyboxMesh", resman_.GetSkyboxVBO(), 36);
+
+    resman_.GenerateSkybox();
+    // ---
+
     std::vector<std::vector<float>> terrain = resman_.LoadTerrainResource(Type::Mesh, "TerrainMesh", MATERIAL_DIRECTORY "/terrain.heightfield");
     camera_.SetTerrainGrid(terrain);
     camera_.SetImpassableCells(resman_.GetImpassableCells(MATERIAL_DIRECTORY "/impassable.csv", terrain));
@@ -467,6 +474,15 @@ void Game::SetupScene(void){
     obj1->SetParticles(particles1);
     obj2->SetParticles(particles2);
     obj3->SetParticles(particles3);
+
+    
+    geom = resman_.GetResource("SkyboxMesh");
+    mat = resman_.GetResource("SkyboxProg");
+    text = resman_.GetResource("SkyboxText");
+    SceneNode* skybox = new Skybox("skybox", geom, mat, text);
+    scene_.AddNode(skybox);
+
+    skybox->Translate(glm::vec3(0, 0, 0));
 }
 
 
@@ -498,7 +514,7 @@ void Game::MainLoop(void){
         //check if contact with player has been made
         ghostContact();
 
-        playerImmunity(deltaTime);
+        playerImmunity(static_cast<float>(deltaTime));
 
         // Draw the scene
         // Enable writing to depth buffer
@@ -564,8 +580,8 @@ void Game::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     void* ptr = glfwGetWindowUserPointer(window);
     Game* game = (Game*)ptr;
 
-    float xOffset = xpos - game->lastMousePos_.x;
-    float yOffset = ypos - game->lastMousePos_.y;
+    float xOffset = static_cast<float>(xpos) - game->lastMousePos_.x;
+    float yOffset = static_cast<float>(ypos) - game->lastMousePos_.y;
     
     // Prevent the player from seeing behind them from the bottom
     if (yOffset > 0 && ypos > 1200) {
@@ -581,8 +597,8 @@ void Game::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
         ypos = -1200;
     }
 
-    game->lastMousePos_.x = xpos;
-    game->lastMousePos_.y = ypos;
+    game->lastMousePos_.x = static_cast<float>(xpos);
+    game->lastMousePos_.y = static_cast<float>(ypos);
 
     const float sensitivity = 0.002f;
     xOffset *= sensitivity;
@@ -611,7 +627,7 @@ void Game::checkKeys(double deltaTime) {
     bool isEKeyPressed = glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS;
 
     // Handle camera movement based on key states
-    float trans_factor = 60.0f * deltaTime;
+    float trans_factor = 60.0f * static_cast<float>(deltaTime);
 
     if (isWKeyPressed || isUpKeyPressed) {
         camera_.Translate(camera_.GetForward() * trans_factor);
@@ -664,7 +680,7 @@ void Game::OnInteract() {
 
             std::vector<InteractableNode*> nodes = scene_.GetInteractableNodes();
 
-            for (int i = 0; i < nodes.size(); ++i) { // Search through all interactables; find closest one within range
+            for (size_t i = 0; i < nodes.size(); ++i) { // Search through all interactables; find closest one within range
                 if (chosen_interactable) {
                     float dist_to_chosen = glm::length(camera_.GetPosition() - chosen_interactable->GetPosition());
                     float dist_to_new = glm::length(camera_.GetPosition() - nodes[i]->GetPosition());
@@ -705,7 +721,7 @@ void Game::ResizeCallback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
     void* ptr = glfwGetWindowUserPointer(window);
     Game *game = (Game *) ptr;
-    game->camera_.SetProjection(camera_fov_g, camera_near_clip_distance_g, camera_far_clip_distance_g, width, height);
+    game->camera_.SetProjection(camera_fov_g, camera_near_clip_distance_g, camera_far_clip_distance_g, static_cast<GLfloat>(width), static_cast<float>(height));
 }
 
 

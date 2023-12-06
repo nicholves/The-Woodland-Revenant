@@ -296,7 +296,7 @@ namespace game {
 
         // Timer
         GLint timer_var = glGetUniformLocation(program, "timer");
-        double current_time = glfwGetTime();
+        float current_time = static_cast<float>(glfwGetTime());
         glUniform1f(timer_var, (float)current_time);
 
         // Transformations
@@ -317,7 +317,7 @@ namespace game {
 
         // Object Color
         GLint object_color = glGetUniformLocation(program, "object_color");
-        glUniform3f(object_color, 0.0, 0.7, 0.9);
+        glUniform3f(object_color, 0.0f, 0.7f, 0.9f);
     }
 
 } // namespace game;

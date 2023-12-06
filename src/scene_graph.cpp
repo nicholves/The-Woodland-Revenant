@@ -77,7 +77,7 @@ namespace game {
     SceneNode* SceneGraph::GetNode(std::string node_name) const {
 
         // Find node with the specified name
-        for (int i = 0; i < node_.size(); i++) {
+        for (size_t i = 0; i < node_.size(); i++) {
             if (node_[i]->GetName() == node_name) {
                 return node_[i];
             }
@@ -89,7 +89,7 @@ namespace game {
 
     void SceneGraph::DeleteNode(std::string node_name) {
         // Find node with the specified name
-        for (int i = 0; i < node_.size(); i++) {
+        for (size_t i = 0; i < node_.size(); i++) {
             if (node_[i]->GetName() == node_name) {
                 delete node_[i];
                 node_.erase(node_.begin() + i);
@@ -131,21 +131,24 @@ namespace game {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Draw all scene nodes
-        for (int i = 0; i < node_.size(); i++) {
+        for (size_t i = 0; i < node_.size(); i++) {
+            if (node_[i]->GetName() == "skybox") continue;
             node_[i]->Draw(camera);
         }
+
+        GetNode("skybox")->Draw(camera);
     }
 
 
-    void SceneGraph::Update(Camera* camera, float deltaTime) {
+    void SceneGraph::Update(Camera* camera, double deltaTime) {
 
-        for (int i = 0; i < node_.size(); i++) {
+        for (size_t i = 0; i < node_.size(); i++) {
             // Check if the current node is a Ghost
             Ghost* ghostNode = dynamic_cast<Ghost*>(node_[i]);
 
             if (ghostNode) {
                 // If it's a Ghost, pass the camera to its Update function
-                ghostNode->Update(camera, deltaTime);
+                ghostNode->Update(camera, static_cast<float>(deltaTime));
             }
             else {
                 node_[i]->Update();
@@ -227,9 +230,12 @@ namespace game {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Draw all scene nodes
-        for (int i = 0; i < node_.size(); i++) {
+        for (size_t i = 0; i < node_.size(); i++) {
+            if (node_[i]->GetName() == "skybox") continue;
             node_[i]->Draw(camera);
         }
+
+        GetNode("skybox")->Draw(camera);
 
         // Enable writing to depth buffer
         glDepthMask(GL_TRUE);
@@ -283,7 +289,7 @@ namespace game {
 
         // Timer
         GLint timer_var = glGetUniformLocation(program, "timer");
-        float current_time = glfwGetTime();
+        float current_time = static_cast<float>(glfwGetTime());
         glUniform1f(timer_var, current_time);
 
         // Bind texture

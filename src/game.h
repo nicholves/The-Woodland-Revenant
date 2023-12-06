@@ -29,7 +29,7 @@ namespace game {
         public:
             GameException(std::string message) : message_(message) {};
             virtual const char* what() const throw() { return message_.c_str(); };
-            virtual ~GameException() throw() {};
+            virtual ~GameException() {};
     };
 
     // Game application
@@ -37,7 +37,6 @@ namespace game {
 
         public:
             // Constructor and destructor
-            Game(void);
             ~Game();
             // Call Init() before calling any other method
             void Init(void); 

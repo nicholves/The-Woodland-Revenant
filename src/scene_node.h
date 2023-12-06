@@ -66,9 +66,9 @@ namespace game {
         void SetOrbitRotation(const glm::quat);
         void SetWindAffected(const bool);
 
-        glm::mat4 CalculateTransform(float) const;
+        virtual glm::mat4 CalculateTransform(float) const;
 
-    private:
+    protected:
         std::string name_; // Name of the scene node
         GLuint array_buffer_; // References to geometry: vertex and array buffers
         GLuint element_array_buffer_;
@@ -88,7 +88,7 @@ namespace game {
         float wind_strength = 0.05f; // The amount the wind moves the tree
 
         // Set matrices that transform the node in a shader program
-        void SetupShader(GLuint program);
+        virtual void SetupShader(GLuint program);
 
     }; // class SceneNode
 

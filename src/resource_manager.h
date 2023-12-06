@@ -53,9 +53,20 @@ namespace game {
 
             // Create particles distributed over a sphere
             void CreateSphereParticles(std::string object_name, int num_particles = 20000);
+
+            static const float *GetSkyboxVertices();
+            static void GenerateSkybox();
+            static GLuint GetSkyboxVBO();
+            static GLuint GetSkyboxVAO();
 			
         private:
-           
+            static float skyboxVertices_[108];
+
+            static bool hasGeneratedSkybox_;
+
+            static GLuint skyboxVBO_;
+            static GLuint skyboxVAO_;
+
             // List storing all resources
             std::vector<Resource*> resource_; 
  
@@ -66,6 +77,7 @@ namespace game {
             std::string LoadTextFile(const char *filename);
             // Load a texture from an image file: png, jpg, etc.
             void LoadTexture(const std::string name, const char* filename);
+            void LoadSkyboxTexture(const std::string name, const char* filename);
             // Loads a mesh in obj format
             void LoadMesh(const std::string name, const char* filename);
 

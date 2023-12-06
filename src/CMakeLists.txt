@@ -7,11 +7,11 @@ project(${PROJ_NAME})
 # Specify project files: header files and source files
 set(HDRS
     asteroid.h camera.h game.h resource.h resource_manager.h scene_graph.h scene_node.h model_loader.h 
-    ghost.h interactable_node.h)
+    ghost.h interactable_node.h skybox.h)
  
 set(SRCS
     asteroid.cpp camera.cpp game.cpp main.cpp resource.cpp resource_manager.cpp scene_graph.cpp scene_node.cpp 
-    ghost.cpp interactable_node.cpp)
+    ghost.cpp interactable_node.cpp skybox.cpp)
 
 # Add path name to configuration file
 #configure_file(path_config.h.in path_config.h)
@@ -30,9 +30,9 @@ add_compile_definitions(CMAKE_SOURCE_DIRECTORY="${CMAKE_SOURCE_DIR}")
 
 # Other libraries needed
 #set(LIBRARY_PATH C:\Users\nicho\Libraries)
-set(LIBRARY_PATH C:/Users/hikel/Desktop/University/Fall\ 2023/COMP\ 3501A/Libraries)
+#set(LIBRARY_PATH C:/Users/hikel/Desktop/University/Fall\ 2023/COMP\ 3501A/Libraries)
 #set(LIBRARY_PATH C:/Users/kevin/OneDrive/Carleton/YEAR3/FALL/COMP3501/Libraries)
-#set(LIBRARY_PATH C:\Libraries)
+set(LIBRARY_PATH C:\Libraries)
 #set(LIBRARY_PATH C:/Program\ Files/Libraries/Libraries)
 include_directories(${LIBRARY_PATH}/include)
 if(NOT WIN32)
