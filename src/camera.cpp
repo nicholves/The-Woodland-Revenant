@@ -92,7 +92,7 @@ namespace game {
         std::cout << z2 << std::endl;*/
 
         //std::cout << terrain_grid_[0][0] << " " << terrain_grid_[0][1] << " " << terrain_grid_[0][2] << std::endl;
-        std::cout << z1 / 2 << " " << x1 / 2 << std::endl;
+        //std::cout << z1 / 2 << " " << x1 / 2 << std::endl;
 
         glm::vec3 p1 = glm::vec3(x1, terrain_grid_[z1 / 2][x1 / 2], z1);
         glm::vec3 p2 = glm::vec3(x1, terrain_grid_[z1 / 2][x2 / 2], z2);

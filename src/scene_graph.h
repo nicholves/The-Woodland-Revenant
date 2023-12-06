@@ -12,6 +12,10 @@
 #include "resource.h"
 #include "camera.h"
 
+// is this correct?
+#define FRAME_BUFFER_WIDTH 1920
+#define FRAME_BUFFER_HEIGHT 1080
+
 namespace game {
 
     // Game Phases
@@ -32,6 +36,14 @@ namespace game {
 
         // Scene nodes to render
         std::vector<SceneNode*> node_;
+
+        // Frame buffer for drawing to texture
+        GLuint frame_buffer_;
+        // Quad vertex array for drawing from texture
+        GLuint quad_array_buffer_;
+        // Render targets
+        GLuint texture_;
+        GLuint depth_buffer_;
 
         // Interactable nodes
         std::vector<InteractableNode*> interactable_nodes_;
@@ -67,6 +79,15 @@ namespace game {
         //void Update(void);
         void Update(Camera* camera, float deltaTime);
 
+        // Drawing from/to a texture
+        // Setup the texture
+        void SetupDrawToTexture(void);
+        // Draw the scene into a texture
+        void DrawToTexture(Camera* camera);
+        // Process and draw the texture on the screen
+        void DisplayTexture(GLuint program);
+        // Save texture to a file in ppm format
+        void SaveTexture(char* filename);
     }; // class SceneGraph
 
 } // namespace game

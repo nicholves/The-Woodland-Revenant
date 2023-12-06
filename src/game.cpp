@@ -96,8 +96,6 @@ void Game::InitView(void){
     camera_.SetView(camera_position_g, camera_look_at_g, camera_up_g);
     // Set projection
     camera_.SetProjection(camera_fov_g, camera_near_clip_distance_g, camera_far_clip_distance_g, width, height);
-
-    
 }
 
 
@@ -271,14 +269,31 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_particle");
     resman_.LoadResource(Material, "Particle", filename.c_str());
 
+    // Load material for screen-space effect
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/night_vision");
+    resman_.LoadResource(Material, "NightVisionShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/wavering");
+    resman_.LoadResource(Material, "WaveringShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/pixelated");
+    resman_.LoadResource(Material, "PixelatedShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/drunk");
+    resman_.LoadResource(Material, "DrunkShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/blur");
+    resman_.LoadResource(Material, "BlurShader", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/bloody");
+    resman_.LoadResource(Material, "BloodyShader", filename.c_str());
+
     std::vector<std::vector<float>> terrain = resman_.LoadTerrainResource(Type::Mesh, "TerrainMesh", MATERIAL_DIRECTORY "/terrain.heightfield");
     camera_.SetTerrainGrid(terrain);
     camera_.SetImpassableCells(resman_.GetImpassableCells(MATERIAL_DIRECTORY "/impassable.csv", terrain));
 
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/terrain");
     resman_.LoadResource(Material, "TerrainShader", filename.c_str());
-
-
 }
 
 
@@ -403,6 +418,10 @@ void Game::SetupScene(void){
     
     particles->Translate(glm::vec3(0, 30, 110));*/
 
+    // Setup drawing to texture
+    scene_.SetupDrawToTexture();
+    use_screen_space_effects_ = false;
+
     // Camera
     camera_.SetPosition(glm::vec3(-230, 0, -230)); // Initialize to start position
     camera_.UpdateYPos();
@@ -460,10 +479,6 @@ void Game::MainLoop(void){
         double deltaTime = currTime - lastTime;
         lastTime = currTime;
 
-        /*std::cout << camera_.GetPosition().x << std::endl;
-        std::cout << camera_.GetPosition().y << std::endl;
-        std::cout << camera_.GetPosition().z << std::endl;*/
-
         checkKeys(deltaTime);
 
         scene_.Update(&camera_, deltaTime);
@@ -478,7 +493,22 @@ void Game::MainLoop(void){
         playerImmunity(deltaTime);
 
         // Draw the scene
-        scene_.Draw(&camera_, gamePhase_);
+        // Enable writing to depth buffer
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+        glDepthFunc(GL_LESS);
+        if (!use_screen_space_effects_) {
+            scene_.Draw(&camera_, gamePhase_);
+        }
+        else {
+            // enable these if using the drunk filter
+            /*
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            */
+            scene_.DrawToTexture(&camera_);
+            scene_.DisplayTexture(resman_.GetResource("BloodyShader")->GetResource());
+        }
 
         // Push buffer drawn in the background onto the display
         glfwSwapBuffers(window_);
@@ -520,8 +550,6 @@ void Game::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     void* ptr = glfwGetWindowUserPointer(window);
     Game* game = (Game*)ptr;
 
-    std::cout << xpos << " " << game->lastMousePos_.x << std::endl;
-
     float xOffset = xpos - game->lastMousePos_.x;
     float yOffset = ypos - game->lastMousePos_.y;
     
@@ -556,6 +584,7 @@ void Game::checkKeys(double deltaTime) {
     bool isSKeyPressed = glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS;
     bool isAKeyPressed = glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS;
     bool isDKeyPressed = glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS;
+    bool isFKeyPressed = glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS;
 
     bool isUpKeyPressed = glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS;
     bool isDownKeyPressed = glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS;
@@ -583,6 +612,9 @@ void Game::checkKeys(double deltaTime) {
     // Handle interaction
     if (isEKeyPressed) {
         OnInteract();
+    }
+    if (isFKeyPressed) {
+        glfwMaximizeWindow(window_);
     }
 }
 
