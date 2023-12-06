@@ -13,6 +13,57 @@
 
 namespace game {
 
+    // from https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/6.1.cubemaps_skybox/cubemaps_skybox.cpp
+    float ResourceManager::skyboxVertices_[] = {
+        // positions          
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f
+    };
+
+    bool ResourceManager::hasGeneratedSkybox_ = false;
+
+    GLuint ResourceManager::skyboxVBO_ = 0;
+    GLuint ResourceManager::skyboxVAO_ = 0;
+
 ResourceManager::ResourceManager(void){
 }
 
@@ -20,10 +71,36 @@ ResourceManager::ResourceManager(void){
 ResourceManager::~ResourceManager(){
 }
 
+const float* ResourceManager::GetSkyboxVertices() {
+    return skyboxVertices_;
+}
+
+void ResourceManager::GenerateSkybox() {
+    if (!hasGeneratedSkybox_) {
+        glGenVertexArrays(1, &skyboxVAO_);
+        glGenBuffers(1, &skyboxVBO_);
+        glBindVertexArray(skyboxVAO_);
+        glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO_);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices_), &skyboxVertices_, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    }
+
+    hasGeneratedSkybox_ = true;
+}
+
+GLuint ResourceManager::GetSkyboxVBO() {
+    return skyboxVBO_;
+}
+
+GLuint ResourceManager::GetSkyboxVAO() {
+    return skyboxVAO_;
+}
+
 std::vector<std::string> StringSplit(const std::string& str, char separator) {
     int startIndex = 0, endIndex = 0;
     std::vector<std::string> tokens;
-    for (int i = 0; i < str.size(); i++) {
+    for (size_t i = 0; i < str.size(); i++) {
         if (str[i] == separator) {
             endIndex = i;
             std::string token = "";
@@ -76,6 +153,9 @@ void ResourceManager::LoadResource(ResourceType type, const std::string name, co
     }
     else if (type == Texture) {
         LoadTexture(name, filename);
+    }
+    else if (type == SkyboxTexture) {
+        LoadSkyboxTexture(name, filename);
     }
     else if (type == Mesh) {
         LoadMesh(name, filename);
@@ -175,21 +255,24 @@ std::vector<std::vector<float>> ResourceManager::LoadTerrainResource(ResourceTyp
 
             float zpos = -((height >> 2) - rowCtr) * sizeOfQuad;
             float xpos = -((width >> 2) - columnCtr) * sizeOfQuad;
-            float ypos = atof(inputNums[0].c_str());
-            float textCordu = atof(inputNums[1].c_str());
-            float textCordv = atof(inputNums[2].c_str());
+            double ypos = atof(inputNums[0].c_str());
+            double textCordu = atof(inputNums[1].c_str());
+            double textCordv = atof(inputNums[2].c_str());
 
-            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 0] = xpos;
-            if (rowCtr > columnCtr - 3 && rowCtr < columnCtr + 3) {
-                vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1] = 0.1;
+            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 0] = static_cast<float>(xpos);
+            if (rowCtr > 5 && rowCtr < 10) { // Create flat terrain for road
+                vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1] = 0.5f;
+            }
+            else if (rowCtr > columnCtr - 3 && rowCtr < columnCtr + 3 && rowCtr > 18) { // Create flat terrain for river
+                vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1] = 0.1f;
             }
             else {
-                vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1] = ypos;
+                vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1] = static_cast<float>(ypos);
             }
-            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 2] = zpos;
+            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 2] = static_cast<float>(zpos);
 
-            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 9] = textCordu;
-            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 10] = textCordv;
+            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 9] = static_cast<float>(textCordu);
+            vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 10] = static_cast<float>(textCordv);
 
             terrain_grid[rowCtr].push_back(vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1]);
 
@@ -384,7 +467,7 @@ GLuint ResourceManager::ParseFaces(const std::string& facesText, GLsizei& faceSi
 Resource *ResourceManager::GetResource(const std::string name) const {
 
     // Find resource with the specified name
-    for (int i = 0; i < resource_.size(); i++){
+    for (size_t i = 0; i < resource_.size(); i++){
         if (resource_[i]->GetName() == name){
             return resource_[i];
         }
@@ -445,13 +528,12 @@ void ResourceManager::LoadMaterial(const std::string name, const char* prefix, R
     // Try to also load a geometry shader
     filename = std::string(prefix) + std::string(GEOMETRY_PROGRAM_EXTENSION);
     bool geometry_program = false;
+    std::string strPrefix(prefix);
     std::string gp = "";
     GLuint gs;
-    try {
-        gp = LoadTextFile(filename.c_str());
+    if (strPrefix.find("particle") != std::string::npos) {
         geometry_program = true;
-    }
-    catch (std::exception& e) {
+        gp = LoadTextFile(filename.c_str());
     }
 
     if (geometry_program) {
@@ -554,8 +636,8 @@ void ResourceManager::CreateCylinder(std::string object_name, float height, floa
     }
 
     // Create vertices 
-    float theta; // Angle for circle
-    float h; // height
+    double theta; // Angle for circle
+    double h; // height
     float s, t; // parameters zero to one
     glm::vec3 loop_center;
     glm::vec3 vertex_position;
@@ -572,8 +654,8 @@ void ResourceManager::CreateCylinder(std::string object_name, float height, floa
             theta = 2.0 * glm::pi<GLfloat>() * t; // circle sample (angle theta)
 
             // Define position, normal and color of vertex
-            vertex_normal = glm::vec3(cos(theta), 0.0f, sin(theta));
-            vertex_position = glm::vec3(cos(theta) * circle_radius, h, sin(theta) * circle_radius);
+            vertex_normal = glm::vec3(static_cast<float>(cos(theta)), 0.0f, static_cast<float>(sin(theta)));
+            vertex_position = glm::vec3(static_cast<float>(cos(theta)) * circle_radius, h, static_cast<float>(sin(theta)) * circle_radius);
             vertex_color = glm::vec3(1.0 - s,
                 t,
                 s);
@@ -714,9 +796,9 @@ void ResourceManager::CreateCone(std::string object_name, float height, float ci
     }
 
     // Create vertices 
-    float theta; // Angle for circle
+    double theta; // Angle for circle
     float local_radius; // radius of this spot on the cone
-    float h; // height
+    double h; // height
     float s, t; // parameters zero to one
     glm::vec3 loop_center;
     glm::vec3 vertex_position;
@@ -875,7 +957,7 @@ void ResourceManager::CreateTorus(std::string object_name, float loop_radius, fl
     }
 
     // Create vertices 
-    float theta, phi; // Angles for circles
+    double theta, phi; // Angles for circles
     glm::vec3 loop_center;
     glm::vec3 vertex_position;
     glm::vec3 vertex_normal;
@@ -978,7 +1060,7 @@ void ResourceManager::CreateSphere(std::string object_name, float radius, int nu
     }
 
     // Create vertices 
-    float theta, phi; // Angles for parametric equation
+    double theta, phi; // Angles for parametric equation
     glm::vec3 vertex_position;
     glm::vec3 vertex_normal;
     glm::vec3 vertex_color;
@@ -1121,6 +1203,49 @@ void ResourceManager::LoadTexture(const std::string name, const char* filename) 
     AddResource(Texture, name, texture, 0);
 }
 
+void ResourceManager::LoadSkyboxTexture(const std::string name, const char* filepath) {
+    char* filenames[] = {"/posx.png",
+                         "/negx.png",
+                         "/posy.png",
+                         "/negy.png",
+                         "/posz.png",
+                         "/negz.png"
+                        
+    };
+
+    assert(strlen(filepath) + sizeof("/posx.png") + 1 < 256);
+
+    char filepaths[6][256];
+
+    // fill buffer with nulls
+    memset(filepaths, 0, sizeof(filepaths));
+
+    for (int i = 0; i < 6; ++i) {
+        // so I can use strcpy and strcat
+        #pragma warning( push )
+        #pragma warning(disable:4996)
+        strcpy(filepaths[i], filepath);
+        strcat(filepaths[i], filenames[i]);
+        #pragma warning( pop )
+    }
+
+    GLuint texture = SOIL_load_OGL_cubemap(filepaths[0], filepaths[1], filepaths[2],
+                                             filepaths[3], filepaths[4], filepaths[5],
+                                             SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
+    if (!texture) {
+        throw(std::ios_base::failure(std::string("Error loading texture ") + std::string(filepath) + std::string(": ") + std::string(SOIL_last_result())));
+    }
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    
+    AddResource(SkyboxTexture, name, texture, 0);
+}
+
 
 void ResourceManager::LoadMesh(const std::string name, const char* filename) {
 
@@ -1192,24 +1317,24 @@ void ResourceManager::LoadMesh(const std::string name, const char* filename) {
                     for (int i = 0; i < 4; i++) {
                         std::vector<std::string> fd = string_split_once(part[i + 1], face_separator);
                         if (fd.size() == 1) {
-                            quad.i[i] = str_to_num<float>(fd[0].c_str()) - 1;
+                            quad.i[i] = static_cast<int>(str_to_num<float>(fd[0].c_str()) - 1);
                             quad.t[i] = -1;
                             quad.n[i] = -1;
                         }
                         else if (fd.size() == 2) {
-                            quad.i[i] = str_to_num<float>(fd[0].c_str()) - 1;
-                            quad.t[i] = str_to_num<float>(fd[1].c_str()) - 1;
+                            quad.i[i] = static_cast<int>(str_to_num<float>(fd[0].c_str()) - 1);
+                            quad.t[i] = static_cast<int>(str_to_num<float>(fd[1].c_str()) - 1);
                             quad.n[i] = -1;
                         }
                         else if (fd.size() == 3) {
-                            quad.i[i] = str_to_num<float>(fd[0].c_str()) - 1;
+                            quad.i[i] = static_cast<int>(str_to_num<float>(fd[0].c_str()) - 1);
                             if (std::string("").compare(fd[1]) != 0) {
-                                quad.t[i] = str_to_num<float>(fd[1].c_str()) - 1;
+                                quad.t[i] = static_cast<int>(str_to_num<float>(fd[1].c_str()) - 1);
                             }
                             else {
                                 quad.t[i] = -1;
                             }
-                            quad.n[i] = str_to_num<float>(fd[2].c_str()) - 1;
+                            quad.n[i] = static_cast<int>(str_to_num<float>(fd[2].c_str()) - 1);
                         }
                         else {
                             throw(std::ios_base::failure(std::string("Error: f parameter should have 1 or 3 parameters separated by '/'")));
@@ -1230,24 +1355,24 @@ void ResourceManager::LoadMesh(const std::string name, const char* filename) {
                     for (int i = 0; i < 3; i++) {
                         std::vector<std::string> fd = string_split_once(part[i + 1], face_separator);
                         if (fd.size() == 1) {
-                            face.i[i] = str_to_num<float>(fd[0].c_str()) - 1;
+                            face.i[i] = static_cast<int>(str_to_num<float>(fd[0].c_str()) - 1);
                             face.t[i] = -1;
                             face.n[i] = -1;
                         }
                         else if (fd.size() == 2) {
-                            face.i[i] = str_to_num<float>(fd[0].c_str()) - 1;
-                            face.t[i] = str_to_num<float>(fd[1].c_str()) - 1;
+                            face.i[i] = static_cast<int>(str_to_num<float>(fd[0].c_str()) - 1);
+                            face.t[i] = static_cast<int>(str_to_num<float>(fd[1].c_str()) - 1);
                             face.n[i] = -1;
                         }
                         else if (fd.size() == 3) {
-                            face.i[i] = str_to_num<float>(fd[0].c_str()) - 1;
+                            face.i[i] = static_cast<int>(str_to_num<float>(fd[0].c_str()) - 1);
                             if (std::string("").compare(fd[1]) != 0) {
-                                face.t[i] = str_to_num<float>(fd[1].c_str()) - 1;
+                                face.t[i] = static_cast<int>(str_to_num<float>(fd[1].c_str()) - 1);
                             }
                             else {
                                 face.t[i] = -1;
                             }
-                            face.n[i] = str_to_num<float>(fd[2].c_str()) - 1;
+                            face.n[i] = static_cast<int>(str_to_num<float>(fd[2].c_str()) - 1);
                         }
                         else {
                             throw(std::ios_base::failure(std::string("Error: f parameter should have 1, 2, or 3 parameters separated by '/'")));
@@ -1269,7 +1394,7 @@ void ResourceManager::LoadMesh(const std::string name, const char* filename) {
     // Check if vertex references are correct
     for (unsigned int i = 0; i < mesh.face.size(); i++) {
         for (int j = 0; j < 3; j++) {
-            if (mesh.face[i].i[j] >= mesh.position.size()) {
+            if (mesh.face[i].i[j] >= static_cast<int>(mesh.position.size())) {
                 throw(std::ios_base::failure(std::string("Error: index for triangle ") + num_to_str<int>(mesh.face[i].i[j]) + std::string(" is out of bounds")));
             }
         }
@@ -1398,16 +1523,16 @@ void ResourceManager::CreateSphereParticles(std::string object_name, int num_par
         throw e;
     }
 
-    float trad = 0.2; // Defines the starting point of the particles along the normal
-    float maxspray = 1; // This is how much we allow the points to deviate from the sphere
-    float u, v, w, theta, phi, spray; // Work variables
+    float trad = 0.2f; // Defines the starting point of the particles along the normal
+    float maxspray = 1.0f; // This is how much we allow the points to deviate from the sphere
+    double u, v, w, theta, phi, spray; // Work variables
 
     for (int i = 0; i < num_particles; i++) {
 
         // Get three random numbers
-        u = ((double)rand() / (RAND_MAX));
-        v = ((double)rand() / (RAND_MAX));
-        w = ((double)rand() / (RAND_MAX));
+        u = (static_cast<float>(rand()) / (RAND_MAX));
+        v = (static_cast<float>(rand()) / (RAND_MAX));
+        w = (static_cast<float>(rand()) / (RAND_MAX));
 
         // Use u to define the angle theta along one direction of the sphere
         theta = u * 2.0 * glm::pi<float>();

@@ -57,6 +57,7 @@ namespace game {
         void SetProjection(GLfloat fov, GLfloat near, GLfloat far, GLfloat w, GLfloat h);
         // Set all camera-related variables in shader program
         void SetupShader(GLuint program);
+        void SetupShaderSkybox(GLuint program);
 
         //general get and set
         bool getImmune();

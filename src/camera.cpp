@@ -63,8 +63,8 @@ namespace game {
         const int coord_offset = 250; // This is to avoid negative indices, seems to be the right value
 
         // Get the lower x and z value of the cell for the terrain grid (corresponds to the coordinates of the cell in the impassable cell grid)
-        int x1 = glm::floor((position_.x + trans.x + coord_offset) * sizeOfQuad);
-        int z1 = glm::floor((position_.z + trans.z + coord_offset) * sizeOfQuad);
+        int x1 = static_cast<int>(glm::floor((position_.x + trans.x + coord_offset) * sizeOfQuad));
+        int z1 = static_cast<int>(glm::floor((position_.z + trans.z + coord_offset) * sizeOfQuad));
 
         if (impassable_cells_[x1/2][z1/2]) {
             return;
@@ -81,10 +81,10 @@ namespace game {
         const float height_scalar = 25.0f;
 
         // Get indices in the grid for all 4 points
-        int x1 = glm::floor((position_.x + coord_offset) * sizeOfQuad);
-        int x2 = glm::ceil((position_.x + coord_offset) * sizeOfQuad);
-        int z1 = glm::floor((position_.z + coord_offset) * sizeOfQuad);
-        int z2 = glm::ceil((position_.z + coord_offset) * sizeOfQuad);
+        int x1 = static_cast<int>(glm::floor((position_.x + coord_offset) * sizeOfQuad));
+        int x2 = static_cast<int>(glm::ceil((position_.x + coord_offset) * sizeOfQuad));
+        int z1 = static_cast<int>(glm::floor((position_.z + coord_offset) * sizeOfQuad));
+        int z2 = static_cast<int>(glm::ceil((position_.z + coord_offset) * sizeOfQuad));
 
         /*std::cout << x1 << std::endl;
         std::cout << x2 << std::endl;
@@ -191,7 +191,7 @@ namespace game {
     void Camera::SetProjection(GLfloat fov, GLfloat near, GLfloat far, GLfloat w, GLfloat h) {
 
         // Set projection based on field-of-view
-        float top = tan((fov / 2.0) * (glm::pi<float>() / 180.0)) * near;
+        float top = static_cast<float>(tan((fov / 2.0) * (glm::pi<float>() / 180.0)) * near);
         float right = top * w / h;
         projection_matrix_ = glm::frustum(-right, right, -top, top, near, far);
     }
@@ -225,7 +225,7 @@ namespace game {
             glUniform3fv(flashlight_pos, 1, glm::value_ptr(flashlight_pos_vec));
             glUniform3fv(flashlight_dir, 1, glm::value_ptr(flashlight_dir_vec));
 
-            glUniform1f(cutoff, cos(FLASHLIGHT_ANGLE_DEGREES * (M_PI / 180)));
+            glUniform1f(cutoff, cos(FLASHLIGHT_ANGLE_DEGREES * (static_cast<float>(M_PI) / 180.0f)));
 
             // Flashlight Fade out Rate with angle
             glUniform1f(falloff_rate, LIGHT_FALLOFF_RATE);
@@ -237,6 +237,19 @@ namespace game {
         glm::vec3 camera_pos = GetPosition();
         GLint camera_position = glGetUniformLocation(program, "camera_position");
         glUniform3f(camera_position, camera_pos.x, camera_pos.y, camera_pos.z);
+    }
+
+    void Camera::SetupShaderSkybox(GLuint program) {
+        // Update view matrix
+        SetupViewMatrix();
+
+        // Set view matrix in shader
+        GLint view_mat = glGetUniformLocation(program, "view_mat");
+        glUniformMatrix4fv(view_mat, 1, GL_FALSE, glm::value_ptr(glm::mat4(glm::mat3(view_matrix_))));
+
+        // Set projection matrix in shader
+        GLint projection_mat = glGetUniformLocation(program, "projection_mat");
+        glUniformMatrix4fv(projection_mat, 1, GL_FALSE, glm::value_ptr(projection_matrix_));
     }
 
 
