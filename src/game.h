@@ -116,6 +116,9 @@ namespace game {
             // Mouse position
             glm::vec2 lastMousePos_;
 
+            // Terrain Grid
+            std::vector<std::vector<float>> terrain_grid_;
+
             // Game Phase
             GamePhase gamePhase_ = title;
 
@@ -125,6 +128,18 @@ namespace game {
 
             //entity collisions
             void checkEntityCollision();
+
+            // Summon Objects
+            void Game::SummonFence(std::string name, glm::vec3 position, float rotation = 0);
+            void Game::SummonGravestone(std::string name, glm::vec3 position, float rotation = 0);
+            void Game::SummonRock(std::string name, glm::vec3 position, float rotation = 0, int type = 1);
+            void Game::SummonCar(std::string name, glm::vec3 position, float rotation = 0);
+            void Game::SummonUI(std::string name, std::string texture);
+            void Game::SummonGhost(std::string name, glm::vec3 position);
+            void Game::SummonTree(std::string name, glm::vec3 position, float rotation = 0);
+            void Game::SummonCabin(std::string name, glm::vec3 position, float rotation = 0);
+            void Game::SummonGasCan(std::string name, glm::vec3 position, float rotation = 0);
+            void Game::SummonSign(std::string name, glm::vec3 position, float rotation = 0);
 
     }; // class Game
 

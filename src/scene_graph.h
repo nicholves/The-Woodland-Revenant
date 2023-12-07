@@ -11,6 +11,7 @@
 #include "interactable_node.h"
 #include "resource.h"
 #include "camera.h"
+#include "resource_manager.h"
 
 #define FRAME_BUFFER_WIDTH 1920
 #define FRAME_BUFFER_HEIGHT 1080
@@ -44,6 +45,8 @@ namespace game {
         GLuint texture_;
         GLuint depth_buffer_;
 
+        
+
         // Interactable nodes
         std::vector<InteractableNode*> interactable_nodes_;
 
@@ -76,11 +79,11 @@ namespace game {
         std::vector<SceneNode*>::const_iterator end() const;
 
         // Draw the entire scene
-        void Draw(Camera* camera, GamePhase gamePhase_);
+        void Draw(Camera* camera, GamePhase gamePhase);
 
         // Update entire scene
         //void Update(void);
-        void Update(Camera* camera, double deltaTime);
+        void Update(Camera* camera, double deltaTime, GamePhase gamePhase);
 
         // Drawing from/to a texture
         // Setup the texture

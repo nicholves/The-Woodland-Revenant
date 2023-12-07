@@ -52,6 +52,9 @@ namespace game {
         // Update the node
         virtual void Update(void);
 
+        // Updates y position
+        void UpdateYPos(std::vector<std::vector<float>> terrain_grid_, float object_offset);
+
         // OpenGL variables
         GLenum GetMode(void) const;
         GLuint GetArrayBuffer(void) const;

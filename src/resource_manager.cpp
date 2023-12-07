@@ -1190,6 +1190,88 @@ void ResourceManager::CreateVertex(std::string object_name) {
     AddResource(Mesh, object_name, vbo, ebo, face_num * face_att);
 }
 
+void ResourceManager::CreatePlane(std::string object_name) {
+    const GLuint vertex_num = 4;
+    const GLuint face_num = 2;
+
+    // Number of attributes for vertices and faces
+    const int vertex_att = 11;
+    const int face_att = 3;
+
+    // Data buffers 
+    GLfloat* vertex = NULL;
+    GLuint* face = NULL;
+
+    // Allocate memory for buffers
+    try {
+        vertex = new GLfloat[vertex_num * vertex_att]; // 11 attributes per vertex: 3D position (3), 3D normal (3), RGB color (3), 2D texture coordinates (2)
+        face = new GLuint[face_num * face_att]; // 3 indices per face
+    }
+    catch (std::exception& e) {
+        throw e;
+    }
+
+    // Create vertices
+    for (int i = 0; i < 4; ++i) {
+        glm::vec3 pos;
+
+        switch (i)
+        {
+        case 0:
+            pos = glm::vec3(-1, 0, -1);
+            break;
+        case 1:
+            pos = glm::vec3(-1, 0, 1);
+            break;
+        case 2:
+            pos = glm::vec3(1, 0, 1);
+			break;
+		case 3:
+			pos = glm::vec3(1, 0, -1);
+			break;
+        default:
+            break;
+        }
+
+        glm::vec3 norm = glm::vec3(0, 1, 0);
+        glm::vec3 color = glm::vec3(1, 1, 1);
+
+        for (int j = 0; j < 3; ++j) {
+            vertex[i * vertex_att + j] = pos[j];
+            vertex[i * vertex_att + j + 3] = norm[j];
+            vertex[i * vertex_att + j + 6] = color[j];
+        }
+        // uv
+        vertex[i * vertex_att + 9] = pos.x / 2 + 0.5;
+        vertex[i * vertex_att + 10] = pos.z / 2 + 0.5;
+    }
+
+    // Create triangles
+    glm::vec3 t1(0, 1, 2);
+    glm::vec3 t2(0, 2, 3);
+
+    for (int k = 0; k < 3; k++) {
+		face[k] = (GLuint)t1[k];
+		face[k + face_att] = (GLuint)t2[k];
+	}
+
+    GLuint vbo, ebo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertex_num * vertex_att * sizeof(GLfloat), vertex, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, face_num * face_att * sizeof(GLuint), face, GL_STATIC_DRAW);
+
+    // Free data buffers
+    delete[] vertex;
+    delete[] face;
+
+    // Create resource
+    AddResource(Mesh, object_name, vbo, ebo, face_num * face_att);
+}
+
 
 void ResourceManager::LoadTexture(const std::string name, const char* filename) {
 

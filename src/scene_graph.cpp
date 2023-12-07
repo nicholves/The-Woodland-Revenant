@@ -115,24 +115,32 @@ namespace game {
     }
 
 
-    void SceneGraph::Draw(Camera* camera, GamePhase gamePhase_) {
-
-        if (gamePhase_ == title) {
-            // Lose Screen (Red fill)
-            glClearColor(0.5f, 0, 0, 1);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            return;
-        } 
-
+    void SceneGraph::Draw(Camera* camera, GamePhase gamePhase) {
         // Clear background
         glClearColor(background_color_[0],
             background_color_[1],
             background_color_[2], 0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        if (gamePhase == title) {
+            GetNode("MainMenu")->Draw(camera);
+            return;
+        }
+        else if (gamePhase == gameLost) {
+            GetNode("LoseScreen")->Draw(camera);
+            return;
+        }
+        else if (gamePhase == gameWon) {
+            GetNode("WinScreen")->Draw(camera);
+            return;
+        }
+
         // Draw all scene nodes
         for (size_t i = 0; i < node_.size(); i++) {
             if (node_[i]->GetName() == "skybox") continue;
+            if (node_[i]->GetName() == "MainMenu") continue;
+            if (node_[i]->GetName() == "LoseScreen") continue;
+            if (node_[i]->GetName() == "WinScreen") continue;
             node_[i]->Draw(camera);
         }
 
@@ -140,7 +148,10 @@ namespace game {
     }
 
 
-    void SceneGraph::Update(Camera* camera, double deltaTime) {
+    void SceneGraph::Update(Camera* camera, double deltaTime, GamePhase gamePhase) {
+        if (gamePhase == title || gamePhase == gameLost || gamePhase == gameWon) {
+			return; // Don't update anything if in UI
+		}
 
         for (size_t i = 0; i < node_.size(); i++) {
             // Check if the current node is a Ghost
