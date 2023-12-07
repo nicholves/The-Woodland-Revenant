@@ -349,11 +349,11 @@ void Game::SetupScene(void){
     scene_.SetupDrawToTexture();
     use_screen_space_effects_ = false;
 
-    // Camera
-    camera_.SetPosition(glm::vec3(0, 50, 0)); // Initialize to start position
+    // -- Camera --
+    camera_.SetPosition(glm::vec3(0, 50, 0)); // Initialize to UI pos
     camera_.UpdateYPos();
 
-    // Skybox
+    // -- Skybox --
     geom = resman_.GetResource("SkyboxMesh");
     mat = resman_.GetResource("SkyboxProg");
     text = resman_.GetResource("SkyboxText");
@@ -362,109 +362,60 @@ void Game::SetupScene(void){
 
     node->Translate(glm::vec3(0, 0, 0));
 
-    // MainMenu
-    geom = resman_.GetResource("UI");
-    mat = resman_.GetResource("TextureShader");
-    text = resman_.GetResource("MainText");
-    node = scene_.CreateNode("MainMenu", geom, mat, text);
-    scene_.AddNode(node);
+    // -- UI --
+    SummonUI("MainMenu", "MainText");
+    SummonUI("LoseScreen", "LoseText");
+    SummonUI("WinScreen", "WinText");
 
-    node->Scale(glm::vec3(160, 100, 90));
-    node->SetOrientation(glm::angleAxis(glm::radians(90.0f), glm::vec3(1, 0, 0)));
-    node->Rotate(glm::angleAxis(glm::radians(180.0f), glm::vec3(0, 0, 1)));
-    node->Translate(glm::vec3(0, 35, 200));
+    // -- Ghost --
+    SummonGhost("Ghost1", glm::vec3(0, 35, 0));
 
-    // LoseScreen
-    geom = resman_.GetResource("UI");
-    mat = resman_.GetResource("TextureShader");
-    text = resman_.GetResource("LoseText");
-    node = scene_.CreateNode("LoseScreen", geom, mat, text);
-    scene_.AddNode(node);
+    // -- Car -- 
+    SummonCar("Car", glm::vec3(-200, 100, -220));
 
-    node->Scale(glm::vec3(160, 100, 90));
-    node->SetOrientation(glm::angleAxis(glm::radians(90.0f), glm::vec3(1, 0, 0)));
-    node->Rotate(glm::angleAxis(glm::radians(180.0f), glm::vec3(0, 0, 1)));
-    node->Translate(glm::vec3(0, 35, 200));
+    // -- Trees --
+    // Border Trees
+    for (int i = 0; i < 10; ++i) {
+        SummonTree("Tree_Border" + std::to_string(i), glm::vec3(-230 + i * 100, 0, -230 + (i % 3 ? 20 : (i % 2 ? -20 : 0))), (i % 4 ? 80 * i : (i % 3 ? 120 * i : 20 * i)));
+    }
 
-    // WinScreen
-    geom = resman_.GetResource("UI");
-    mat = resman_.GetResource("TextureShader");
-    text = resman_.GetResource("WinText");
-    node = scene_.CreateNode("WinScreen", geom, mat, text);
-    scene_.AddNode(node);
+    // Misc Trees
+    SummonTree("Tree1", glm::vec3(-50, 0, -50));
+    SummonTree("Tree2", glm::vec3(-100, 0, 50));
+    SummonTree("Tree3", glm::vec3(50, 0, -100));
 
-    node->Scale(glm::vec3(160, 100, 90));
-    node->SetOrientation(glm::angleAxis(glm::radians(90.0f), glm::vec3(1, 0, 0)));
-    node->Rotate(glm::angleAxis(glm::radians(180.0f), glm::vec3(0, 0, 1)));
-    node->Translate(glm::vec3(0, 35, 200));
+    // -- Gravestones -- 
+    SummonGravestone("Gravestone1", glm::vec3(-220, 0, -160));
+    SummonGravestone("Gravestone2", glm::vec3(-230, 0, -140));
+    SummonGravestone("Gravestone3", glm::vec3(-240, 0, -150));
 
-    //Ghost
-    geom = resman_.GetResource("Ghost");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("ClothTexture");
+    // -- Fences --
+    // Fences left of car
+    for (int i = 0; i < 3; ++i) {
+        SummonFence("Fence" + std::to_string(i), glm::vec3(-220 - 20*i, 0, -200));
+    }
 
-    ghost = new Ghost("Ghost", geom, mat, text);
-    ghost->Scale(glm::vec3(0.3, 0.3, 0.3));
-    ghost->Translate(glm::vec3(0, 35, 0));
-    scene_.AddNode(ghost);
+    // Fences right of car
+    for (int i = 0; i < 40; ++i) {
+		SummonFence("Fence" + std::to_string(i+3), glm::vec3(-180 + 20*i, 0, -200));
+	}
 
-    // Car
-    geom = resman_.GetResource("Car");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("CarTexture");
-    car_ = scene_.CreateNode("Car", geom, mat, text);
-    car_->Scale(glm::vec3(5, 5, 5));
-    car_->Translate(glm::vec3(-200, 100, -220));
-    car_->UpdateYPos(terrain_grid_, 8);
+    // -- Cabin --
+    SummonCabin("Cabin", glm::vec3(0, 0, 1000), 180);
 
-    // Trees
-    SetupTree("Tree1");
-    node = scene_.GetNode("Tree1_branch0");
-    node->Scale(glm::vec3(5, 5, 5));
-    node->Translate(glm::vec3(-100, 0, -200));
-    node->UpdateYPos(terrain_grid_, 8);
+    // -- Signs --
+    SummonSign("Sign1", glm::vec3(-200, 0, -200), 0);
 
-    SetupTree("Tree2");
-    node = scene_.GetNode("Tree2_branch0");
-    node->Scale(glm::vec3(5, 5, 5));
-    node->Translate(glm::vec3(-200, 0, -100));
-    node->UpdateYPos(terrain_grid_, 8);
-
-    SetupTree("Tree3");
-    node = scene_.GetNode("Tree3_branch0");
-    node->Scale(glm::vec3(5, 5, 5));
-    node->Translate(glm::vec3(-50, 0, -50));
-    node->UpdateYPos(terrain_grid_, 8);
-
-    SetupTree("Tree4");
-    node = scene_.GetNode("Tree4_branch0");
-    node->Scale(glm::vec3(5, 5, 5));
-    node->Translate(glm::vec3(-100, 0, 50));
-    node->UpdateYPos(terrain_grid_, 8);
-
-    SetupTree("Tree5");
-    node = scene_.GetNode("Tree5_branch0");
-    node->Scale(glm::vec3(5, 5, 5));
-    node->Translate(glm::vec3(50, 0, -100));
-    node->UpdateYPos(terrain_grid_, 8);
-
-    // Gravestones
-    geom = resman_.GetResource("Gravestone");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("GravestoneTexture");
-    node = scene_.CreateNode("Gravestone1", geom, mat, text);
-    node->Scale(glm::vec3(30, 30, 30));
-    node->Translate(glm::vec3(-200, 0, -200));
-    node->UpdateYPos(terrain_grid_, 0);
+    // Rocks
 
     // Tree Border
-    for (int i = 0; i < 10; ++i) {
+    /*for (int i = 0; i < 10; ++i) {
         std::cout << i << std::endl;
         SetupTree("TreeBorder" + std::to_string(i) + "A");
         SceneNode* treeA = scene_.GetNode("TreeBorder" + std::to_string(i) + "A_branch0");
         treeA->Scale(glm::vec3(5, 5, 5));
         treeA->Translate(glm::vec3(-230 + i * 200, 0, -230));
-    }
+    }*/
 
     //Rock1
     /*geom = resman_.GetResource("Rock_1");
@@ -614,6 +565,103 @@ void Game::SetupScene(void){
     
 }
 
+void Game::SummonFence(std::string name, glm::vec3 position, float rotation) {
+    Resource* geom = resman_.GetResource("Fence");
+    Resource* mat = resman_.GetResource("LitTextureShader");
+    Resource* text = resman_.GetResource("FenceTexture");
+    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
+    node->Scale(glm::vec3(30, 30, 30));
+    node->Translate(position);
+    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+    node->UpdateYPos(terrain_grid_, -3);
+}
+
+void Game::SummonGravestone(std::string name, glm::vec3 position, float rotation) {
+    Resource* geom = resman_.GetResource("Gravestone");
+    Resource* mat = resman_.GetResource("LitTextureShader");
+    Resource* text = resman_.GetResource("GravestoneTexture");
+    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
+    node->Scale(glm::vec3(30, 30, 30));
+    node->Translate(position);
+    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+    node->UpdateYPos(terrain_grid_, 0);
+}
+
+void Game::SummonRock(std::string name, glm::vec3 position, float rotation, int type) {
+    Resource* geom = resman_.GetResource(type == 1 ? "Rock_1" : (type == 2 ? "Rock_2" : "Rock_3"));
+    Resource* mat = resman_.GetResource("LitTextureShader");
+    Resource* text = resman_.GetResource(type == 1 ? "Rock_1Texture" : (type == 2 ? "Rock_2Texture" : "Rock_3Texture"));
+    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
+    node->Scale(glm::vec3(1, 1, 1));
+    node->Translate(position);
+    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+    node->UpdateYPos(terrain_grid_, 0);
+}
+
+void Game::SummonCar(std::string name, glm::vec3 position, float rotation) {
+    Resource* geom = resman_.GetResource("Car");
+    Resource* mat = resman_.GetResource("LitTextureShader");
+    Resource* text = resman_.GetResource("CarTexture");
+    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
+    node->Scale(glm::vec3(5, 5, 5));
+    node->Translate(position);
+    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+    node->UpdateYPos(terrain_grid_, 8);
+}
+
+void Game::SummonUI(std::string name, std::string texture) {
+    Resource* geom = resman_.GetResource("UI");
+    Resource* mat = resman_.GetResource("TextureShader");
+    Resource* text = resman_.GetResource(texture);
+    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
+
+    node->Scale(glm::vec3(160, 100, 90));
+    node->SetOrientation(glm::angleAxis(glm::radians(90.0f), glm::vec3(1, 0, 0)));
+    node->Rotate(glm::angleAxis(glm::radians(180.0f), glm::vec3(0, 0, 1)));
+    node->Translate(glm::vec3(0, 35, 200));
+}
+
+void Game::SummonGhost(std::string name, glm::vec3 position) {
+    Resource* geom = resman_.GetResource("Ghost");
+    Resource* mat = resman_.GetResource("LitTextureShader");
+    Resource* text = resman_.GetResource("ClothTexture");
+
+    ghost = new Ghost(name, geom, mat, text);
+    ghost->Scale(glm::vec3(0.3, 0.3, 0.3));
+    ghost->Translate(position);
+    scene_.AddNode(ghost);
+}
+
+void Game::SummonTree(std::string name, glm::vec3 position, float rotation) {
+    SetupTree(name);
+    SceneNode* node = scene_.GetNode(name + "_branch0");
+    node->Scale(glm::vec3(5, 5, 5));
+    node->Translate(position);
+    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+    node->UpdateYPos(terrain_grid_, 8);
+}
+
+void Game::SummonCabin(std::string name, glm::vec3 position, float rotation) {
+    Resource* geom = resman_.GetResource("Cabin");
+    Resource* mat = resman_.GetResource("LitTextureShader");
+    Resource* text = resman_.GetResource("CabinTexture");
+    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
+    node->Scale(glm::vec3(30, 30, 30));
+    node->Translate(position);
+    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+    node->UpdateYPos(terrain_grid_, 0);
+}
+
+void Game::SummonSign(std::string name, glm::vec3 position, float rotation) {
+    Resource* geom = resman_.GetResource("SignPost");
+    Resource* mat = resman_.GetResource("LitTextureShader");
+    Resource* text = resman_.GetResource("SignTexture");
+    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
+    node->Scale(glm::vec3(8, 8, 8));
+    node->Translate(position);
+    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+    node->UpdateYPos(terrain_grid_, 8);
+}
 
 void Game::MainLoop(void){
     const char* ssShaders[] = {"None",
@@ -698,6 +746,8 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
         if(game->gamePhase_ == title) {
             // Start game
             game->gamePhase_ = gameplay;
+            game->camera_.SetPosition(glm::vec3(-190, 50, -155));
+            game->camera_.UpdateYPos();
         }
         else if (game->gamePhase_ == gameLost || game->gamePhase_ == gameWon) {
             // Quit game now that the game is over
