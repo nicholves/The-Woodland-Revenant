@@ -404,6 +404,16 @@ void Game::SetupScene(void){
     sWallBent_->Scale(glm::vec3(0.2, 0.2, 0.2));
     sWallBent_->Translate(glm::vec3(-85, 30, -130));
 
+    //Entity Object for testing
+    geom = resman_.GetResource("GasCan");
+    mat = resman_.GetResource("LitTextureShader");
+    text = resman_.GetResource("GasCanTex");
+    Entity* sWall2 = new Entity("EntityCan", geom, mat, text);
+    sWall2->Scale(glm::vec3(5, 5, 5));
+    sWall2->Translate(glm::vec3(-85, 30, -90));
+    scene_.AddNode(sWall2);
+    entities.push_back(sWall2);
+
     //Sparkles
     /*geom = resman_.GetResource("SphereParticles");
     mat = resman_.GetResource("Particle");
@@ -503,6 +513,7 @@ void Game::MainLoop(void){
         double deltaTime = currTime - lastTime;
         lastTime = currTime;
 
+
         checkKeys(deltaTime);
 
         scene_.Update(&camera_, deltaTime);
@@ -515,6 +526,9 @@ void Game::MainLoop(void){
         ghostContact();
 
         playerImmunity(static_cast<float>(deltaTime));
+
+        //check if player is at contact with an impassable entity
+        checkEntityCollision();
 
         // Draw the scene
         // Enable writing to depth buffer
@@ -631,15 +645,19 @@ void Game::checkKeys(double deltaTime) {
 
     if (isWKeyPressed || isUpKeyPressed) {
         camera_.Translate(camera_.GetForward() * trans_factor);
+        camera_.updateBoundingBox();
     }
     if (isSKeyPressed || isDownKeyPressed) {
         camera_.Translate(-camera_.GetForward() * trans_factor);
+        camera_.updateBoundingBox();
     }
     if (isAKeyPressed || isLeftKeyPressed) {
         camera_.Translate(-camera_.GetSide() * trans_factor);
+        camera_.updateBoundingBox();
     }
     if (isDKeyPressed || isRightKeyPressed) {
         camera_.Translate(camera_.GetSide() * trans_factor);
+        camera_.updateBoundingBox();
     }
 
     // Handle interaction
@@ -874,6 +892,26 @@ void Game::playerImmunity(float deltaTime) {
             camera_.setImmune(false);
         }
     }
+}
+
+
+void Game::checkEntityCollision() {
+
+    camera_.updateBoundingBox();
+
+    //loop through entities
+    for(const auto& entity : entities) {
+        bool collision = entity->checkPlayerCollision(&camera_);
+        
+        //if colliding with an entity
+        if (collision) {
+            camera_.SetPosition(originalPos);
+            camera_.updateBoundingBox();
+        }
+    }
+
+    originalPos = camera_.GetPosition();
+
 }
 
 } // namespace game

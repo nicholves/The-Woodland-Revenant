@@ -9,6 +9,12 @@
 
 namespace game {
 
+    struct BoundingBox {
+        //may need to initialize values
+        glm::vec3 min;  // Minimum coordinates of the bounding box
+        glm::vec3 max;  // Maximum coordinates of the bounding box
+    };
+
     // Abstraction of a camera
     class Camera {
 
@@ -66,6 +72,10 @@ namespace game {
         void setImmune(bool immune);
         void setTimer(float timer);
 
+        //bounding box
+        void updateBoundingBox();
+        BoundingBox getBBox();
+
     private:
         glm::vec3 position_; // Position of camera
         glm::quat orientation_; // Orientation of camera
@@ -82,7 +92,12 @@ namespace game {
         bool isImmune = false;
         float immuneTimer = 0.0f;
 
+        BoundingBox boundingBox;
+        
+
     }; // class Camera
+
+
 
 } // namespace game
 

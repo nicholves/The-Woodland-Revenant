@@ -14,6 +14,7 @@
 #include "scene_graph.h"
 
 #include "ghost.h"
+#include "entities.h"
 
 // Interaction related constants
 #define INTERACT_COOLDOWN 2
@@ -70,6 +71,10 @@ namespace game {
             SceneNode* sWall_;
             SceneNode* sWallBent_;
 
+            //entities vector
+            std::vector<Entity*> entities;
+            glm::vec3 originalPos;
+
             // Held interactable item
             InteractableNode* held_item_ = NULL;
 
@@ -117,6 +122,9 @@ namespace game {
             //collision with ghost
             void ghostContact();
             void playerImmunity(float deltaTime);
+
+            //entity collisions
+            void checkEntityCollision();
 
     }; // class Game
 

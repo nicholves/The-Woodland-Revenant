@@ -306,4 +306,15 @@ namespace game {
         immuneTimer = timer;
     }
 
+    // Function to update the camera's bounding box
+    void Camera::updateBoundingBox() {
+        // Set the bounding box around the camera position
+        boundingBox.min = position_ - glm::vec3(1.0f, 10.0f, 1.0f);  // Assuming a unit cube
+        boundingBox.max = position_ + glm::vec3(1.0f, 10.0f, 1.0f);
+    }
+
+    BoundingBox Camera::getBBox() {
+        return boundingBox;
+    }
+
 } // namespace game
