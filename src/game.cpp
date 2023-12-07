@@ -6,6 +6,11 @@
 #include "skybox.h"
 #include "path_config.h"
 
+#include <BASS/bass.h>
+
+#define GAMEPLAY_MUSIC_VOLUME 0.2f
+#define INITIAL_MENU_MUSIC_VOLUME 0.3f
+
 namespace game {
 
 // Some configuration constants
@@ -41,6 +46,11 @@ void Game::Init(void){
     animating_ = true;
     lastMousePos_ = glm::vec2(window_width_g / 2, window_height_g / 2);
     last_interacted_ = glfwGetTime();
+
+    if (!BASS_Init(-1, 44100, 0, 0, NULL)) {
+        MessageBox(NULL, "BASS initialization failed!", "Error", MB_OK | MB_ICONERROR);
+        throw ("ERROR: BASS LIBRARY FAILED TO INITIALIZE");
+    }
 }
 
        
@@ -704,12 +714,46 @@ void Game::MainLoop(void){
                                "BloodyShader"
                                };
 
+    const char* filepath = AUDIO_DIRECTORY "/Agoraphobia.mp3";
+    HSAMPLE gameplaySample = BASS_SampleLoad(FALSE, filepath, 0, 0, 3, BASS_SAMPLE_OVER_POS);
+    if (gameplaySample == 0) {
+        MessageBox(NULL, "Failed to load sound file!", "Error", MB_OK | MB_ICONERROR);
+        BASS_Free();
+        throw ("ERROR: BASS FAILED TO LOAD SOUND FILE" + std::string(filepath));
+    }
+
+    const char* filepath2 = AUDIO_DIRECTORY "/Aberrant.mp3";
+    HSAMPLE menuSample = BASS_SampleLoad(FALSE, filepath2, 0, 0, 3, BASS_SAMPLE_OVER_POS);
+    if (menuSample == 0) {
+        MessageBox(NULL, "Failed to load sound file!", "Error", MB_OK | MB_ICONERROR);
+        BASS_Free();
+        throw ("ERROR: BASS FAILED TO LOAD SOUND FILE" + std::string(filepath));
+    }
+
+    HCHANNEL gameplayChannel = BASS_SampleGetChannel(gameplaySample, FALSE);
+    BASS_ChannelSetAttribute(gameplayChannel, BASS_ATTRIB_VOL, 0.2f);
+
+    float menuMusicVolume = INITIAL_MENU_MUSIC_VOLUME;
+    HCHANNEL menuChannel = BASS_SampleGetChannel(menuSample, FALSE);
+    BASS_ChannelSetAttribute(menuChannel, BASS_ATTRIB_VOL, menuMusicVolume);
+
     // Loop while the user did not close the window
     double lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window_)){
+        if (BASS_ChannelIsActive(menuChannel) != BASS_ACTIVE_PLAYING && gamePhase_ == GamePhase::title)
+            BASS_ChannelPlay(menuChannel, FALSE);
+
         double currTime = glfwGetTime();
         double deltaTime = currTime - lastTime;
         lastTime = currTime;
+
+        if (gamePhase_ != GamePhase::title && BASS_ChannelIsActive(menuChannel) == BASS_ACTIVE_PLAYING) {
+            menuMusicVolume -= static_cast<float>(deltaTime) * (INITIAL_MENU_MUSIC_VOLUME / 6.0f);
+            if (menuMusicVolume > 0.0f)
+                BASS_ChannelSetAttribute(menuChannel, BASS_ATTRIB_VOL, menuMusicVolume);
+            else
+                BASS_ChannelStop(menuChannel);
+        }
 
 
         checkKeys(deltaTime);
@@ -725,7 +769,7 @@ void Game::MainLoop(void){
 
         playerImmunity(static_cast<float>(deltaTime));
 
-        std::cout << camera_.GetPosition().x << " " << camera_.GetPosition().z << std::endl;
+        //std::cout << camera_.GetPosition().x << " " << camera_.GetPosition().z << std::endl;
 
         //check if player is at contact with an impassable entity
         checkEntityCollision();
@@ -762,7 +806,16 @@ void Game::MainLoop(void){
 
         // Enable writing to depth buffer
         glDepthMask(GL_TRUE);
+
+        if (BASS_ChannelIsActive(gameplayChannel) != BASS_ACTIVE_PLAYING && gamePhase_ == GamePhase::gameplay && BASS_ChannelIsActive(menuChannel) != BASS_ACTIVE_PLAYING)
+            BASS_ChannelPlay(gameplayChannel, FALSE);
     }
+
+    BASS_ChannelFree(menuChannel);
+    BASS_ChannelFree(gameplayChannel);
+    BASS_SampleFree(menuSample);
+    BASS_SampleFree(gameplaySample);
+    BASS_Free();
 }
 
 
