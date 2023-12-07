@@ -52,7 +52,7 @@ namespace game {
             void CreateVertex(std::string object_name);
 
             // Create a plane, used for UI
-            void CreatePlane(std::string object_name);
+            void CreatePlane(std::string object_name, int repeatsX = 1);
 
             // Create particles distributed over a sphere
             void CreateSphereParticles(std::string object_name, int num_particles = 20000);

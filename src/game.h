@@ -130,16 +130,17 @@ namespace game {
             void checkEntityCollision();
 
             // Summon Objects
-            void Game::SummonFence(std::string name, glm::vec3 position, float rotation = 0);
-            void Game::SummonGravestone(std::string name, glm::vec3 position, float rotation = 0);
-            void Game::SummonRock(std::string name, glm::vec3 position, float rotation = 0, int type = 1);
-            void Game::SummonCar(std::string name, glm::vec3 position, float rotation = 0);
-            void Game::SummonUI(std::string name, std::string texture);
-            void Game::SummonGhost(std::string name, glm::vec3 position);
-            void Game::SummonTree(std::string name, glm::vec3 position, float rotation = 0);
-            void Game::SummonCabin(std::string name, glm::vec3 position, float rotation = 0);
-            void Game::SummonGasCan(std::string name, glm::vec3 position, float rotation = 0);
-            void Game::SummonSign(std::string name, glm::vec3 position, float rotation = 0);
+            void SummonFence(std::string name, glm::vec3 position, float rotation = 0);
+            void SummonGravestone(std::string name, glm::vec3 position, float rotation = 0);
+            void SummonRock(std::string name, glm::vec3 position, float rotation = 0, int type = 1);
+            void SummonCar(std::string name, glm::vec3 position, float rotation = 0);
+            void SummonUI(std::string name, std::string texture);
+            void SummonGhost(std::string name, glm::vec3 position);
+            void SummonTree(std::string name, glm::vec3 position, float rotation = 0);
+            void SummonCabin(std::string name, glm::vec3 position, float rotation = 0);
+            void SummonGasCan(std::string name, glm::vec3 position, float rotation = 0);
+            void SummonSign(std::string name, glm::vec3 position, float rotation = 0);
+            void SummonPlane(std::string name, std::string texture, glm::vec3 position, glm::vec3 scale, float rotation = 0);
 
     }; // class Game
 

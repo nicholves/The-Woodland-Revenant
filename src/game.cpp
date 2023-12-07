@@ -138,8 +138,9 @@ void Game::SetupResources(void){
     //Tree
     resman_.CreateCylinder("BranchObject", 4.0, 0.5, 10, 10);
 
-    // UI
+    // UI & Wall
     resman_.CreatePlane("UI");
+    resman_.CreatePlane("Wall", 20);
 
     //Gravestone
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/gravestoneRound.obj");
@@ -225,6 +226,14 @@ void Game::SetupResources(void){
     // Moon Texture
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/moon_texture.jpg");
     resman_.LoadResource(Texture, "MoonTexture", filename.c_str());
+
+    // Grass Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/grass_tex.png");
+    resman_.LoadResource(Texture, "GrassTexture", filename.c_str());
+
+    // Rock Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/rock_tex.png");
+    resman_.LoadResource(Texture, "RockTexture", filename.c_str());
 
     // Cloth Texture
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/whiteCloth_tex.png");
@@ -332,7 +341,7 @@ void Game::SetupScene(void){
     Resource* geom = resman_.GetResource("TerrainMesh");
     Resource* mat  = resman_.GetResource("TerrainShader");
     Resource* text;
-    Resource* mtext = resman_.GetResource("MoonTexture");
+    Resource* mtext = resman_.GetResource("GrassTexture");
     
     SceneNode* terrain = scene_.CreateNode("Terrain", geom, mat, mtext);
     constexpr int bumpyNess = 2; // at 1 the terrain will vary between 1 and -1 in the y. Increasing this causes more jagged terrain
@@ -375,9 +384,14 @@ void Game::SetupScene(void){
 
     // -- Trees --
     // Border Trees
-    for (int i = 0; i < 10; ++i) {
-        SummonTree("Tree_Border" + std::to_string(i), glm::vec3(-230 + i * 100, 0, -230 + (i % 3 ? 20 : (i % 2 ? -20 : 0))), (i % 4 ? 80 * i : (i % 3 ? 120 * i : 20 * i)));
-    }
+    SummonPlane("TreeBorder1", "RockTexture", glm::vec3(690, 0, -250), glm::vec3(970, 0, 40), 180);
+    SummonPlane("TreeBorder2", "RockTexture", glm::vec3(-250, 0, 690), glm::vec3(970, 0, 40), 270);
+    SummonPlane("TreeBorder3", "RockTexture", glm::vec3(690, 0, 1650), glm::vec3(970, 0, 40), 180);
+    SummonPlane("TreeBorder4", "RockTexture", glm::vec3(1650, 0, 690), glm::vec3(970, 0, 40), 270);
+
+    //for (int i = 0; i < 10; ++i) {
+        //SummonTree("Tree_Border" + std::to_string(i), glm::vec3(-230 + i * 100, 0, -230 + (i % 3 ? 20 : (i % 2 ? -20 : 0))), (i % 4 ? 80 * i : (i % 3 ? 120 * i : 20 * i)));
+    //}
 
     // Misc Trees
     SummonTree("Tree1", glm::vec3(-50, 0, -50));
@@ -407,6 +421,11 @@ void Game::SetupScene(void){
     SummonSign("Sign1", glm::vec3(-200, 0, -200), 0);
 
     // Rocks
+    SummonRock("Rock1", glm::vec3(-230, 0, -160), 0, 1);
+    SummonRock("Rock2", glm::vec3(-240, 0, -140), 0, 2);
+    SummonRock("Rock3", glm::vec3(-230, 0, -100), 0, 3);
+    SummonRock("Rock4", glm::vec3(-240, 0, -50), 0, 1);
+    SummonRock("Rock5", glm::vec3(-230, 0, 40), 0, 3);
 
     // Tree Border
     /*for (int i = 0; i < 10; ++i) {
@@ -592,7 +611,7 @@ void Game::SummonRock(std::string name, glm::vec3 position, float rotation, int 
     Resource* mat = resman_.GetResource("LitTextureShader");
     Resource* text = resman_.GetResource(type == 1 ? "Rock_1Texture" : (type == 2 ? "Rock_2Texture" : "Rock_3Texture"));
     SceneNode* node = scene_.CreateNode(name, geom, mat, text);
-    node->Scale(glm::vec3(1, 1, 1));
+    node->Scale(glm::vec3(1, 1, 1) * (type == 1 ? 0.2f : 1));
     node->Translate(position);
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
     node->UpdateYPos(terrain_grid_, 0);
@@ -661,6 +680,18 @@ void Game::SummonSign(std::string name, glm::vec3 position, float rotation) {
     node->Translate(position);
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
     node->UpdateYPos(terrain_grid_, 8);
+}
+
+void Game::SummonPlane(std::string name, std::string texture, glm::vec3 position, glm::vec3 scale, float rotation) {
+    Resource* geom = resman_.GetResource("Wall");
+    Resource* mat = resman_.GetResource("LitTextureShader");
+    Resource* text = resman_.GetResource(texture);
+    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
+    node->Scale(scale);
+    node->Translate(position);
+    node->SetOrientation(glm::angleAxis(glm::radians(90.0f), glm::vec3(1, 0, 0)));
+    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 0, 1)));
+    node->UpdateYPos(terrain_grid_, -6);
 }
 
 void Game::MainLoop(void){

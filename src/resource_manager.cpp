@@ -1190,7 +1190,7 @@ void ResourceManager::CreateVertex(std::string object_name) {
     AddResource(Mesh, object_name, vbo, ebo, face_num * face_att);
 }
 
-void ResourceManager::CreatePlane(std::string object_name) {
+void ResourceManager::CreatePlane(std::string object_name, int repeatsX) {
     const GLuint vertex_num = 4;
     const GLuint face_num = 2;
 
@@ -1242,7 +1242,7 @@ void ResourceManager::CreatePlane(std::string object_name) {
             vertex[i * vertex_att + j + 6] = color[j];
         }
         // uv
-        vertex[i * vertex_att + 9] = pos.x / 2 + 0.5;
+        vertex[i * vertex_att + 9] = pos.x / 2 * repeatsX + 0.5;
         vertex[i * vertex_att + 10] = pos.z / 2 + 0.5;
     }
 
