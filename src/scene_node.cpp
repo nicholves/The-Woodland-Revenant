@@ -295,11 +295,6 @@ namespace game {
         glm::mat4 orbit = glm::mat4(1.0); // identity -- left out for now
         glm::mat4 transf = translation * orbit * rotation * scaling;
 
-        // Normal matrix
-        glm::mat4 normal_matrix = glm::transpose(glm::inverse(transf));
-        GLint normal_mat = glGetUniformLocation(program, "normal_mat");
-        glUniformMatrix4fv(normal_mat, 1, GL_FALSE, glm::value_ptr(normal_matrix));
-
         // Texture
         if (texture_) {
             GLint tex = glGetUniformLocation(program, "texture_map");

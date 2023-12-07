@@ -1,0 +1,15 @@
+1. Place models!!!!!.
+2. Replace ground with grass.
+3. Log, River, Interactions Kevin B
+
+
+Create Remaining Models (Collisions where needed)
+Ghost combat, Damage notification SSE.
+
+
+
+
+
+
+Build outer wall.
+Add particle effect on top of ghost.

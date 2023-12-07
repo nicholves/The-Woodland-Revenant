@@ -2,7 +2,6 @@
 
 // Attributes passed from the vertex shader
 in vec3 fragPos;
-in vec3 position_interp;
 in vec3 normal_interp;
 in vec4 color_interp;
 in vec2 uv_interp;
