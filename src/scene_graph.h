@@ -83,7 +83,7 @@ namespace game {
 
         // Update entire scene
         //void Update(void);
-        void Update(Camera* camera, double deltaTime);
+        void Update(Camera* camera, double deltaTime, GamePhase gamePhase);
 
         // Drawing from/to a texture
         // Setup the texture

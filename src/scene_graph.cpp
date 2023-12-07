@@ -148,7 +148,10 @@ namespace game {
     }
 
 
-    void SceneGraph::Update(Camera* camera, double deltaTime) {
+    void SceneGraph::Update(Camera* camera, double deltaTime, GamePhase gamePhase) {
+        if (gamePhase == title || gamePhase == gameLost || gamePhase == gameWon) {
+			return; // Don't update anything if in UI
+		}
 
         for (size_t i = 0; i < node_.size(); i++) {
             // Check if the current node is a Ghost

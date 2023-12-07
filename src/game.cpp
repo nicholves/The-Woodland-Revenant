@@ -635,7 +635,7 @@ void Game::MainLoop(void){
 
         checkKeys(deltaTime);
 
-        scene_.Update(&camera_, deltaTime);
+        scene_.Update(&camera_, deltaTime, gamePhase_);
 
         SceneNode* cam_vertex = scene_.GetNode("CameraVertex");
         cam_vertex->SetPosition(camera_.GetPosition() - glm::vec3(0,3.5,0));
