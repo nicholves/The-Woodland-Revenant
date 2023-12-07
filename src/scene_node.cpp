@@ -190,6 +190,28 @@ namespace game {
         return transf;
     }
 
+    void SceneNode::UpdateYPos(std::vector<std::vector<float>> terrain_grid_, float object_offset) {
+        constexpr float sizeOfQuad = 0.1f;
+        const int coord_offset = 300; // This is to avoid negative indices, seems to be the right value
+        const float height_scalar = 25.0f;
+
+        // Get indices in the grid for all 4 points
+        int x1 = static_cast<int>(glm::floor((position_.x + coord_offset) * sizeOfQuad));
+        int x2 = static_cast<int>(glm::ceil((position_.x + coord_offset) * sizeOfQuad));
+        int z1 = static_cast<int>(glm::floor((position_.z + coord_offset) * sizeOfQuad));
+        int z2 = static_cast<int>(glm::ceil((position_.z + coord_offset) * sizeOfQuad));
+
+        glm::vec3 p1 = glm::vec3(x1, terrain_grid_[z1 / 2][x1 / 2], z1);
+        glm::vec3 p2 = glm::vec3(x1, terrain_grid_[z1 / 2][x2 / 2], z2);
+        glm::vec3 p3 = glm::vec3(x2, terrain_grid_[z2 / 2][x1 / 2], z1);
+        glm::vec3 p4 = glm::vec3(x2, terrain_grid_[z2 / 2][x2 / 2], z2);
+
+        float s = (position_.x + coord_offset) * sizeOfQuad - x1;
+        float t = (position_.z + coord_offset) * sizeOfQuad - z1;
+
+        position_.y = ((1 - t) * ((1 - s) * p1 + s * p2) + t * ((1 - s) * p3 + s * p4)).y * height_scalar + object_offset;
+    }
+
     void SceneNode::Draw(Camera* camera) {
 
         // Select particle blending or not

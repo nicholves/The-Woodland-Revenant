@@ -51,6 +51,9 @@ namespace game {
             // Create a singular vertex, used to represent the camera's position
             void CreateVertex(std::string object_name);
 
+            // Create a plane, used for UI
+            void CreatePlane(std::string object_name);
+
             // Create particles distributed over a sphere
             void CreateSphereParticles(std::string object_name, int num_particles = 20000);
 

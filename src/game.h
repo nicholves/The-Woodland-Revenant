@@ -116,6 +116,9 @@ namespace game {
             // Mouse position
             glm::vec2 lastMousePos_;
 
+            // Terrain Grid
+            std::vector<std::vector<float>> terrain_grid_;
+
             // Game Phase
             GamePhase gamePhase_ = title;
 
