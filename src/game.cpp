@@ -76,8 +76,6 @@ void Game::InitWindow(void){
     // Make the window's context the current 
     glfwMakeContextCurrent(window_);
 
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
-
     // Initialize the GLEW library to access OpenGL extensions
     // Need to do it after initializing an OpenGL context
     glewExperimental = GL_TRUE;
