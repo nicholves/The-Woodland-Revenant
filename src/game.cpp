@@ -394,14 +394,10 @@ void Game::SetupScene(void){
 
     // -- Trees --
     // Border Trees
-    SummonPlane("TreeBorder1", "RockTexture", glm::vec3(690, 0, -250), glm::vec3(970, 0, 40), 180);
-    SummonPlane("TreeBorder2", "RockTexture", glm::vec3(-250, 0, 690), glm::vec3(970, 0, 40), 270);
-    SummonPlane("TreeBorder3", "RockTexture", glm::vec3(690, 0, 1650), glm::vec3(970, 0, 40), 180);
-    SummonPlane("TreeBorder4", "RockTexture", glm::vec3(1650, 0, 690), glm::vec3(970, 0, 40), 270);
-
-    //for (int i = 0; i < 10; ++i) {
-        //SummonTree("Tree_Border" + std::to_string(i), glm::vec3(-230 + i * 100, 0, -230 + (i % 3 ? 20 : (i % 2 ? -20 : 0))), (i % 4 ? 80 * i : (i % 3 ? 120 * i : 20 * i)));
-    //}
+    SummonPlane("TreeBorder1", "RockTexture", glm::vec3(690, 0, -250), glm::vec3(970, 1, 40), 0);
+    SummonPlane("TreeBorder2", "RockTexture", glm::vec3(-250, 0, 690), glm::vec3(970, 1, 40), 90);
+    SummonPlane("TreeBorder3", "RockTexture", glm::vec3(690, 0, 1650), glm::vec3(970, 1, 40), 180);
+    SummonPlane("TreeBorder4", "RockTexture", glm::vec3(1650, 0, 690), glm::vec3(970, 1, 40), 270);
 
     // Misc Trees
     SummonTree("Tree1", glm::vec3(-50, 0, -50));
@@ -697,9 +693,10 @@ void Game::SummonPlane(std::string name, std::string texture, glm::vec3 position
     Resource* mat = resman_.GetResource("LitTextureShader");
     Resource* text = resman_.GetResource(texture);
     SceneNode* node = scene_.CreateNode(name, geom, mat, text);
-    node->Scale(scale);
-    node->Translate(position);
+    node->SetScale(scale);
+    node->SetPosition(position);
     node->SetOrientation(glm::angleAxis(glm::radians(90.0f), glm::vec3(1, 0, 0)));
+    node->Rotate(glm::angleAxis(glm::radians(180.0f), glm::vec3(1, 0, 0)));
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 0, 1)));
     node->UpdateYPos(terrain_grid_, -6);
 }
@@ -907,7 +904,7 @@ void Game::checkKeys(double deltaTime) {
     bool isEKeyPressed = glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS;
 
     // Handle camera movement based on key states
-    float trans_factor = 60.0f * static_cast<float>(deltaTime);
+    float trans_factor = 200.0f * static_cast<float>(deltaTime);
 
     if (isWKeyPressed || isUpKeyPressed) {
         camera_.Translate(camera_.GetForward() * trans_factor);

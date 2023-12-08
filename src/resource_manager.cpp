@@ -1233,7 +1233,7 @@ void ResourceManager::CreatePlane(std::string object_name, int repeatsX) {
             break;
         }
 
-        glm::vec3 norm = glm::vec3(0, 1, 0);
+        glm::vec3 norm = glm::vec3(0, -1, 0);
         glm::vec3 color = glm::vec3(1, 1, 1);
 
         for (int j = 0; j < 3; ++j) {

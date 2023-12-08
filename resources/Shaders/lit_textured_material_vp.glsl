@@ -12,7 +12,6 @@ uniform mat4 view_mat;
 uniform mat4 projection_mat;
 
 // Attributes forwarded to the fragment shader
-out vec3 position_interp;
 out vec3 normal_interp;
 out vec4 color_interp;
 out vec2 uv_interp;
