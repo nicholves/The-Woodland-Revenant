@@ -9,8 +9,7 @@
 #define GLM_FORCE_RADIANS
 #include <glm/gtc/quaternion.hpp>
 
-#include "resource.h"
-#include "scene_node.h"
+#include "camera.h"
 
 namespace game {
 
@@ -18,24 +17,22 @@ namespace game {
     //    glm::vec3 min;  // Minimum coordinates of the bounding box
     //    glm::vec3 max;  // Maximum coordinates of the bounding box
     //};
-
-    // Abstraction of an asteroid
-    class Entity : public SceneNode {
+    class Entity {
 
     public:
-        // Create asteroid from given resources
-        Entity(const std::string name, const Resource* geometry, const Resource* material, const Resource* texture);
+        Entity(const glm::vec3& min, const glm::vec3& max, const glm::vec3& pos);
+        Entity(float x, float y, float z, const glm::vec3& pos);
 
         // Destructor
         ~Entity();
 
         //bounding box
         void updateBoundingBox();
-        //Entity::BoundingBox getBBox();
         void setBBox(glm::vec3 min, glm::vec3 max);
         void setBBoxValues(float x, float y, float z);
 
-        bool checkPlayerCollision(Camera* camera);
+        bool checkPlayerCollision(Camera* camera) const;
+        void setPos(const glm::vec3& pos);
 
         // Update geometry configuration
         void Update(void);
@@ -43,6 +40,7 @@ namespace game {
     private:
 
         BoundingBox boundingBox;
+        glm::vec3 position_;
 
         //values to set BoundingBox checks
         float boxX = 7.0;

@@ -11,4 +11,12 @@ namespace game {
 		return name_;
 	}
 
+	void Renderable::setEntity(Entity* e) {
+		colisionBox_ = e;
+	}
+
+	Entity* Renderable::getEntity() const {
+		return colisionBox_;
+	}
+
 }

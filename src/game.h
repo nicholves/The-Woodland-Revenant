@@ -72,7 +72,7 @@ namespace game {
             SceneNode* sWallBent_;
 
             //entities vector
-            std::vector<Entity*> entities;
+            std::vector<Entity> entities;
             glm::vec3 originalPos;
 
             // Held interactable item

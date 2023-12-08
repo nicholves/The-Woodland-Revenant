@@ -2,7 +2,13 @@
 
 namespace game {
 
-    Entity::Entity(const std::string name, const Resource* geometry, const Resource* material, const Resource* texture) : SceneNode(name, geometry, material, texture) {
+    Entity::Entity(const glm::vec3& min, const glm::vec3& max, const glm::vec3& pos) : position_(pos) {
+        boundingBox = BoundingBox{min, max};
+    }
+
+    Entity::Entity(float x, float y, float z, const glm::vec3& pos) : position_(pos) {
+        setBBoxValues(x, y, z);
+        updateBoundingBox();
     }
 
 
@@ -18,7 +24,7 @@ namespace game {
     }
 
 
-    bool Entity::checkPlayerCollision(Camera* camera) {
+    bool Entity::checkPlayerCollision(Camera* camera) const {
         if (camera->getBBox().max.x < boundingBox.min.x || camera->getBBox().min.x > boundingBox.max.x) return false;
         if (camera->getBBox().max.y < boundingBox.min.y || camera->getBBox().min.y > boundingBox.max.y) return false;
         if (camera->getBBox().max.z < boundingBox.min.z || camera->getBBox().min.z > boundingBox.max.z) return false;
@@ -26,11 +32,14 @@ namespace game {
         return true;  // Collision detected
     }
 
+    void Entity::setPos(const glm::vec3& pos) {
+        position_ = pos;
+    }
+
 
     void Entity::Update(void) {
         //update bounding box
         updateBoundingBox();
-
     }
 
 

@@ -399,7 +399,7 @@ void Game::SetupScene(void){
     SummonUI("WinScreen", "WinText");
 
     // -- Ghost --
-    SummonGhost("Ghost1", glm::vec3(0, 35, 0));
+    SummonGhost("Ghost1", glm::vec3(1600, 35, 1570));
 
     // -- Car -- 
     SummonCar("Car", glm::vec3(-200, 100, -220));
@@ -427,6 +427,13 @@ void Game::SetupScene(void){
     mat = resman_.GetResource("LitTextureInstanceShader");
     text = resman_.GetResource("TreeTexture1");
 
+    typedef struct { float minx; float maxx; float minz; float maxz; } boundingArea;
+    const boundingArea posesToIgnore[] = {
+                                         // player spawn
+                                         boundingArea{-195, -185, -160, -150},
+                                         // cabin
+                                         boundingArea{-82, 34, 918, 1025}
+                                         };
 
     srand(100);
     std::vector<glm::vec3> treePositions;
@@ -446,13 +453,22 @@ void Game::SetupScene(void){
         float xpos = std::min(std::max(-150 + ((120 * i) % 1800) + randomX, -225.0f), 1625.0f);
         float zpos = std::min(std::max(-170 + (60 * j) + randomZ, -215.0f), 1591.0f);
 
-        // don't spawn in cabin
-        if (xpos < 34 && xpos > -82 && zpos > 918 && zpos < 1025)
+        bool ignore = false;
+        for (const auto& box : posesToIgnore) {
+            if (xpos < box.maxx && xpos > box.minx && zpos > box.minz && zpos < box.maxz) {
+                ignore = true;
+                break;
+            }
+        }
+        if (ignore)
             continue;
 
         treeOrientations.push_back(glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0)));
         treeScales.push_back(glm::vec3(3, 3, 3));
         treePositions.push_back(camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
+
+        Entity entity(5.0f, 25.0f, 5.0f, camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
+        entities.push_back(entity);
     }
 
     InstancedObject* trees = new InstancedObject("TreeInstance1", geom, mat, treePositions, treeScales, treeOrientations, text);
@@ -747,6 +763,7 @@ void Game::SummonPlane(std::string name, std::string texture, glm::vec3 position
 }
 
 void Game::MainLoop(void){
+    glfwSwapInterval(0);
     const char* ssShaders[] = {"None",
                                "NightVisionShader",
                                "WaveringShader",
@@ -949,7 +966,7 @@ void Game::checkKeys(double deltaTime) {
     bool isEKeyPressed = glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS;
 
     // Handle camera movement based on key states
-    float trans_factor = 200.0f * static_cast<float>(deltaTime);
+    float trans_factor = 60.0f * static_cast<float>(deltaTime);
 
     if (isWKeyPressed || isUpKeyPressed) {
         camera_.Translate(camera_.GetForward() * trans_factor);
@@ -1209,7 +1226,7 @@ void Game::checkEntityCollision() {
 
     //loop through entities
     for(const auto& entity : entities) {
-        bool collision = entity->checkPlayerCollision(&camera_);
+        bool collision = entity.checkPlayerCollision(&camera_);
         
         //if colliding with an entity
         if (collision) {
