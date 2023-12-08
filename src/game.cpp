@@ -5,6 +5,7 @@
 #include "game.h"
 #include "skybox.h"
 #include "path_config.h"
+#include "instanced_object.h"
 
 #include <BASS/bass.h>
 
@@ -74,6 +75,8 @@ void Game::InitWindow(void){
 
     // Make the window's context the current 
     glfwMakeContextCurrent(window_);
+
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
 
     // Initialize the GLEW library to access OpenGL extensions
     // Need to do it after initializing an OpenGL context
@@ -292,6 +295,9 @@ void Game::SetupResources(void){
     filename = std::string(SHADERS_DIRECTORY) + std::string("/lit_textured_material");
     resman_.LoadResource(Material, "LitTextureShader", filename.c_str());
 
+    filename = std::string(SHADERS_DIRECTORY) + std::string("/lit_textured_material_instanced");
+    resman_.LoadResource(Material, "LitTextureInstanceShader", filename.c_str());
+
     filename = std::string(SHADERS_DIRECTORY) + std::string("/lit_color");
     resman_.LoadResource(Material, "LitColorShader", filename.c_str());
 
@@ -411,13 +417,28 @@ void Game::SetupScene(void){
 
     // -- Fences --
     // Fences left of car
-    for (int i = 0; i < 3; ++i) {
-        SummonFence("Fence" + std::to_string(i), glm::vec3(-220 - 20*i, 0, -200));
+    geom = resman_.GetResource("Fence");
+    mat = resman_.GetResource("LitTextureInstanceShader");
+    text = resman_.GetResource("FenceTexture");
+
+    std::vector<glm::vec3> fencePositions;
+    fencePositions.reserve(1000);
+    std::vector<glm::quat> fenceOrientations;
+    fenceOrientations.reserve(1000);
+    std::vector<glm::vec3> fenceScales;
+    fenceScales.reserve(1000);
+    for (int i = 0; i < 1000; ++i) {
+        fenceOrientations.push_back(glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0)));
+        fenceScales.push_back(glm::vec3(30, 30, 30));
+        fencePositions.push_back(camera_.clampToGround(glm::vec3(-180 + 20 * i, 50, -200), -3));
     }
+
+    InstancedObject* fences = new InstancedObject("FenceInstance1", geom, mat, fencePositions, fenceScales, fenceOrientations, text);
+    scene_.AddNode(fences);
 
     // Fences right of car
     for (int i = 0; i < 40; ++i) {
-		SummonFence("Fence" + std::to_string(i+3), glm::vec3(-180 + 20*i, 0, -200));
+		//SummonFence("Fence" + std::to_string(i+3), glm::vec3(-180 + 20*i, 0, -200));
 	}
 
     // -- Cabin --
@@ -904,7 +925,7 @@ void Game::checkKeys(double deltaTime) {
     bool isEKeyPressed = glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS;
 
     // Handle camera movement based on key states
-    float trans_factor = 200.0f * static_cast<float>(deltaTime);
+    float trans_factor = 60.0f * static_cast<float>(deltaTime);
 
     if (isWKeyPressed || isUpKeyPressed) {
         camera_.Translate(camera_.GetForward() * trans_factor);

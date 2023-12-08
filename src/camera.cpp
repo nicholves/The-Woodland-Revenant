@@ -74,6 +74,35 @@ namespace game {
         UpdateYPos();
     }
 
+    glm::vec3 Camera::clampToGround(glm::vec3 pos, float offset) const {
+        constexpr float sizeOfQuad = 0.1f;
+        constexpr int coord_offset = 300; // This is to avoid negative indices, seems to be the right value
+        constexpr float height_scalar = 25.0f;
+
+        // Get indices in the grid for all 4 points
+        int x1 = static_cast<int>(glm::floor((pos.x + coord_offset) * sizeOfQuad));
+        int x2 = static_cast<int>(glm::ceil((pos.x + coord_offset) * sizeOfQuad));
+        int z1 = static_cast<int>(glm::floor((pos.z + coord_offset) * sizeOfQuad));
+        int z2 = static_cast<int>(glm::ceil((pos.z + coord_offset) * sizeOfQuad));
+
+        if (terrain_grid_.size() <= std::max(z1, z2) / 2 || terrain_grid_[0].size() <= std::max(x1, x2) / 2)
+            return pos;
+
+        glm::vec3 p1 = glm::vec3(x1, terrain_grid_[z1 / 2][x1 / 2], z1);
+        glm::vec3 p2 = glm::vec3(x1, terrain_grid_[z1 / 2][x2 / 2], z2);
+        glm::vec3 p3 = glm::vec3(x2, terrain_grid_[z2 / 2][x1 / 2], z1);
+        glm::vec3 p4 = glm::vec3(x2, terrain_grid_[z2 / 2][x2 / 2], z2);
+
+        // Interpolate the y position
+
+        float s = (pos.x + coord_offset) * sizeOfQuad - x1;
+        float t = (pos.z + coord_offset) * sizeOfQuad - z1;
+
+        pos.y = ((1 - t) * ((1 - s) * p1 + s * p2) + t * ((1 - s) * p3 + s * p4)).y * height_scalar + offset;
+
+        return pos;
+    }
+
     void Camera::UpdateYPos() {
         constexpr float sizeOfQuad = 0.1f;
         const int coord_offset = 300; // This is to avoid negative indices, seems to be the right value
@@ -93,6 +122,9 @@ namespace game {
 
         //std::cout << terrain_grid_[0][0] << " " << terrain_grid_[0][1] << " " << terrain_grid_[0][2] << std::endl;
         //std::cout << z1 / 2 << " " << x1 / 2 << std::endl;
+
+        if (terrain_grid_.size() <= std::max(z1, z2) / 2 || terrain_grid_[0].size() <= std::max(x1, x2) / 2)
+            return;
 
         glm::vec3 p1 = glm::vec3(x1, terrain_grid_[z1 / 2][x1 / 2], z1);
         glm::vec3 p2 = glm::vec3(x1, terrain_grid_[z1 / 2][x2 / 2], z2);

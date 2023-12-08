@@ -13,10 +13,7 @@
 
 namespace game {
 
-    SceneNode::SceneNode(const std::string name, const Resource* geometry, const Resource* material, const Resource* texture) {
-
-        // Set name of scene node
-        name_ = name;
+    SceneNode::SceneNode(const std::string name, const Resource* geometry, const Resource* material, const Resource* texture) : Renderable(name) {
 
         // Set geometry
         if (geometry->GetType() == PointSet) {
@@ -213,7 +210,6 @@ namespace game {
     }
 
     void SceneNode::Draw(Camera* camera) {
-
         // Select particle blending or not
         if (blending_) {
             // Disable depth write

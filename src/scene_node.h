@@ -9,13 +9,14 @@
 #define GLM_FORCE_RADIANS
 #include <glm/gtc/quaternion.hpp>
 
+#include "renderable.h"
 #include "resource.h"
 #include "camera.h"
 
 namespace game {
 
     // Class that manages one object in a scene 
-    class SceneNode {
+    class SceneNode : public Renderable {
 
     public:
         // Create scene node from given resources
@@ -44,13 +45,13 @@ namespace game {
 
         // Draw the node according to scene parameters in 'camera'
         // variable
-        virtual void Draw(Camera* camera);
+        virtual void Draw(Camera* camera) override;
 
         // Set blending mode
         void SetBlending(bool blending);
 
         // Update the node
-        virtual void Update(void);
+        virtual void Update(void) override;
 
         // Updates y position
         void UpdateYPos(std::vector<std::vector<float>> terrain_grid_, float object_offset);
@@ -91,7 +92,7 @@ namespace game {
         float wind_strength = 0.05f; // The amount the wind moves the tree
 
         // Set matrices that transform the node in a shader program
-        virtual void SetupShader(GLuint program);
+        virtual void SetupShader(GLuint program) override;
 
     }; // class SceneNode
 

@@ -68,22 +68,32 @@ namespace game {
     }
 
 
-    void SceneGraph::AddNode(SceneNode* node) {
+    void SceneGraph::AddNode(Renderable* node) {
 
         node_.push_back(node);
     }
 
 
-    SceneNode* SceneGraph::GetNode(std::string node_name) const {
+    SceneNode* SceneGraph::GetNode(const std::string& node_name) const {
 
         // Find node with the specified name
         for (size_t i = 0; i < node_.size(); i++) {
-            if (node_[i]->GetName() == node_name) {
-                return node_[i];
+            if (node_[i]->GetName() == node_name && dynamic_cast<SceneNode*>(node_[i])) {
+                return dynamic_cast<SceneNode*>(node_[i]);
             }
         }
         return NULL;
 
+    }
+
+    Renderable* SceneGraph::getRenderable(const std::string& node_name) {
+        // Find node with the specified name
+        for (size_t i = 0; i < node_.size(); i++) {
+            if (node_[i]->GetName() == node_name && node_[i]) {
+                return node_[i];
+            }
+        }
+        return NULL;
     }
 
 
@@ -103,13 +113,13 @@ namespace game {
     }
 
 
-    std::vector<SceneNode*>::const_iterator SceneGraph::begin() const {
+    std::vector<Renderable*>::const_iterator SceneGraph::begin() const {
 
         return node_.begin();
     }
 
 
-    std::vector<SceneNode*>::const_iterator SceneGraph::end() const {
+    std::vector<Renderable*>::const_iterator SceneGraph::end() const {
 
         return node_.end();
     }

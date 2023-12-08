@@ -6,6 +6,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <vector>
+#include <glm/gtc/quaternion.hpp>
 
 namespace game {
 
@@ -38,6 +39,7 @@ namespace game {
 
         // Updates y position
         void UpdateYPos();
+        glm::vec3 clampToGround(glm::vec3 pos, float offset) const;
 
         // Perform global transformations of camera
         void Translate(glm::vec3 trans);
