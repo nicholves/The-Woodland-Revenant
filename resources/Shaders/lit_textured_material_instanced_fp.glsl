@@ -24,6 +24,10 @@ void main()
 	vec2 uv_use = uv_interp;
     vec4 pixel = texture(texture_map, uv_use);
 
+	if (pixel.a < 0.1) {
+		discard;
+	}
+
     // Use texture in determining fragment colour
 
     // Lighting
@@ -59,6 +63,6 @@ void main()
 
     gl_FragColor = 
 		diffuse * pixel * light_color            // Diffuse Component
-		+ specular *pixel * light_color		// Specular Component
+		+ specular * pixel * light_color		// Specular Component
 		+ amb * pixel * ambient_light_color;             // Ambient Component
 }

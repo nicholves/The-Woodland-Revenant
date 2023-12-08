@@ -1,6 +1,8 @@
+#define NOMINMAX
 #include <iostream>
 #include <time.h>
 #include <sstream>
+#include <algorithm>
 
 #include "game.h"
 #include "skybox.h"
@@ -185,6 +187,9 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/stoneWallBent.obj");
     resman_.LoadResource(Mesh, "StoneWallBent", filename.c_str());
 
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/tree1.obj");
+    resman_.LoadResource(Mesh, "Tree1", filename.c_str());
+
     //SphereParticles
     resman_.CreateSphereParticles("SphereParticles", 20);
 
@@ -233,6 +238,9 @@ void Game::SetupResources(void){
     // Tree Texture
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/tree_tex.png");
     resman_.LoadResource(Texture, "TreeTexture", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/tree_tex1.png");
+    resman_.LoadResource(Texture, "TreeTexture1", filename.c_str());
 
     // Moon Texture
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/moon_texture.jpg");
@@ -415,24 +423,42 @@ void Game::SetupScene(void){
 
     // -- Fences --
     // Fences left of car
-    geom = resman_.GetResource("Fence");
+    geom = resman_.GetResource("Tree1");
     mat = resman_.GetResource("LitTextureInstanceShader");
-    text = resman_.GetResource("FenceTexture");
+    text = resman_.GetResource("TreeTexture1");
 
-    std::vector<glm::vec3> fencePositions;
-    fencePositions.reserve(1000);
-    std::vector<glm::quat> fenceOrientations;
-    fenceOrientations.reserve(1000);
-    std::vector<glm::vec3> fenceScales;
-    fenceScales.reserve(1000);
-    for (int i = 0; i < 1000; ++i) {
-        fenceOrientations.push_back(glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0)));
-        fenceScales.push_back(glm::vec3(30, 30, 30));
-        fencePositions.push_back(camera_.clampToGround(glm::vec3(-180 + 20 * i, 50, -200), -3));
+
+    srand(100);
+    std::vector<glm::vec3> treePositions;
+    treePositions.reserve(440);
+    std::vector<glm::quat> treeOrientations;
+    treeOrientations.reserve(440);
+    std::vector<glm::vec3> treeScales;
+    treeScales.reserve(440);
+    int j = 0;
+    for (int i = 0; i < 440; ++i) {
+        if ((120 * i) % 1800 >= 1800 - 120) {
+            j++;
+        }
+
+        float randomX = (rand() % (261)) - 130;
+        float randomZ = (rand() % (261)) - 130;
+        float xpos = std::min(std::max(-150 + ((120 * i) % 1800) + randomX, -225.0f), 1625.0f);
+        float zpos = std::min(std::max(-170 + (60 * j) + randomZ, -215.0f), 1591.0f);
+
+        // don't spawn in cabin
+        if (xpos < 34 && xpos > -82 && zpos > 918 && zpos < 1025)
+            continue;
+
+        treeOrientations.push_back(glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0)));
+        treeScales.push_back(glm::vec3(3, 3, 3));
+        treePositions.push_back(camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
     }
 
-    InstancedObject* fences = new InstancedObject("FenceInstance1", geom, mat, fencePositions, fenceScales, fenceOrientations, text);
-    scene_.AddNode(fences);
+    InstancedObject* trees = new InstancedObject("TreeInstance1", geom, mat, treePositions, treeScales, treeOrientations, text);
+    scene_.AddNode(trees);
+
+    srand(time(NULL));
 
     // Fences right of car
     for (int i = 0; i < 40; ++i) {
@@ -923,7 +949,7 @@ void Game::checkKeys(double deltaTime) {
     bool isEKeyPressed = glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS;
 
     // Handle camera movement based on key states
-    float trans_factor = 60.0f * static_cast<float>(deltaTime);
+    float trans_factor = 200.0f * static_cast<float>(deltaTime);
 
     if (isWKeyPressed || isUpKeyPressed) {
         camera_.Translate(camera_.GetForward() * trans_factor);

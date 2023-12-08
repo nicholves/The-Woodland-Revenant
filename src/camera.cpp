@@ -4,6 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include <algorithm>
 
 #include "camera.h"
 
@@ -60,7 +61,16 @@ namespace game {
 
     void Camera::Translate(glm::vec3 trans) {
         constexpr float sizeOfQuad = 0.1f;
-        const int coord_offset = 250; // This is to avoid negative indices, seems to be the right value
+        const int coord_offset = 300; // This is to avoid negative indices, seems to be the right value
+
+        float xpos = position_.x + trans.x;
+        float zpos = position_.z + trans.z;
+        
+        xpos = std::max(std::min(xpos, 1645.0f), -245.0f);
+        zpos = std::max(std::min(zpos, 1645.0f), -245.0f);
+
+        trans.x = xpos - position_.x;
+        trans.z = zpos - position_.z;
 
         // Get the lower x and z value of the cell for the terrain grid (corresponds to the coordinates of the cell in the impassable cell grid)
         int x1 = static_cast<int>(glm::floor((position_.x + trans.x + coord_offset) * sizeOfQuad));
