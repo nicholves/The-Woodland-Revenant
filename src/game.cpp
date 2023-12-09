@@ -442,45 +442,47 @@ void Game::SetupScene(void){
 
     // -- Instanced Objects --
     const std::vector<boundingArea> posesToIgnore{
-        // player spawn
-        boundingArea{-195, -185, -160, -150},
-        // cabin
-        boundingArea{-82, 34, 918, 1025},
         // road
-        boundingArea{-250, 1650, -200, -115}
+        boundingArea{-300, 1700, -200, -100},
+        // river
+        boundingArea{-300, 1700, 90, 250},
+        // cabin
+        // ruins
     };
     SummonInstancedObjects("TreeInstance1", "Tree1", "TreeTexture1", 200, glm::vec3(3, 3, 3), posesToIgnore, 100);
     SummonInstancedObjects("RockInstance1", "Rock_1", "Rock_1Texture", 50, glm::vec3(0.2f, 0.2f, 0.2f), posesToIgnore, 101);
     SummonInstancedObjects("RockInstance2", "Rock_2", "Rock_2Texture", 50, glm::vec3(1, 1, 1), posesToIgnore, 102);
     SummonInstancedObjects("RockInstance3", "Rock_3", "Rock_3Texture", 50, glm::vec3(2, 2, 2), posesToIgnore, 103, glm::vec3(0,0,-70));
 
+    // Only summon on top right of map
     const std::vector<boundingArea> gravestonePosesToIgnore{
-        // player spawn
-        boundingArea{-195, -185, -160, -150},
-        // cabin
-        boundingArea{-82, 34, 918, 1025},
-        // road
-        boundingArea{-250, 1650, -200, -115}
+        // left of map
+        boundingArea{400, 1700, -300, 1700},
+        // bottom of map
+        boundingArea{-300, 1700, -300, 300}
     };
     SummonInstancedObjects("GraveInstance1", "Gravestone", "GravestoneTexture", 100, glm::vec3(30, 30, 30), gravestonePosesToIgnore, 104);
 
     // -- Animated Trees --
-    SummonTreeType2("Tree1", glm::vec3(-50, 0, -50));
-    SummonTreeType2("Tree2", glm::vec3(-100, 0, 50));
-    SummonTreeType2("Tree3", glm::vec3(50, 0, -100));
+    SummonTree("Tree1", glm::vec3(-50, 0, -50));
+    SummonTree("Tree2", glm::vec3(-100, 0, 50));
+    SummonTree("Tree3", glm::vec3(50, 0, -100));
 
     // -- Cabin --
     SummonCabin("Cabin", glm::vec3(1000, 0, 0), 180);
 
     // -- Signs --
-    SummonSign("Sign1", glm::vec3(-200, 0, -200), 0);
+    SummonSign("Sign1", glm::vec3(-150, 0, -80), 210);
 
     // -- Fences --
-    // Fences left of car
-
     // Fences right of car
+    for (int i = 0; i < 2; ++i) {
+        SummonFence("Fence" + std::to_string(i + 3), glm::vec3(-240 - 20 * i, 0, -120));
+    }
+
+    // Fences left of car
     for (int i = 0; i < 40; ++i) {
-		//SummonFence("Fence" + std::to_string(i+3), glm::vec3(-180 + 20*i, 0, -200));
+		SummonFence("Fence" + std::to_string(i+3), glm::vec3(-160 + 20*i, 0, -120));
 	}
 
     // Tree Border
@@ -639,7 +641,10 @@ void Game::SummonFence(std::string name, glm::vec3 position, float rotation) {
     node->Scale(glm::vec3(30, 30, 30));
     node->Translate(position);
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
-    node->UpdateYPos(terrain_grid_, -3);
+    node->UpdateYPos(terrain_grid_, 1);
+
+    Entity entity(20.0f, 25.0f, 5.0f, camera_.clampToGround(glm::vec3(position.x, 50, position.z + 15), -3));
+    entities.push_back(entity);
 }
 
 void Game::SummonCar(std::string name, glm::vec3 position, float rotation) {
@@ -651,6 +656,9 @@ void Game::SummonCar(std::string name, glm::vec3 position, float rotation) {
     node->Translate(position);
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
     node->UpdateYPos(terrain_grid_, 8);
+
+    Entity entity(30.0f, 25.0f, 18.0f, camera_.clampToGround(glm::vec3(position.x, 50, position.z), -3));
+    entities.push_back(entity);
 }
 
 void Game::SummonUI(std::string name, std::string texture) {
@@ -729,64 +737,7 @@ void Game::SummonInstancedObjects(std::string name, std::string geometry, std::s
     srand(time(NULL));
 }
 
-void Game::SummonTreesType1(std::string name, std::string geometry, std::string texture, int amount) {
-    Resource* geom = resman_.GetResource(geometry);
-    Resource* mat = resman_.GetResource("LitTextureInstanceShader");
-    Resource* text = resman_.GetResource(texture);
-
-    
-    const boundingArea posesToIgnore[] = {
-        // player spawn
-        boundingArea{-195, -185, -160, -150},
-        // cabin
-        boundingArea{-82, 34, 918, 1025},
-        // road
-        boundingArea{-250, 1650, -200, -115}
-    };
-
-    srand(100);
-    std::vector<glm::vec3> treePositions;
-    treePositions.reserve(amount);
-    std::vector<glm::quat> treeOrientations;
-    treeOrientations.reserve(amount);
-    std::vector<glm::vec3> treeScales;
-    treeScales.reserve(amount);
-    int j = 0;
-    for (int i = 0; i < amount; ++i) {
-        if ((120 * i) % 1800 >= 1800 - 120) {
-            j++;
-        }
-
-        float randomX = (rand() % (261)) - 130;
-        float randomZ = (rand() % (261)) - 130;
-        float xpos = std::min(std::max(-150 + ((120 * i) % 1800) + randomX, -225.0f), 1625.0f);
-        float zpos = std::min(std::max(-170 + (60 * j) + randomZ, -215.0f), 1591.0f);
-
-        bool ignore = false;
-        for (const auto& box : posesToIgnore) {
-            if (xpos < box.maxx && xpos > box.minx && zpos > box.minz && zpos < box.maxz) {
-                ignore = true;
-                break;
-            }
-        }
-        if (ignore)
-            continue;
-
-        treeOrientations.push_back(glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0)));
-        treeScales.push_back(glm::vec3(3, 3, 3));
-        treePositions.push_back(camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
-
-        Entity entity(5.0f, 25.0f, 5.0f, camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
-        entities.push_back(entity);
-    }
-
-    InstancedObject* trees = new InstancedObject(name, geom, mat, treePositions, treeScales, treeOrientations, text);
-    scene_.AddNode(trees);
-
-    srand(time(NULL));
-}
-
-void Game::SummonTreeType2(std::string name, glm::vec3 position, float rotation) {
+void Game::SummonTree(std::string name, glm::vec3 position, float rotation) {
     SetupTree(name);
     SceneNode* node = scene_.GetNode(name + "_branch0");
     node->Scale(glm::vec3(5, 5, 5));
@@ -815,6 +766,9 @@ void Game::SummonSign(std::string name, glm::vec3 position, float rotation) {
     node->Translate(position);
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
     node->UpdateYPos(terrain_grid_, 8);
+
+    Entity entity(10.0f, 25.0f, 10.0f, camera_.clampToGround(glm::vec3(position.x - 10, 50, position.y), -3));
+    entities.push_back(entity);
 }
 
 void Game::SummonPlane(std::string name, std::string texture, glm::vec3 position, glm::vec3 scale, float rotation) {
@@ -964,6 +918,9 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
         else if (game->gamePhase_ == gameLost || game->gamePhase_ == gameWon) {
             // Quit game now that the game is over
             glfwSetWindowShouldClose(window, true);
+        }
+        else {
+            std::cout << game->camera_.GetPosition().x << " " << game->camera_.GetPosition().z << std::endl;
         }
     }
 
