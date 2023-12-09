@@ -445,18 +445,22 @@ void Game::SetupScene(void){
         // player spawn
         boundingArea{-195, -185, -160, -150},
         // cabin
-        boundingArea{-82, 34, 918, 1025}
+        boundingArea{-82, 34, 918, 1025},
+        // road
+        boundingArea{-250, 1650, -200, -115}
     };
     SummonInstancedObjects("TreeInstance1", "Tree1", "TreeTexture1", 200, glm::vec3(3, 3, 3), posesToIgnore, 100);
     SummonInstancedObjects("RockInstance1", "Rock_1", "Rock_1Texture", 50, glm::vec3(0.2f, 0.2f, 0.2f), posesToIgnore, 101);
     SummonInstancedObjects("RockInstance2", "Rock_2", "Rock_2Texture", 50, glm::vec3(1, 1, 1), posesToIgnore, 102);
-    SummonInstancedObjects("RockInstance3", "Rock_3", "Rock_3Texture", 50, glm::vec3(2, 2, 2), posesToIgnore, 103);
+    SummonInstancedObjects("RockInstance3", "Rock_3", "Rock_3Texture", 50, glm::vec3(2, 2, 2), posesToIgnore, 103, glm::vec3(0,0,-70));
 
     const std::vector<boundingArea> gravestonePosesToIgnore{
         // player spawn
         boundingArea{-195, -185, -160, -150},
         // cabin
-        boundingArea{-82, 34, 918, 1025}
+        boundingArea{-82, 34, 918, 1025},
+        // road
+        boundingArea{-250, 1650, -200, -115}
     };
     SummonInstancedObjects("GraveInstance1", "Gravestone", "GravestoneTexture", 100, glm::vec3(30, 30, 30), gravestonePosesToIgnore, 104);
 
@@ -672,7 +676,7 @@ void Game::SummonGhost(std::string name, glm::vec3 position) {
     scene_.AddNode(ghost);
 }
 
-void Game::SummonInstancedObjects(std::string name, std::string geometry, std::string texture, int amount, glm::vec3 scale, std::vector<boundingArea> posesToIgnore, int seed) {
+void Game::SummonInstancedObjects(std::string name, std::string geometry, std::string texture, int amount, glm::vec3 scale, std::vector<boundingArea> posesToIgnore, int seed, glm::vec3 offset) {
     Resource* geom = resman_.GetResource(geometry);
     Resource* mat = resman_.GetResource("LitTextureInstanceShader");
     Resource* text = resman_.GetResource(texture);
@@ -702,7 +706,7 @@ void Game::SummonInstancedObjects(std::string name, std::string geometry, std::s
         if (!posesToIgnore.empty()) {
             bool ignore = false;
             for (const auto& box : posesToIgnore) {
-                if (xpos < box.maxx && xpos > box.minx && zpos > box.minz && zpos < box.maxz) {
+                if (xpos + offset.x < box.maxx && xpos + offset.x > box.minx && zpos + offset.z > box.minz && zpos + offset.z < box.maxz) {
                     ignore = true;
                     break;
                 }
@@ -735,7 +739,9 @@ void Game::SummonTreesType1(std::string name, std::string geometry, std::string 
         // player spawn
         boundingArea{-195, -185, -160, -150},
         // cabin
-        boundingArea{-82, 34, 918, 1025}
+        boundingArea{-82, 34, 918, 1025},
+        // road
+        boundingArea{-250, 1650, -200, -115}
     };
 
     srand(100);
@@ -1020,6 +1026,7 @@ void Game::checkKeys(double deltaTime) {
     bool isAKeyPressed = glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS;
     bool isDKeyPressed = glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS;
     bool isFKeyPressed = glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS;
+    bool isGKeyPressed = glfwGetKey(window_, GLFW_KEY_G) == GLFW_PRESS; // Debug: Print camera x and z
 
     bool isUpKeyPressed = glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS;
     bool isDownKeyPressed = glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS;
@@ -1047,6 +1054,11 @@ void Game::checkKeys(double deltaTime) {
         camera_.Translate(camera_.GetSide() * trans_factor);
         camera_.updateBoundingBox();
     }
+    if (isGKeyPressed) {
+        std::cout << camera_.GetPosition().x << std::endl;
+        std::cout << camera_.GetPosition().z << std::endl;
+    }
+
 
     // Handle interaction
     if (isEKeyPressed) {
