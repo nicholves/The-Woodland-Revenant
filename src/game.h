@@ -136,8 +136,7 @@ namespace game {
             void SummonCar(std::string name, glm::vec3 position, float rotation = 0);
             void SummonUI(std::string name, std::string texture);
             void SummonGhost(std::string name, glm::vec3 position);
-            void SummonTreesType1(std::string name, std::string geometry, std::string texture, int amount);
-            void SummonTreeType2(std::string name, glm::vec3 position, float rotation = 0);
+            void SummonTree(std::string name, glm::vec3 position, float rotation = 0);
             void SummonCabin(std::string name, glm::vec3 position, float rotation = 0);
             void SummonGasCan(std::string name, glm::vec3 position, float rotation = 0);
             void SummonSign(std::string name, glm::vec3 position, float rotation = 0);
