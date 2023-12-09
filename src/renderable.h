@@ -3,6 +3,7 @@
 
 #include <string>
 #include "camera.h"
+#include "entities.h"
 
 namespace game {
 	class Renderable {
@@ -16,7 +17,11 @@ namespace game {
 		// Get name of node
 		const std::string GetName(void) const;
 
+		void setEntity(Entity* e);
+		Entity* getEntity() const;
+
 	protected:
+		Entity* colisionBox_ = nullptr;
 		std::string name_; // Name
 		bool blending_ = false;
 

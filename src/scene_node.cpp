@@ -257,8 +257,8 @@ namespace game {
 
 
     void SceneNode::Update(void) {
-
-        // Do nothing for this generic type of scene node
+        if (colisionBox_)
+            colisionBox_->setPos(position_);
     }
 
 
