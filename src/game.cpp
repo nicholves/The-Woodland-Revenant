@@ -452,11 +452,12 @@ void Game::SetupScene(void){
     SummonInstancedObjects("RockInstance2", "Rock_2", "Rock_2Texture", 50, glm::vec3(1, 1, 1), posesToIgnore, 102);
     SummonInstancedObjects("RockInstance3", "Rock_3", "Rock_3Texture", 50, glm::vec3(2, 2, 2), posesToIgnore, 103);
 
+    // Only summon on top right of map
     const std::vector<boundingArea> gravestonePosesToIgnore{
-        // player spawn
-        boundingArea{-195, -185, -160, -150},
-        // cabin
-        boundingArea{-82, 34, 918, 1025}
+        // left of map
+        boundingArea{400, 1700, -300, 1700},
+        // bottom of map
+        boundingArea{-300, 1700, -300, 300}
     };
     SummonInstancedObjects("GraveInstance1", "Gravestone", "GravestoneTexture", 100, glm::vec3(30, 30, 30), gravestonePosesToIgnore, 104);
 
@@ -472,11 +473,14 @@ void Game::SetupScene(void){
     SummonSign("Sign1", glm::vec3(-200, 0, -200), 0);
 
     // -- Fences --
-    // Fences left of car
-
     // Fences right of car
+    for (int i = 0; i < 2; ++i) {
+        SummonFence("Fence" + std::to_string(i + 3), glm::vec3(-240 - 20 * i, 0, -120));
+    }
+
+    // Fences left of car
     for (int i = 0; i < 40; ++i) {
-		//SummonFence("Fence" + std::to_string(i+3), glm::vec3(-180 + 20*i, 0, -200));
+		SummonFence("Fence" + std::to_string(i+3), glm::vec3(-160 + 20*i, 0, -120));
 	}
 
     // Tree Border
@@ -635,7 +639,10 @@ void Game::SummonFence(std::string name, glm::vec3 position, float rotation) {
     node->Scale(glm::vec3(30, 30, 30));
     node->Translate(position);
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
-    node->UpdateYPos(terrain_grid_, -3);
+    node->UpdateYPos(terrain_grid_, 1);
+
+    Entity entity(20.0f, 25.0f, 5.0f, camera_.clampToGround(glm::vec3(position.x, 50, position.z + 15), -3));
+    entities.push_back(entity);
 }
 
 void Game::SummonCar(std::string name, glm::vec3 position, float rotation) {
@@ -699,17 +706,17 @@ void Game::SummonInstancedObjects(std::string name, std::string geometry, std::s
         float xpos = std::min(std::max(-150 + ((120 * i) % 1800) + randomX, -225.0f), 1625.0f);
         float zpos = std::min(std::max(-170 + (60 * j) + randomZ, -215.0f), 1591.0f);
 
-        if (!posesToIgnore.empty()) {
-            bool ignore = false;
-            for (const auto& box : posesToIgnore) {
-                if (xpos < box.maxx && xpos > box.minx && zpos > box.minz && zpos < box.maxz) {
-                    ignore = true;
-                    break;
-                }
+        
+        bool ignore = false;
+        for (const auto& box : posesToIgnore) {
+            if (xpos < box.maxx && xpos > box.minx && zpos > box.minz && zpos < box.maxz) {
+                ignore = true;
+                break;
             }
-            if (ignore)
-                continue;
-		}
+        }
+        if (ignore)
+            continue;
+		
 
         orientations.push_back(glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0)));
         scales.push_back(glm::vec3(scale));
@@ -958,6 +965,9 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
         else if (game->gamePhase_ == gameLost || game->gamePhase_ == gameWon) {
             // Quit game now that the game is over
             glfwSetWindowShouldClose(window, true);
+        }
+        else {
+            std::cout << game->camera_.GetPosition().x << " " << game->camera_.GetPosition().z << std::endl;
         }
     }
 
