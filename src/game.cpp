@@ -412,69 +412,20 @@ void Game::SetupScene(void){
     SummonPlane("TreeBorder4", "RockTexture", glm::vec3(1650, 0, 690), glm::vec3(970, 1, 40), 270);
 
     // Misc Trees
-    SummonTree("Tree1", glm::vec3(-50, 0, -50));
-    SummonTree("Tree2", glm::vec3(-100, 0, 50));
-    SummonTree("Tree3", glm::vec3(50, 0, -100));
+    //SummonTree("Tree1", glm::vec3(-50, 0, -50));
+   // SummonTree("Tree2", glm::vec3(-100, 0, 50));
+    //SummonTree("Tree3", glm::vec3(50, 0, -100));
 
     // -- Gravestones -- 
+    
     SummonGravestone("Gravestone1", glm::vec3(-220, 0, -160));
     SummonGravestone("Gravestone2", glm::vec3(-230, 0, -140));
     SummonGravestone("Gravestone3", glm::vec3(-240, 0, -150));
 
     // -- Fences --
     // Fences left of car
-    geom = resman_.GetResource("Tree1");
-    mat = resman_.GetResource("LitTextureInstanceShader");
-    text = resman_.GetResource("TreeTexture1");
-
-    typedef struct { float minx; float maxx; float minz; float maxz; } boundingArea;
-    const boundingArea posesToIgnore[] = {
-                                         // player spawn
-                                         boundingArea{-195, -185, -160, -150},
-                                         // cabin
-                                         boundingArea{-82, 34, 918, 1025}
-                                         };
-
-    srand(100);
-    std::vector<glm::vec3> treePositions;
-    treePositions.reserve(440);
-    std::vector<glm::quat> treeOrientations;
-    treeOrientations.reserve(440);
-    std::vector<glm::vec3> treeScales;
-    treeScales.reserve(440);
-    int j = 0;
-    for (int i = 0; i < 440; ++i) {
-        if ((120 * i) % 1800 >= 1800 - 120) {
-            j++;
-        }
-
-        float randomX = (rand() % (261)) - 130;
-        float randomZ = (rand() % (261)) - 130;
-        float xpos = std::min(std::max(-150 + ((120 * i) % 1800) + randomX, -225.0f), 1625.0f);
-        float zpos = std::min(std::max(-170 + (60 * j) + randomZ, -215.0f), 1591.0f);
-
-        bool ignore = false;
-        for (const auto& box : posesToIgnore) {
-            if (xpos < box.maxx && xpos > box.minx && zpos > box.minz && zpos < box.maxz) {
-                ignore = true;
-                break;
-            }
-        }
-        if (ignore)
-            continue;
-
-        treeOrientations.push_back(glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0)));
-        treeScales.push_back(glm::vec3(3, 3, 3));
-        treePositions.push_back(camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
-
-        Entity entity(5.0f, 25.0f, 5.0f, camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
-        entities.push_back(entity);
-    }
-
-    InstancedObject* trees = new InstancedObject("TreeInstance1", geom, mat, treePositions, treeScales, treeOrientations, text);
-    scene_.AddNode(trees);
-
-    srand(time(NULL));
+    
+    SummonTreesType1("TreeInstance1", "Tree1", "TreeTexture1", 100);
 
     // Fences right of car
     for (int i = 0; i < 40; ++i) {
@@ -482,7 +433,7 @@ void Game::SetupScene(void){
 	}
 
     // -- Cabin --
-    SummonCabin("Cabin", glm::vec3(0, 0, 1000), 180);
+    SummonCabin("Cabin", glm::vec3(1000, 0, 0), 180);
 
     // -- Signs --
     SummonSign("Sign1", glm::vec3(-200, 0, -200), 0);
@@ -718,7 +669,62 @@ void Game::SummonGhost(std::string name, glm::vec3 position) {
     scene_.AddNode(ghost);
 }
 
-void Game::SummonTree(std::string name, glm::vec3 position, float rotation) {
+void Game::SummonTreesType1(std::string name, std::string geometry, std::string texture, int amount) {
+    Resource* geom = resman_.GetResource(geometry);
+    Resource* mat = resman_.GetResource("LitTextureInstanceShader");
+    Resource* text = resman_.GetResource(texture);
+
+    typedef struct { float minx; float maxx; float minz; float maxz; } boundingArea;
+    const boundingArea posesToIgnore[] = {
+        // player spawn
+        boundingArea{-195, -185, -160, -150},
+        // cabin
+        boundingArea{-82, 34, 918, 1025}
+    };
+
+    srand(100);
+    std::vector<glm::vec3> treePositions;
+    treePositions.reserve(amount);
+    std::vector<glm::quat> treeOrientations;
+    treeOrientations.reserve(amount);
+    std::vector<glm::vec3> treeScales;
+    treeScales.reserve(amount);
+    int j = 0;
+    for (int i = 0; i < amount; ++i) {
+        if ((120 * i) % 1800 >= 1800 - 120) {
+            j++;
+        }
+
+        float randomX = (rand() % (261)) - 130;
+        float randomZ = (rand() % (261)) - 130;
+        float xpos = std::min(std::max(-150 + ((120 * i) % 1800) + randomX, -225.0f), 1625.0f);
+        float zpos = std::min(std::max(-170 + (60 * j) + randomZ, -215.0f), 1591.0f);
+
+        bool ignore = false;
+        for (const auto& box : posesToIgnore) {
+            if (xpos < box.maxx && xpos > box.minx && zpos > box.minz && zpos < box.maxz) {
+                ignore = true;
+                break;
+            }
+        }
+        if (ignore)
+            continue;
+
+        treeOrientations.push_back(glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0)));
+        treeScales.push_back(glm::vec3(3, 3, 3));
+        treePositions.push_back(camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
+
+        Entity entity(5.0f, 25.0f, 5.0f, camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
+        entities.push_back(entity);
+    }
+
+    InstancedObject* trees = new InstancedObject(name, geom, mat, treePositions, treeScales, treeOrientations, text);
+    scene_.AddNode(trees);
+
+    srand(time(NULL));
+}
+
+void Game::SummonTreeType2(std::string name, glm::vec3 position, float rotation) {
     SetupTree(name);
     SceneNode* node = scene_.GetNode(name + "_branch0");
     node->Scale(glm::vec3(5, 5, 5));
