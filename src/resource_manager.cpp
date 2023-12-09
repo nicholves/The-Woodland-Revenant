@@ -263,7 +263,7 @@ std::vector<std::vector<float>> ResourceManager::LoadTerrainResource(ResourceTyp
             if (rowCtr > 5 && rowCtr < 10) { // Create flat terrain for road
                 vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1] = 0.5f;
             }
-            else if (rowCtr > columnCtr - 3 && rowCtr < columnCtr + 3 && rowCtr > 18) { // Create flat terrain for river
+            else if (rowCtr > 20 && rowCtr < 27) { // Create flat terrain for river
                 vertices[width * rowCtr * vertex_att + columnCtr * vertex_att + 1] = 0.1f;
             }
             else {
@@ -1189,6 +1189,35 @@ void ResourceManager::CreateVertex(std::string object_name) {
     // Create resource
     AddResource(Mesh, object_name, vbo, ebo, face_num * face_att);
 }
+
+
+void ResourceManager::CreateWall(std::string object_name, glm::vec3 color) {
+
+    GLfloat vertex[] = {
+        // Position, normal, color, texture coordinates
+        // Here, color stores the tangent of the vertex
+        -1.0, -1.0, 0.0,  0.0, -1.0,  0.0,  color[0], color[1], color[2],  0.0, 0.0,
+        -1.0,  1.0, 0.0,  0.0, -1.0,  0.0,  color[0], color[1], color[2],  0.0, 1.0,
+         1.0,  1.0, 0.0,  0.0, -1.0,  0.0,  color[0], color[1], color[2],  1.0, 1.0,
+         1.0, -1.0, 0.0,  0.0, -1.0,  0.0,  color[0], color[1], color[2],  1.0, 0.0 };
+    GLuint face[] = { 0, 2, 1,
+                     0, 3, 2 };
+
+    // Create OpenGL buffers and copy data
+    GLuint vbo, ebo;
+
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, 4 * 11 * sizeof(GLfloat), vertex, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * 3 * sizeof(GLuint), face, GL_STATIC_DRAW);
+
+    // Create resource
+    AddResource(Mesh, object_name, vbo, ebo, 2 * 3);
+}
+
 
 void ResourceManager::CreatePlane(std::string object_name, int repeatsX) {
     const GLuint vertex_num = 4;

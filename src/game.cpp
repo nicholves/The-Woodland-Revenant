@@ -196,6 +196,9 @@ void Game::SetupResources(void){
     //Invisible vertex that follows camera
     resman_.CreateVertex("CameraVertex");
 
+    //Road geometry
+    resman_.CreateWall("RoadRect", glm::vec3(0.5f, 0.5f, 0.5f));
+
     //-------------------------------- Texture --------------------------------
     // Load texture to be used on the object
     //Sign Texture
@@ -290,6 +293,13 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/win.png");
     resman_.LoadResource(Texture, "WinText", filename.c_str());
 
+    // Water Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/water_tex.jpg");
+    resman_.LoadResource(Texture, "WaterText", filename.c_str());
+
+    // Asphalt Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/road_tex.png");
+    resman_.LoadResource(Texture, "RoadText", filename.c_str());
 
     //-------------------------------Materials-----------------------------
     filename = std::string(SHADERS_DIRECTORY) + std::string("/material");
@@ -371,6 +381,25 @@ void Game::SetupScene(void){
     terrain->SetScale(glm::vec3(100.0f + terrain_offset, 25.0f, 100.0f + terrain_offset));
     terrain->SetPosition(glm::vec3(terrain_offset * 2, 0, terrain_offset * 2));
 
+    // Road
+    geom = resman_.GetResource("Wall");
+    mat = resman_.GetResource("LitTextureShader");
+    text = resman_.GetResource("RoadText");
+    SceneNode* road = scene_.CreateNode("Road", geom, mat, text);
+    road->Translate(glm::vec3(650,13,-150));
+    road->Scale(glm::vec3(1300,1,30));
+    road->Rotate(glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1)));
+
+    // River
+    geom = resman_.GetResource("Wall");
+    mat = resman_.GetResource("LitTextureShader");
+    text = resman_.GetResource("WaterText");
+    SceneNode* river = scene_.CreateNode("River", geom, mat, text);
+    river->Translate(glm::vec3(650, 10, 175));
+    river->Scale(glm::vec3(1300, 1, 70));
+    //river->Rotate(glm::angleAxis(glm::pi<float>() / 2, glm::vec3(0, 1, 0)));
+    river->Rotate(glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1)));
+
     // Vertex that follows camera
     geom = resman_.GetResource("CameraVertex");
     mat = resman_.GetResource("ObjectMaterial");
@@ -402,7 +431,7 @@ void Game::SetupScene(void){
     SummonGhost("Ghost1", glm::vec3(0, 35, 0));
 
     // -- Car -- 
-    SummonCar("Car", glm::vec3(-200, 100, -220));
+    SummonCar("Car", glm::vec3(-200, 100, -150));
 
     // -- Trees --
     // Border Trees
@@ -417,9 +446,9 @@ void Game::SetupScene(void){
     SummonTree("Tree3", glm::vec3(50, 0, -100));
 
     // -- Gravestones -- 
-    SummonGravestone("Gravestone1", glm::vec3(-220, 0, -160));
-    SummonGravestone("Gravestone2", glm::vec3(-230, 0, -140));
-    SummonGravestone("Gravestone3", glm::vec3(-240, 0, -150));
+    SummonGravestone("Gravestone1", glm::vec3(-220, 10, -110));
+    SummonGravestone("Gravestone2", glm::vec3(-230, 10, -90));
+    SummonGravestone("Gravestone3", glm::vec3(-240, 10, -70));
 
     // -- Fences --
     // Fences left of car
@@ -472,10 +501,10 @@ void Game::SetupScene(void){
     SummonSign("Sign1", glm::vec3(-200, 0, -200), 0);
 
     // Rocks
-    SummonRock("Rock1", glm::vec3(-230, 0, -160), 0, 1);
-    SummonRock("Rock2", glm::vec3(-240, 0, -140), 0, 2);
-    SummonRock("Rock3", glm::vec3(-230, 0, -100), 0, 3);
-    SummonRock("Rock4", glm::vec3(-240, 0, -50), 0, 1);
+    SummonRock("Rock1", glm::vec3(-230, 0, -120), 0, 1);
+    SummonRock("Rock2", glm::vec3(-240, 0, -100), 0, 2);
+    SummonRock("Rock3", glm::vec3(-230, 0, -80), 0, 3);
+    SummonRock("Rock4", glm::vec3(-240, 0, -20), 0, 1);
     SummonRock("Rock5", glm::vec3(-230, 0, 40), 0, 3);
 
     // Tree Border
@@ -802,6 +831,7 @@ void Game::MainLoop(void){
 
         scene_.Update(&camera_, deltaTime, gamePhase_);
 
+        // Move invisible camera vertex to the camera's current position
         SceneNode* cam_vertex = scene_.GetNode("CameraVertex");
         cam_vertex->SetPosition(camera_.GetPosition() - glm::vec3(0,3.5,0));
         cam_vertex->SetOrientation(camera_.GetOrientation());
@@ -872,7 +902,7 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
         if(game->gamePhase_ == title) {
             // Start game
             game->gamePhase_ = gameplay;
-            game->camera_.SetPosition(glm::vec3(-190, 50, -155));
+            game->camera_.SetPosition(glm::vec3(-190, 50, -120));
             game->camera_.UpdateYPos();
         }
         else if (game->gamePhase_ == gameLost || game->gamePhase_ == gameWon) {

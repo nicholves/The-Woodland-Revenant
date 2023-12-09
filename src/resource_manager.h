@@ -6,6 +6,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 #include "resource.h"
 
@@ -50,6 +51,9 @@ namespace game {
 
             // Create a singular vertex, used to represent the camera's position
             void CreateVertex(std::string object_name);
+
+            // Taken from assignment 7, wall is used for river and road geometry
+            void CreateWall(std::string object_name, glm::vec3 color);
 
             // Create a plane, used for UI
             void CreatePlane(std::string object_name, int repeatsX = 1);
