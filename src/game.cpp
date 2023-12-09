@@ -470,7 +470,7 @@ void Game::SetupScene(void){
     SummonCabin("Cabin", glm::vec3(1000, 0, 0), 180);
 
     // -- Signs --
-    SummonSign("Sign1", glm::vec3(-200, 0, -200), 0);
+    SummonSign("Sign1", glm::vec3(-150, 0, -80), 210);
 
     // -- Fences --
     // Fences right of car
@@ -654,6 +654,9 @@ void Game::SummonCar(std::string name, glm::vec3 position, float rotation) {
     node->Translate(position);
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
     node->UpdateYPos(terrain_grid_, 8);
+
+    Entity entity(30.0f, 25.0f, 18.0f, camera_.clampToGround(glm::vec3(position.x, 50, position.z), -3));
+    entities.push_back(entity);
 }
 
 void Game::SummonUI(std::string name, std::string texture) {
@@ -816,6 +819,9 @@ void Game::SummonSign(std::string name, glm::vec3 position, float rotation) {
     node->Translate(position);
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
     node->UpdateYPos(terrain_grid_, 8);
+
+    Entity entity(10.0f, 25.0f, 10.0f, camera_.clampToGround(glm::vec3(position.x - 10, 50, position.y), -3));
+    entities.push_back(entity);
 }
 
 void Game::SummonPlane(std::string name, std::string texture, glm::vec3 position, glm::vec3 scale, float rotation) {
