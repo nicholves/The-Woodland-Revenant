@@ -129,10 +129,10 @@ namespace game {
             //entity collisions
             void checkEntityCollision();
 
+            typedef struct { float minx; float maxx; float minz; float maxz; } boundingArea;
+
             // Summon Objects
             void SummonFence(std::string name, glm::vec3 position, float rotation = 0);
-            void SummonGravestone(std::string name, glm::vec3 position, float rotation = 0);
-            void SummonRock(std::string name, glm::vec3 position, float rotation = 0, int type = 1);
             void SummonCar(std::string name, glm::vec3 position, float rotation = 0);
             void SummonUI(std::string name, std::string texture);
             void SummonGhost(std::string name, glm::vec3 position);
@@ -142,6 +142,7 @@ namespace game {
             void SummonGasCan(std::string name, glm::vec3 position, float rotation = 0);
             void SummonSign(std::string name, glm::vec3 position, float rotation = 0);
             void SummonPlane(std::string name, std::string texture, glm::vec3 position, glm::vec3 scale, float rotation = 0);
+            void SummonInstancedObjects(std::string name, std::string geometry, std::string texture, int amount, glm::vec3 scale, std::vector<boundingArea>, int seed);
 
     }; // class Game
 

@@ -404,33 +404,37 @@ void Game::SetupScene(void){
     // -- Car -- 
     SummonCar("Car", glm::vec3(-200, 100, -220));
 
-    // -- Trees --
-    // Border Trees
+    // -- Border --
+    // Border Rock Wall
     SummonPlane("TreeBorder1", "RockTexture", glm::vec3(690, 0, -250), glm::vec3(970, 1, 40), 0);
     SummonPlane("TreeBorder2", "RockTexture", glm::vec3(-250, 0, 690), glm::vec3(970, 1, 40), 90);
     SummonPlane("TreeBorder3", "RockTexture", glm::vec3(690, 0, 1650), glm::vec3(970, 1, 40), 180);
     SummonPlane("TreeBorder4", "RockTexture", glm::vec3(1650, 0, 690), glm::vec3(970, 1, 40), 270);
 
-    // Misc Trees
-    //SummonTree("Tree1", glm::vec3(-50, 0, -50));
-   // SummonTree("Tree2", glm::vec3(-100, 0, 50));
-    //SummonTree("Tree3", glm::vec3(50, 0, -100));
+    // -- Instanced Objects --
+    const std::vector<boundingArea> posesToIgnore{
+        // player spawn
+        boundingArea{-195, -185, -160, -150},
+        // cabin
+        boundingArea{-82, 34, 918, 1025}
+    };
+    SummonInstancedObjects("TreeInstance1", "Tree1", "TreeTexture1", 200, glm::vec3(3, 3, 3), posesToIgnore, 100);
+    SummonInstancedObjects("RockInstance1", "Rock_1", "Rock_1Texture", 50, glm::vec3(0.2f, 0.2f, 0.2f), posesToIgnore, 101);
+    SummonInstancedObjects("RockInstance2", "Rock_2", "Rock_2Texture", 50, glm::vec3(1, 1, 1), posesToIgnore, 102);
+    SummonInstancedObjects("RockInstance3", "Rock_3", "Rock_3Texture", 50, glm::vec3(2, 2, 2), posesToIgnore, 103);
 
-    // -- Gravestones -- 
-    
-    SummonGravestone("Gravestone1", glm::vec3(-220, 0, -160));
-    SummonGravestone("Gravestone2", glm::vec3(-230, 0, -140));
-    SummonGravestone("Gravestone3", glm::vec3(-240, 0, -150));
+    const std::vector<boundingArea> gravestonePosesToIgnore{
+        // player spawn
+        boundingArea{-195, -185, -160, -150},
+        // cabin
+        boundingArea{-82, 34, 918, 1025}
+    };
+    SummonInstancedObjects("GraveInstance1", "Gravestone", "GravestoneTexture", 100, glm::vec3(30, 30, 30), gravestonePosesToIgnore, 104);
 
-    // -- Fences --
-    // Fences left of car
-    
-    SummonTreesType1("TreeInstance1", "Tree1", "TreeTexture1", 100);
-
-    // Fences right of car
-    for (int i = 0; i < 40; ++i) {
-		//SummonFence("Fence" + std::to_string(i+3), glm::vec3(-180 + 20*i, 0, -200));
-	}
+    // -- Animated Trees --
+    SummonTreeType2("Tree1", glm::vec3(-50, 0, -50));
+    SummonTreeType2("Tree2", glm::vec3(-100, 0, 50));
+    SummonTreeType2("Tree3", glm::vec3(50, 0, -100));
 
     // -- Cabin --
     SummonCabin("Cabin", glm::vec3(1000, 0, 0), 180);
@@ -438,50 +442,17 @@ void Game::SetupScene(void){
     // -- Signs --
     SummonSign("Sign1", glm::vec3(-200, 0, -200), 0);
 
-    // Rocks
-    SummonRock("Rock1", glm::vec3(-230, 0, -160), 0, 1);
-    SummonRock("Rock2", glm::vec3(-240, 0, -140), 0, 2);
-    SummonRock("Rock3", glm::vec3(-230, 0, -100), 0, 3);
-    SummonRock("Rock4", glm::vec3(-240, 0, -50), 0, 1);
-    SummonRock("Rock5", glm::vec3(-230, 0, 40), 0, 3);
+    // -- Fences --
+    // Fences left of car
 
-    // Tree Border
-    /*for (int i = 0; i < 10; ++i) {
-        std::cout << i << std::endl;
-        SetupTree("TreeBorder" + std::to_string(i) + "A");
-        SceneNode* treeA = scene_.GetNode("TreeBorder" + std::to_string(i) + "A_branch0");
-        treeA->Scale(glm::vec3(5, 5, 5));
-        treeA->Translate(glm::vec3(-230 + i * 200, 0, -230));
-    }*/
+    // Fences right of car
+    for (int i = 0; i < 40; ++i) {
+		//SummonFence("Fence" + std::to_string(i+3), glm::vec3(-180 + 20*i, 0, -200));
+	}
 
-    //Rock1
-    /*geom = resman_.GetResource("Rock_1");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("Rock_1Texture");
-    rock1_ = scene_.CreateNode("Rock1", geom, mat, text);
-    rock1_->Scale(glm::vec3(1, 1, 1));
-    rock1_->Translate(glm::vec3(175, 0, 0));
+    
 
-    // Tree Border
-    for (int i = 0; i < 10; ++i) {
-        std::cout << i << std::endl;
-        SetupTree("TreeBorder" + std::to_string(i) + "A");
-        SceneNode* treeA = scene_.GetNode("TreeBorder" + std::to_string(i) + "A_branch0");
-        treeA->Scale(glm::vec3(5, 5, 5));
-        treeA->Translate(glm::vec3(-230 + i * 200, 0, -230));
-    }
-
-    // Trees
-    SetupTree("Tree1");
-    SetupTree("Tree2");
-
-    SceneNode* tree1 = scene_.GetNode("Tree1_branch0");
-    tree1->Scale(glm::vec3(5, 5, 5));
-    tree1->Translate(glm::vec3(-200, 0, -200));
-    SceneNode* tree2 = scene_.GetNode("Tree2_branch0");
-    tree2->Scale(glm::vec3(5, 5, 5));
-    tree2->Translate(glm::vec3(-300, 0, -250));*/
-
+    
     
 
     /*
@@ -613,28 +584,6 @@ void Game::SummonFence(std::string name, glm::vec3 position, float rotation) {
     node->UpdateYPos(terrain_grid_, -3);
 }
 
-void Game::SummonGravestone(std::string name, glm::vec3 position, float rotation) {
-    Resource* geom = resman_.GetResource("Gravestone");
-    Resource* mat = resman_.GetResource("LitTextureShader");
-    Resource* text = resman_.GetResource("GravestoneTexture");
-    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
-    node->Scale(glm::vec3(30, 30, 30));
-    node->Translate(position);
-    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
-    node->UpdateYPos(terrain_grid_, 0);
-}
-
-void Game::SummonRock(std::string name, glm::vec3 position, float rotation, int type) {
-    Resource* geom = resman_.GetResource(type == 1 ? "Rock_1" : (type == 2 ? "Rock_2" : "Rock_3"));
-    Resource* mat = resman_.GetResource("LitTextureShader");
-    Resource* text = resman_.GetResource(type == 1 ? "Rock_1Texture" : (type == 2 ? "Rock_2Texture" : "Rock_3Texture"));
-    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
-    node->Scale(glm::vec3(1, 1, 1) * (type == 1 ? 0.2f : 1));
-    node->Translate(position);
-    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
-    node->UpdateYPos(terrain_grid_, 0);
-}
-
 void Game::SummonCar(std::string name, glm::vec3 position, float rotation) {
     Resource* geom = resman_.GetResource("Car");
     Resource* mat = resman_.GetResource("LitTextureShader");
@@ -669,12 +618,65 @@ void Game::SummonGhost(std::string name, glm::vec3 position) {
     scene_.AddNode(ghost);
 }
 
+void Game::SummonInstancedObjects(std::string name, std::string geometry, std::string texture, int amount, glm::vec3 scale, std::vector<boundingArea> posesToIgnore, int seed) {
+    Resource* geom = resman_.GetResource(geometry);
+    Resource* mat = resman_.GetResource("LitTextureInstanceShader");
+    Resource* text = resman_.GetResource(texture);
+
+    srand(seed);
+
+    std::vector<glm::vec3> positions;
+    positions.reserve(amount);
+
+    std::vector<glm::quat> orientations;
+    orientations.reserve(amount);
+
+    std::vector<glm::vec3> scales;
+    scales.reserve(amount);
+
+    int j = 0;
+    for (int i = 0; i < amount; ++i) {
+        if ((120 * i) % 1800 >= 1800 - 120) {
+            j++;
+        }
+
+        float randomX = (rand() % (261)) - 130;
+        float randomZ = (rand() % (261)) - 130;
+        float xpos = std::min(std::max(-150 + ((120 * i) % 1800) + randomX, -225.0f), 1625.0f);
+        float zpos = std::min(std::max(-170 + (60 * j) + randomZ, -215.0f), 1591.0f);
+
+        if (!posesToIgnore.empty()) {
+            bool ignore = false;
+            for (const auto& box : posesToIgnore) {
+                if (xpos < box.maxx && xpos > box.minx && zpos > box.minz && zpos < box.maxz) {
+                    ignore = true;
+                    break;
+                }
+            }
+            if (ignore)
+                continue;
+		}
+
+        orientations.push_back(glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0)));
+        scales.push_back(glm::vec3(scale));
+        positions.push_back(camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
+
+        Entity entity(5.0f, 25.0f, 5.0f, camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
+        entities.push_back(entity);
+    }
+
+    InstancedObject* objects = new InstancedObject(name, geom, mat, positions, scales, orientations, text);
+    scene_.AddNode(objects);
+
+    srand(time(NULL));
+}
+
 void Game::SummonTreesType1(std::string name, std::string geometry, std::string texture, int amount) {
     Resource* geom = resman_.GetResource(geometry);
     Resource* mat = resman_.GetResource("LitTextureInstanceShader");
     Resource* text = resman_.GetResource(texture);
 
-    typedef struct { float minx; float maxx; float minz; float maxz; } boundingArea;
+    
     const boundingArea posesToIgnore[] = {
         // player spawn
         boundingArea{-195, -185, -160, -150},
