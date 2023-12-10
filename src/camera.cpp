@@ -13,10 +13,10 @@
 #define FLASHLIGHT_ANGLE_DEGREES 25.0f
 
 // smaller number falls off faster with angle
-#define LIGHT_FALLOFF_RATE 2
+#define LIGHT_FALLOFF_RATE 0.6f
 
 // bigger number falls off faster with distance
-#define DISTANCE_FACTOR 0.0002f
+#define DISTANCE_FACTOR 0.0001f
 
 namespace game {
 
@@ -179,6 +179,13 @@ namespace game {
         return -current_forward; // Return -forward since the camera coordinate system points in the opposite direction
     }
 
+    glm::vec3 Camera::GetStraigth(void) const {
+        glm::vec3 result = GetForward();
+        result.y = 0.0f;
+
+        return glm::normalize(result);
+    }
+
 
     glm::vec3 Camera::GetSide(void) const {
         // how do you get the side vector?
@@ -195,8 +202,12 @@ namespace game {
 
     void Camera::Pitch(float angle) {
         glm::quat rotation = glm::angleAxis(angle, GetSide()); // Rotate around Side For Pitch 
-        orientation_ = rotation * orientation_;
-        orientation_ = glm::normalize(orientation_);
+        glm::quat new_orientation = rotation * orientation_;
+        new_orientation = glm::normalize(new_orientation);
+        if ((new_orientation * forward_).y <= -0.999 || (new_orientation * forward_).y >= 0.999) {
+            return;
+        }
+        orientation_ = new_orientation;
     }
 
 

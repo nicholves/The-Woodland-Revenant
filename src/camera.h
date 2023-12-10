@@ -48,6 +48,7 @@ namespace game {
 
         // Get relative attributes of camera
         glm::vec3 GetForward(void) const;
+        glm::vec3 GetStraigth(void) const;
         glm::vec3 GetSide(void) const;
         glm::vec3 GetUp(void) const;
 

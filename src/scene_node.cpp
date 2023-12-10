@@ -48,6 +48,9 @@ namespace game {
         // Other attributes
         scale_ = glm::vec3(1.0, 1.0, 1.0);
         blending_ = false;
+
+        glGenVertexArrays(1, &VAO);
+        setupVertexAttributes(material_);
     }
 
 
@@ -241,6 +244,8 @@ namespace game {
         // Set world matrix and other shader input variables
         SetupShader(material_);
 
+        glBindVertexArray(VAO);
+
         // Draw geometry
         if (mode_ == GL_POINTS) {
             glDrawArrays(mode_, 0, size_);
@@ -249,6 +254,8 @@ namespace game {
             // glDrawElementsInstanced(mode_, size_, GL_UNSIGNED_INT, 0, 200);
             glDrawElements(mode_, size_, GL_UNSIGNED_INT, 0);
         }
+
+        glBindVertexArray(0);
     }
 
     void SceneNode::SetBlending(bool blending) {
@@ -261,10 +268,10 @@ namespace game {
             colisionBox_->setPos(position_);
     }
 
-
-    void SceneNode::SetupShader(GLuint program) {
-
-
+    void SceneNode::setupVertexAttributes(GLuint program) {
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, array_buffer_);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_array_buffer_);
         // Set attributes for shaders
         GLint vertex_att = glGetAttribLocation(program, "vertex");
         glVertexAttribPointer(vertex_att, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), 0);
@@ -282,29 +289,17 @@ namespace game {
         glVertexAttribPointer(tex_att, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(9 * sizeof(GLfloat)));
         glEnableVertexAttribArray(tex_att);
 
-        // World transformation
-        glm::mat4 scaling = glm::scale(glm::mat4(1.0), scale_);
+        glBindVertexArray(0);
+    }
 
-        glm::mat4 rotation = glm::mat4_cast(orientation_);
-        glm::mat4 translation = glm::translate(glm::mat4(1.0), position_);
 
-        glm::mat4 orbit = glm::mat4(1.0); // identity -- left out for now
-        glm::mat4 transf = translation * orbit * rotation * scaling;
-
+    void SceneNode::SetupShader(GLuint program) {
         // Texture
         if (texture_) {
             GLint tex = glGetUniformLocation(program, "texture_map");
             glUniform1i(tex, 0); // Assign the first texture to the map
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture_); // First texture we bind
-            // Define texture interpolation
-            glGenerateMipmap(GL_TEXTURE_2D);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
         }
 
         // Timer

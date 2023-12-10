@@ -51,7 +51,7 @@ void main()
 
 	float distance = length(flashlight_pos - fragPos);
 
-	float amb = 0.1; // ambient coefficient
+	float amb = 0.05; // ambient coefficient
 
 	specular *= 1 / (distanceFactor * distance * distance);
 	diffuse *= 1 / (distanceFactor * distance * distance);

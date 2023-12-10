@@ -37,8 +37,10 @@ namespace game {
         // Update geometry configuration
         void Update(void);
 
-    private:
+        void setOrientation(glm::quat orientation);
 
+    private:
+        glm::quat orientation_ = glm::quat(glm::angleAxis(0.0f, glm::vec3(-1, 0, 0)));
         BoundingBox boundingBox;
         glm::vec3 position_;
 

@@ -15,19 +15,32 @@ namespace game {
     Entity::~Entity() {
     }
 
+    void Entity::setOrientation(glm::quat orientation) {
+        orientation_ = orientation;
+        updateBoundingBox();
+    }
 
     // Function to update the Entity's bounding box
     void Entity::updateBoundingBox() {
         // Set the bounding box around the camera position
-        boundingBox.min = position_ - glm::vec3(boxX, boxY, boxZ);  // Assuming a unit cube
-        boundingBox.max = position_ + glm::vec3(boxX, boxY, boxZ);
+        glm::mat4 rotate = glm::mat4_cast(orientation_);
+        boundingBox.min = position_ - glm::vec3(glm::vec4(glm::vec3(boxX, boxY, boxZ), 1.0f) * rotate);  // Assuming a unit cube
+        boundingBox.max = position_ + glm::vec3(glm::vec4(glm::vec3(boxX, boxY, boxZ), 1.0f) * rotate);
     }
 
 
     bool Entity::checkPlayerCollision(Camera* camera) const {
-        if (camera->getBBox().max.x < boundingBox.min.x || camera->getBBox().min.x > boundingBox.max.x) return false;
-        if (camera->getBBox().max.y < boundingBox.min.y || camera->getBBox().min.y > boundingBox.max.y) return false;
-        if (camera->getBBox().max.z < boundingBox.min.z || camera->getBBox().min.z > boundingBox.max.z) return false;
+        float minx = std::min(boundingBox.min.x, boundingBox.max.x);
+        float minz = std::min(boundingBox.min.z, boundingBox.max.z);
+        float miny = std::min(boundingBox.min.y, boundingBox.max.y);
+
+        float maxx = std::max(boundingBox.min.x, boundingBox.max.x);
+        float maxz = std::max(boundingBox.min.z, boundingBox.max.z);
+        float maxy = std::max(boundingBox.min.y, boundingBox.max.y);
+
+        if (camera->getBBox().max.x < minx || camera->getBBox().min.x > maxx) return false;
+        if (camera->getBBox().max.y < miny || camera->getBBox().min.y > maxy) return false;
+        if (camera->getBBox().max.z < minz || camera->getBBox().min.z > maxz) return false;
         
         return true;  // Collision detected
     }

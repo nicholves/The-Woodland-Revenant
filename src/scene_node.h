@@ -73,9 +73,12 @@ namespace game {
         virtual glm::mat4 CalculateTransform(float) const;
 
     protected:
+        void setupVertexAttributes(GLuint program);
+
         std::string name_; // Name of the scene node
         GLuint array_buffer_; // References to geometry: vertex and array buffers
         GLuint element_array_buffer_;
+        GLuint VAO;
         GLenum mode_; // Type of geometry
         GLsizei size_; // Number of primitives in geometry
         GLuint material_; // Reference to shader program

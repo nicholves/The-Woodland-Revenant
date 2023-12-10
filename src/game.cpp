@@ -491,25 +491,42 @@ void Game::SetupScene(void){
         // cabin
         // ruins
     };
-    SummonInstancedObjects("TreeInstance1", "Tree1", "TreeTexture1", 100, glm::vec3(3, 3, 3), posesToIgnore, 100);
-    SummonInstancedObjects("TreeInstance2", "Tree2", "TreeTexture2", 100, glm::vec3(9, 9, 9), posesToIgnore, 107);
+
+    std::vector<glm::vec3> filledPositions;
+    filledPositions.reserve(444 * 6);
+
+    glm::vec3 tree1Scale(5.0f, 50.0f, 3.5f);
+    glm::vec3 tree2Scale(6.5f, 50.0f, 3.5f);
+    SummonInstancedObjects("TreeInstance1", "Tree1", "TreeTexture1", 444, glm::vec3(3, 3, 3), tree1Scale, posesToIgnore, 100, filledPositions);
+    SummonInstancedObjects("TreeInstance2", "Tree2", "TreeTexture2", 444, glm::vec3(9, 9, 9), tree2Scale, posesToIgnore, 107, filledPositions);
 
     const std::vector<boundingArea> rockPosesToIgnore{
         // road and everything north of it
-        boundingArea{-300, 1700, -200, 1700},
+        boundingArea{-300, 1700, -200, -100},
+        // river
+        boundingArea{-300, 1700, 90, 250},
     };
-    SummonInstancedObjects("RockInstance1", "Rock_1", "Rock_1Texture", 100, glm::vec3(0.2f, 0.2f, 0.2f), rockPosesToIgnore, 101);
-    SummonInstancedObjects("RockInstance2", "Rock_2", "Rock_2Texture", 100, glm::vec3(1, 1, 1), rockPosesToIgnore, 102);
-    SummonInstancedObjects("RockInstance3", "Rock_3", "Rock_3Texture", 100, glm::vec3(2, 2, 2), rockPosesToIgnore, 103, glm::vec3(0,0,-70));
+
+    glm::vec3 rock1Scale(10.0f, 50.0f, 7.5f);
+    glm::vec3 rock2Scale(10.0f, 50.0f, 7.5f);
+    glm::vec3 rock3Scale(8.0f, 50.0f, 7.5f);
+    SummonInstancedObjects("RockInstance1", "Rock_1", "Rock_1Texture", 444, glm::vec3(0.2f, 0.2f, 0.2f), rock1Scale, rockPosesToIgnore, 101, filledPositions);
+    SummonInstancedObjects("RockInstance2", "Rock_2", "Rock_2Texture", 444, glm::vec3(5, 5, 5), rock2Scale, rockPosesToIgnore, 102, filledPositions);
+    SummonInstancedObjects("RockInstance3", "Rock_3", "Rock_3Texture", 444, glm::vec3(2, 2, 2), rock3Scale, rockPosesToIgnore, 103, filledPositions);
 
     // Only summon on top right of map
     const std::vector<boundingArea> gravestonePosesToIgnore{
         // left of map
-        boundingArea{400, 1700, -300, 1700},
+        boundingArea{-300, 400, -300, 1700},
         // bottom of map
-        boundingArea{-300, 1700, -300, 300}
+        boundingArea{-300, 1700, 250, 1700},
+        // road
+        boundingArea{-300, 1700, -200, -100},
+        // river
+        boundingArea{-300, 1700, 90, 250},
     };
-    SummonInstancedObjects("GraveInstance1", "Gravestone", "GravestoneTexture", 100, glm::vec3(30, 30, 30), gravestonePosesToIgnore, 104);
+    glm::vec3 graveStoneScale(8.0f, 50.0f, 7.5f);
+    SummonInstancedObjects("GraveInstance1", "Gravestone", "GravestoneTexture", 444, glm::vec3(30, 30, 30), graveStoneScale, gravestonePosesToIgnore, 104, filledPositions);
 
     // -- Animated Trees --
     SummonTree("Tree1", glm::vec3(-50, 0, -50));
@@ -690,7 +707,10 @@ void Game::SummonGhost(std::string name, glm::vec3 position) {
     scene_.AddNode(ghost);
 }
 
-void Game::SummonInstancedObjects(std::string name, std::string geometry, std::string texture, int amount, glm::vec3 scale, std::vector<boundingArea> posesToIgnore, int seed, glm::vec3 offset) {
+void Game::SummonInstancedObjects(std::string name, std::string geometry, std::string texture, int amount, glm::vec3 scale, 
+                                  const glm::vec3& boundingBox, std::vector<boundingArea> posesToIgnore, int seed, std::vector<glm::vec3>& filledPosses) {
+    constexpr float minDistanceBetweenObjects = 20.0f;
+    
     Resource* geom = resman_.GetResource(geometry);
     Resource* mat = resman_.GetResource("LitTextureInstanceShader");
     Resource* text = resman_.GetResource(texture);
@@ -712,15 +732,16 @@ void Game::SummonInstancedObjects(std::string name, std::string geometry, std::s
             j++;
         }
 
+        bool ignore = false;
+
         float randomX = (rand() % (261)) - 130;
         float randomZ = (rand() % (261)) - 130;
         float xpos = std::min(std::max(-150 + ((120 * i) % 1800) + randomX, -225.0f), 1625.0f);
         float zpos = std::min(std::max(-170 + (60 * j) + randomZ, -215.0f), 1591.0f);
 
         if (!posesToIgnore.empty()) {
-            bool ignore = false;
             for (const auto& box : posesToIgnore) {
-                if (xpos + offset.x < box.maxx && xpos + offset.x > box.minx && zpos + offset.z > box.minz && zpos + offset.z < box.maxz) {
+                if (xpos < box.maxx && xpos > box.minx && zpos > box.minz && zpos < box.maxz) {
                     ignore = true;
                     break;
                 }
@@ -729,12 +750,25 @@ void Game::SummonInstancedObjects(std::string name, std::string geometry, std::s
                 continue;
 		}
 
+        glm::vec3 newPos(xpos, 50, zpos);
+        for (const auto& pos : filledPosses) {
+            if (glm::length(newPos - pos) <= minDistanceBetweenObjects) {
+                ignore = true;
+                break;
+            }
+        }
+        if (ignore)
+            continue;
+
         orientations.push_back(glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0)));
         scales.push_back(glm::vec3(scale));
         positions.push_back(camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
 
-        Entity entity(5.0f, 25.0f, 5.0f, camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
+        Entity entity(boundingBox.x, boundingBox.y, boundingBox.z, camera_.clampToGround(glm::vec3(xpos, 50, zpos), -3));
+        entity.setOrientation(glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0)));
         entities.push_back(entity);
+
+        filledPosses.push_back(glm::vec3(xpos, 50, zpos));
     }
 
     InstancedObject* objects = new InstancedObject(name, geom, mat, positions, scales, orientations, text);
@@ -773,7 +807,8 @@ void Game::SummonSign(std::string name, glm::vec3 position, float rotation) {
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
     node->UpdateYPos(terrain_grid_, 8);
 
-    Entity entity(10.0f, 25.0f, 10.0f, camera_.clampToGround(glm::vec3(position.x - 10, 50, position.y), -3));
+    Entity entity(10.0f, 50.0f, 0.05f, camera_.clampToGround(glm::vec3(position.x, 50, position.z), -3));
+    entity.setOrientation(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
     entities.push_back(entity);
 }
 
@@ -1036,11 +1071,11 @@ void Game::checkKeys(double deltaTime) {
     float trans_factor = 60.0f * static_cast<float>(deltaTime);
 
     if (isWKeyPressed || isUpKeyPressed) {
-        camera_.Translate(camera_.GetForward() * trans_factor);
+        camera_.Translate(camera_.GetStraigth() * trans_factor);
         camera_.updateBoundingBox();
     }
     if (isSKeyPressed || isDownKeyPressed) {
-        camera_.Translate(-camera_.GetForward() * trans_factor);
+        camera_.Translate(-camera_.GetStraigth() * trans_factor);
         camera_.updateBoundingBox();
     }
     if (isAKeyPressed || isLeftKeyPressed) {
@@ -1121,7 +1156,9 @@ void Game::OnInteract() {
             }
 
             if (chosen_interactable) {
-                scene_.DeleteNode(chosen_interactable->GetParticles()->GetName());
+                if (chosen_interactable->GetParticles())
+                    scene_.DeleteNode(chosen_interactable->GetParticles()->GetName());
+
                 held_item_ = chosen_interactable;
                 held_item_->SetParent(scene_.GetNode("CameraVertex"));
                 held_item_->SetPosition(held_item_->GetHeldPos());

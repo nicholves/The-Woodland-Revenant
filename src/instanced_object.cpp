@@ -59,6 +59,8 @@ namespace game {
         glGenVertexArrays(1, &VAO);
 
         delete[] transforms;
+
+        setupVertexAttributes(material_);
     }
 
    void InstancedObject::Update(void) {
@@ -101,24 +103,11 @@ namespace game {
        }
        else {
            glDrawElementsInstanced(mode_, size_, GL_UNSIGNED_INT, 0, instance_count_);
-       }
-
+       }  
        glBindVertexArray(0);
    }
 
-   void InstancedObject::CalculateTransforms(glm::mat4* arr, const std::vector<glm::vec3>& instancePositions,
-       const std::vector<glm::vec3>& instanceScales, const std::vector<glm::quat>& instanceOrientations) const {
-       assert(instanceOrientations.size() == instancePositions.size() && instancePositions.size() == instanceScales.size());
-
-       std::vector<glm::mat4> result;
-       result.reserve(instancePositions.size());
-
-       for (int i = 0; i < instancePositions.size(); ++i) {
-           arr[i] = CalculateTransform(instancePositions[i], instanceScales[i], instanceOrientations[i]);
-       }
-   }
-
-   void InstancedObject::SetupShader(GLuint program) {
+   void InstancedObject::setupVertexAttributes(GLuint program) {
        glBindVertexArray(VAO);
        glBindBuffer(GL_ARRAY_BUFFER, array_buffer_);
        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_array_buffer_);
@@ -162,22 +151,29 @@ namespace game {
        glVertexAttribDivisor(instance_tranforms_att + 3, 1);
 
        glBindVertexArray(0);
+   }
 
+   void InstancedObject::CalculateTransforms(glm::mat4* arr, const std::vector<glm::vec3>& instancePositions,
+       const std::vector<glm::vec3>& instanceScales, const std::vector<glm::quat>& instanceOrientations) const {
+       assert(instanceOrientations.size() == instancePositions.size() && instancePositions.size() == instanceScales.size());
+
+       std::vector<glm::mat4> result;
+       result.reserve(instancePositions.size());
+
+       for (int i = 0; i < instancePositions.size(); ++i) {
+           arr[i] = CalculateTransform(instancePositions[i], instanceScales[i], instanceOrientations[i]);
+       }
+   }
+
+   void InstancedObject::SetupShader(GLuint program) {
        // Texture
        if (texture_) {
            GLint tex = glGetUniformLocation(program, "texture_map");
            glUniform1i(tex, 0); // Assign the first texture to the map
            glActiveTexture(GL_TEXTURE0);
            glBindTexture(GL_TEXTURE_2D, texture_); // First texture we bind
-           // Define texture interpolation
-           glGenerateMipmap(GL_TEXTURE_2D);
-           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
        }
-
+    
        // Timer
        GLint timer_var = glGetUniformLocation(program, "timer");
        float current_time = static_cast<float>(glfwGetTime());
@@ -198,7 +194,6 @@ namespace game {
        // Object Color
        GLint object_color = glGetUniformLocation(program, "object_color");
        glUniform3f(object_color, 0.0f, 0.7f, 0.9f);
-   
    }
 
    glm::mat4 InstancedObject::CalculateTransform(const glm::vec3& position_, const glm::vec3& scale_, const glm::quat& orientation_) {

@@ -17,6 +17,7 @@ namespace game {
 		virtual void Draw(Camera* camera) override;
 
 	private:
+		void setupVertexAttributes(GLuint program);
 		GLuint instanceVBO = 0;
         GLuint array_buffer_ = 0; // References to geometry: vertex and array buffers
         GLuint element_array_buffer_ = 0;
