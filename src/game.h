@@ -132,6 +132,8 @@ namespace game {
             //entity collisions
             void checkEntityCollision();
 
+            void adjustBlurFactor();
+
             typedef struct { float minx; float maxx; float minz; float maxz; } boundingArea;
 
             // Summon Objects

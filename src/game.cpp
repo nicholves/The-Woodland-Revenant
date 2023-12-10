@@ -3,6 +3,8 @@
 #include <time.h>
 #include <sstream>
 #include <algorithm>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #include "game.h"
 #include "skybox.h"
@@ -344,6 +346,9 @@ void Game::SetupResources(void){
     resman_.LoadResource(Material, "TerrainShader", filename.c_str());
 
     //-------------------------------Screen Space Material------------------
+    filename = std::string(SCREEN_SPACE_SHADERS_DIRECTORY) + std::string("/blank");
+    resman_.LoadResource(SS_Material, "BlankShader", filename.c_str());
+
     filename = std::string(SCREEN_SPACE_SHADERS_DIRECTORY) + std::string("/night_vision");
     resman_.LoadResource(SS_Material, "NightVisionShader", filename.c_str());
 
@@ -843,7 +848,7 @@ void Game::SummonLog(std::string name, glm::vec3 position, float rotation) {
 
 void Game::MainLoop(void){
     glfwSwapInterval(0);
-    const char* ssShaders[] = {"None",
+    const char* ssShaders[] = {"BlankShader",
                                "NightVisionShader",
                                "WaveringShader",
                                "PixelatedShader",
@@ -877,6 +882,7 @@ void Game::MainLoop(void){
 
     // Loop while the user did not close the window
     double lastTime = glfwGetTime();
+    use_screen_space_effects_ = true;
     while (!glfwWindowShouldClose(window_)){
         if (BASS_ChannelIsActive(menuChannel) != BASS_ACTIVE_PLAYING && gamePhase_ == GamePhase::title)
             BASS_ChannelPlay(menuChannel, FALSE);
@@ -915,18 +921,16 @@ void Game::MainLoop(void){
                 use_screen_space_effects_ = false;
             }
             else if (hp == 2) {
-                use_screen_space_effects_ = true;
                 scene_.bloodFactor = 0.1f;
                 screen_space_effect_index_ = 6;
             }
             else if (hp == 1) {
-                use_screen_space_effects_ = true;
-                scene_.bloodFactor = 0.2f;
+                scene_.bloodFactor = 0.15f;
                 screen_space_effect_index_ = 6;
             }
         }
 
-        //std::cout << camera_.GetPosition().x << " " << camera_.GetPosition().z << std::endl;
+        
 
         //check if player is at contact with an impassable entity
         checkEntityCollision();
@@ -936,7 +940,7 @@ void Game::MainLoop(void){
         glDepthMask(GL_TRUE);
         glDisable(GL_BLEND);
         glDepthFunc(GL_LESS);
-        if (!use_screen_space_effects_) {
+        if (!use_screen_space_effects_ || gamePhase_ != gameplay) {
             scene_.Draw(&camera_, gamePhase_);
         }
         else {
@@ -947,6 +951,12 @@ void Game::MainLoop(void){
             }
             
             scene_.DrawToTexture(&camera_, gamePhase_);
+            if (glm::length(ghost->GetPosition() - camera_.GetPosition()) <= 600.0f) {
+                adjustBlurFactor();
+                scene_.ApplySSE(resman_.GetResource(ssShaders[5])->GetResource());
+            }
+            
+
             scene_.DisplayTexture(resman_.GetResource(ssShaders[screen_space_effect_index_])->GetResource());
 
             if (screen_space_effect_index_ == 4) {
@@ -1360,6 +1370,21 @@ void Game::checkEntityCollision() {
 
     originalPos = camera_.GetPosition();
 
+}
+
+void Game::adjustBlurFactor() {
+    constexpr int maxBlurSamples = 100;
+    glm::vec3 ghostpos = ghost->GetPosition();
+    ghostpos.y += 25.0f;
+    float distanceToGhost = glm::length(camera_.GetPosition() - ghostpos);
+    float angleToGhost = acos(glm::dot(camera_.GetForward(), glm::normalize(ghostpos - camera_.GetPosition())));
+
+    int blurSamples = maxBlurSamples * (1.0 - std::min((angleToGhost / (M_PI / 2.0f)), 1.0));
+    if (distanceToGhost >= 400.0f) {
+        blurSamples *= 1 - ((distanceToGhost - 400.0f) / 200);
+    }
+
+    scene_.blurrSamples = std::max(std::min(blurSamples, maxBlurSamples), 1);
 }
 
 } // namespace game

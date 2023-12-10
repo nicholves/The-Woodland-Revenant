@@ -176,7 +176,7 @@ namespace game {
     glm::vec3 Camera::GetForward(void) const {
 
         glm::vec3 current_forward = orientation_ * forward_;
-        return -current_forward; // Return -forward since the camera coordinate system points in the opposite direction
+        return -glm::normalize(current_forward); // Return -forward since the camera coordinate system points in the opposite direction
     }
 
     glm::vec3 Camera::GetStraigth(void) const {

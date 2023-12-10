@@ -10,6 +10,14 @@ uniform sampler2D texture_map;
 
 void main() 
 {
+	if (num_samples <= 1) {
+		vec4 pixel;
+		pixel = texture(texture_map,uv0);
+	
+  		gl_FragColor = pixel;
+		return;
+	}
+
 	int n = num_samples;
 	vec2 sampleSize = 1 / vec2(1920, 1080);
 

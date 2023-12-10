@@ -12,7 +12,7 @@
 namespace game {
 
     // the higher this number the blurrier the scene will get but also the bigger the performance impact
-    int SceneGraph::blurrSamples = 40;
+    int SceneGraph::blurrSamples = 10;
 
     // this should be between 0 and 1. Describes how bloody the screen gets. Bigger = more blood.
     float SceneGraph::bloodFactor = 0.1f;
@@ -283,6 +283,67 @@ namespace game {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // Restore viewport
+        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    }
+
+    void SceneGraph::ApplySSE(GLuint program) {
+        // Save current viewport
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+
+        // Enable frame buffer
+        glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer_);
+        glViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+
+        // Configure output to the screen
+       //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDisable(GL_DEPTH_TEST);
+
+        // Set up quad geometry
+        glBindBuffer(GL_ARRAY_BUFFER, quad_array_buffer_);
+
+        // Select proper material (shader program)
+        glUseProgram(program);
+
+        // Setup attributes of screen-space shader
+        GLint pos_att = glGetAttribLocation(program, "position");
+        glEnableVertexAttribArray(pos_att);
+        glVertexAttribPointer(pos_att, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+
+        GLint tex_att = glGetAttribLocation(program, "uv");
+        glEnableVertexAttribArray(tex_att);
+        glVertexAttribPointer(tex_att, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+
+        GLint ratio_var = glGetUniformLocation(program, "aspect_ratio");
+        float aspect_ratio = static_cast<float>(viewport[2]) / viewport[3];
+        glUniform1f(ratio_var, aspect_ratio);
+
+        GLint blur_samples = glGetUniformLocation(program, "num_samples");
+        glUniform1i(blur_samples, blurrSamples);
+
+        GLint blood_factor = glGetUniformLocation(program, "blood_factor");
+        // 1 is fully bloody. 0 is no blood
+        glUniform1f(blood_factor, bloodFactor);
+
+        GLint pixel_spacing = glGetUniformLocation(program, "pixelSpacing");
+        glUniform1f(pixel_spacing, pixelSpacing);
+
+        // Timer
+        GLint timer_var = glGetUniformLocation(program, "timer");
+        float current_time = static_cast<float>(glfwGetTime());
+        glUniform1f(timer_var, current_time);
+
+        // Bind texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture_);
+
+        // Draw geometry
+        glDrawArrays(GL_TRIANGLES, 0, 6); // Quad: 6 coordinates
+
+        // Reset current geometry
+        glEnable(GL_DEPTH_TEST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     }
 

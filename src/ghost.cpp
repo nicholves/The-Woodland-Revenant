@@ -38,7 +38,7 @@ namespace game {
         glm::vec3 movement = glm::normalize(toPlayer) * speed * deltaTime;
 
         // Set the new position of the ghost
-        SetPosition(GetPosition() + movement);
+        SetPosition(camera->clampToGround(GetPosition() + movement, 25.0f));
 
         //check for player contact.    Change values to determine how large the range is for contact
         if (toPlayer.x <= 17.0f && toPlayer.x >= -17.0f && toPlayer.z <= 17.0f && toPlayer.z >= -17.0f && contacted == false) {

@@ -94,6 +94,8 @@ namespace game {
         void DrawToTexture(Camera* camera, GamePhase gamePhase);
         // Process and draw the texture on the screen
         void DisplayTexture(GLuint program);
+        // apply an sse to the frame buffer without drawing to screen
+        void ApplySSE(GLuint program);
         // Save texture to a file in ppm format
         void SaveTexture(char* filename);
     }; // class SceneGraph
