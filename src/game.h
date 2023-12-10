@@ -142,10 +142,12 @@ namespace game {
             void SummonSign(std::string name, glm::vec3 position, float rotation = 0);
             void SummonPlane(std::string name, std::string texture, glm::vec3 position, glm::vec3 scale, float rotation = 0);
             void SummonInstancedObjects(std::string name, std::string geometry, std::string texture, int amount, glm::vec3 scale, std::vector<boundingArea>, int seed, glm::vec3 offset = glm::vec3(0, 0, 0));
-            void SummonRuins(std::string name, glm::vec3 position, float rotation = 0);
+            void SummonRuins(std::string name, glm::vec3 position);
             void SummonDoor(std::string name, glm::vec3 position, float rotation = 0);
             void SummonGasCan(std::string name, glm::vec3 position, float rotation = 0);
             void SummonRuinWall(std::string name, glm::vec3 position, float rotation = 0);
+            void SummonKey(std::string name, glm::vec3 position);
+            void SummonInsects(std::string name, glm::vec3 position);
 
     }; // class Game
 

@@ -201,26 +201,55 @@ std::vector<std::vector<bool>> ResourceManager::GetImpassableCells(const char* i
         impassable_cells.push_back(row);
     }
 
-    // Set a cell to impassable if the maximum horizontal or vertical slope is greater than a threshold
-    const float tall_slope_threshold = 0.1f;
-
-    // Loop through all cells and get the max slope of each. Then compare against threshold
-    /*for (int i = 0; i < width; ++i) {
-        for (int j = 0; j < height; ++j) {
-            float maxHorizontalSlope = glm::max(glm::abs(terrain[i][j] - terrain[i][j+1]), glm::abs(terrain[i+1][j] - terrain[i+1][j+1]));
-            float maxVerticalSlope = glm::max(glm::abs(terrain[i][j] - terrain[i+1][j]), glm::abs(terrain[i][j+1] - terrain[i+1][j+1]));
-            
-            float maxSlope = glm::max(maxHorizontalSlope, maxVerticalSlope);
-
-            //std::cout << maxSlope << std::endl;
-
-            if (maxSlope > tall_slope_threshold) {
-                impassable_cells[i][j] = true;
-            }
-        }
-    }*/
-
     return impassable_cells;
+}
+
+void ResourceManager::CreateInsectParticles(std::string object_name, int num_particles) {
+    // Data buffer
+    GLfloat* particle = NULL;
+
+    // Number of attributes per particle: position (3), normal (3), and color (3), texture coordinates (2)
+    const int particle_att = 11;
+
+    // Allocate memory for buffer
+    try {
+        particle = new GLfloat[num_particles * particle_att];
+    }
+    catch (std::exception& e) {
+        throw e;
+    }
+
+    float u, v, w; // Work variables
+
+    for (int i = 0; i < num_particles; i++) {
+        // Get three random numbers
+        u = ((double)rand() / (RAND_MAX)) - 0.5f;
+        v = ((double)rand() / (RAND_MAX)) - 0.5f;
+        w = ((double)rand() / (RAND_MAX)) - 0.5f;
+
+        glm::vec3 normal(u, v, w); // each normal value slightly offsets the time for movement in that direction (x, y, or z) for that particles
+        glm::vec3 position(u, v, w); // randomizes start position of the particles
+        glm::vec3 color(i / (float)num_particles, 0.0, 1.0 - (i / (float)num_particles));
+
+        // Add vectors to the data buffer
+        for (int k = 0; k < 3; k++) {
+            particle[i * particle_att + k] = position[k];
+            particle[i * particle_att + k + 3] = normal[k];
+            particle[i * particle_att + k + 6] = color[k];
+        }
+    }
+
+    // Create OpenGL buffer and copy data
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, num_particles * particle_att * sizeof(GLfloat), particle, GL_STATIC_DRAW);
+
+    // Free data buffers
+    delete[] particle;
+
+    // Create resource
+    AddResource(PointSet, object_name, vbo, 0, num_particles);
 }
 
 std::vector<std::vector<float>> ResourceManager::LoadTerrainResource(ResourceType type, const std::string name, const char* terrainFilePath) {
@@ -1271,8 +1300,8 @@ void ResourceManager::CreatePlane(std::string object_name, int repeatsX) {
             vertex[i * vertex_att + j + 6] = color[j];
         }
         // uv
-        vertex[i * vertex_att + 9] = pos.x / 2 * repeatsX + 0.5;
-        vertex[i * vertex_att + 10] = pos.z / 2 + 0.5;
+        vertex[i * vertex_att + 9] = pos.x / 2 * repeatsX + 0.5f;
+        vertex[i * vertex_att + 10] = pos.z / 2 + 0.5f;
     }
 
     // Create triangles

@@ -127,8 +127,12 @@ void Game::SetupResources(void){
     //----------------------------------- Meshes ------------------------------------
     resman_.LoadCustomResource(Mesh, "SignPost", signVerticesFilepath.c_str(), signFacesFilepath.c_str());
 
+    // Load material to be applied to insect particles
+    std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/Shaders/particle_insect");
+    resman_.LoadResource(Material, "ParticleInsectMaterial", filename.c_str());
+
     //Car Mesh
-    std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/car.obj");
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/car.obj");
     resman_.LoadResource(Mesh, "Car", filename.c_str());
 
     //Cabin Mesh
@@ -305,6 +309,9 @@ void Game::SetupResources(void){
     // Asphalt Texture
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/road_tex.png");
     resman_.LoadResource(Texture, "RoadText", filename.c_str());
+
+    // Create particles for insects
+    resman_.CreateInsectParticles("InsectParticles", 10);
 
     //-------------------------------Materials-----------------------------
     filename = std::string(SHADERS_DIRECTORY) + std::string("/material");
@@ -502,7 +509,10 @@ void Game::SetupScene(void){
     SummonTree("Tree3", glm::vec3(50, 0, -100));
 
     // -- Cabin --
-    SummonCabin("Cabin", glm::vec3(1000, 0, 0), 180);
+    SummonCabin("Cabin", glm::vec3(1424, 0, 1063));
+
+    // -- Key --
+    SummonKey("Key", glm::vec3(1472, 30, 1094));
 
     // -- Signs --
     SummonSign("Sign1", glm::vec3(-150, 0, -80), 210);
@@ -518,159 +528,35 @@ void Game::SetupScene(void){
 		SummonFence("Fence" + std::to_string(i+3), glm::vec3(-160 + 20*i, 0, -120));
 	}
 
-    SummonRuins("Ruins", glm::vec3(-100, 0, -200), 0);
+    // -- Ruins --
+    SummonRuins("Ruins", glm::vec3(954, 0, -20));
 
-    // Tree Border
-    /*for (int i = 0; i < 10; ++i) {
-        std::cout << i << std::endl;
-        SetupTree("TreeBorder" + std::to_string(i) + "A");
-        SceneNode* treeA = scene_.GetNode("TreeBorder" + std::to_string(i) + "A_branch0");
-        treeA->Scale(glm::vec3(5, 5, 5));
-        treeA->Translate(glm::vec3(-230 + i * 200, 0, -230));
-    }*/
-
-    //Rock1
-    /*geom = resman_.GetResource("Rock_1");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("Rock_1Texture");
-    rock1_ = scene_.CreateNode("Rock1", geom, mat, text);
-    rock1_->Scale(glm::vec3(1, 1, 1));
-    rock1_->Translate(glm::vec3(175, 0, 0));
-
-    // Tree Border
-    for (int i = 0; i < 10; ++i) {
-        std::cout << i << std::endl;
-        SetupTree("TreeBorder" + std::to_string(i) + "A");
-        SceneNode* treeA = scene_.GetNode("TreeBorder" + std::to_string(i) + "A_branch0");
-        treeA->Scale(glm::vec3(5, 5, 5));
-        treeA->Translate(glm::vec3(-230 + i * 200, 0, -230));
-    }
-
-    // Trees
-    SetupTree("Tree1");
-    SetupTree("Tree2");
-
-    /*
-    
-
-    //GasCan
-    geom = resman_.GetResource("GasCan");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("GasCanTex");
-    gasCan_ = scene_.CreateNode("GasCan", geom, mat, text);
-    gasCan_->Scale(glm::vec3(5, 5, 5));
-    // Create a quaternion for a 90-degree rotation
-    glm::quat rotationQuat = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    gasCan_->Rotate(rotationQuat);
-    gasCan_->Translate(glm::vec3(-170, 35, -170));
-    scene_.AddNode(gasCan_);
-
-    //door
-    geom = resman_.GetResource("Door");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("DoorTex");
-    door_ = scene_.CreateNode("Door", geom, mat, text);
-    door_->Scale(glm::vec3(0.15, 0.15, 0.15));
-    door_->Translate(glm::vec3(-135, 30, -165));
-
-    //Stone Wall for Ruin
-    geom = resman_.GetResource("StoneWall");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("RuinTex");
-    sWall_ = scene_.CreateNode("StoneWall", geom, mat, text);
-    sWall_->Scale(glm::vec3(0.1, 0.1, 0.1));
-    sWall_->Translate(glm::vec3(-85, 30, -165));
-
-    //Stone Wall for Ruin
-    geom = resman_.GetResource("StoneWallBent");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("RuinTex");
-    sWallBent_ = scene_.CreateNode("StoneWallBent", geom, mat, text);
-    sWallBent_->Scale(glm::vec3(0.2, 0.2, 0.2));
-    sWallBent_->Translate(glm::vec3(-85, 30, -130));
-
-    //Entity Object for testing
-    geom = resman_.GetResource("GasCan");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("GasCanTex");
-    Entity* sWall2 = new Entity("EntityCan", geom, mat, text);
-    sWall2->Scale(glm::vec3(5, 5, 5));
-    sWall2->Translate(glm::vec3(-85, 30, -90));
-    scene_.AddNode(sWall2);
-    entities.push_back(sWall2);*/
-
-    //Sparkles
-    /*geom = resman_.GetResource("SphereParticles");
-    mat = resman_.GetResource("Particle");
-    text = resman_.GetResource("SparkleTexture");
-
-    SceneNode* particles = scene_.CreateNode("TestSparkles1", geom, mat, text);
-    particles->SetBlending(true);
-    particles->Translate(glm::vec3(0, 30, 100));*/
-
-    //Clouds
-    /*geom = resman_.GetResource("SphereParticles");
-    mat = resman_.GetResource("Particle");
-    text = resman_.GetResource("CloudTexture");
-
-    particles = scene_.CreateNode("TestSparkles2", geom, mat, text);
-    particles->SetBlending(true);
-    particles->Translate(glm::vec3(0, 30, 110));
-
-    
-    particles->Translate(glm::vec3(0, 30, 110));*/
-
-    
-
-
-    // Test interactable geometry
-    // Create 3 keys
-    /*geom = resman_.GetResource("Key");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("KeyTexture");
-
-    glm::vec3 key_held_pos = glm::vec3(-3, -1, 8);
-    glm::vec3 key_held_scale = glm::vec3(12, 12, 12);
-    glm::quat key_held_orientation = glm::angleAxis(glm::radians(-95.0f), glm::vec3(0, 1, 0));
-
-    InteractableNode* obj1 = scene_.CreateInteractableNode("Interactable1", geom, mat, text);
-    obj1->Translate(glm::vec3(0,30,0));
-    obj1->Scale(glm::vec3(35, 35, 35));
-    obj1->SetPositioning(key_held_pos, key_held_scale, key_held_orientation, obj1->GetScale(), obj1->GetOrientation());
-
-    InteractableNode* obj2 = scene_.CreateInteractableNode("Interactable2", geom, mat, text);
-    obj2->Translate(glm::vec3(0, 30, 40));
-    obj2->Scale(glm::vec3(35, 35, 35));
-    obj2->SetPositioning(key_held_pos, key_held_scale, key_held_orientation, obj2->GetScale(), obj2->GetOrientation());
-
-    InteractableNode* obj3 = scene_.CreateInteractableNode("Interactable3", geom, mat, text);
-    obj3->Translate(glm::vec3(0, 30, -40));
-    obj3->Scale(glm::vec3(35, 35, 35));
-    obj3->SetPositioning(key_held_pos, key_held_scale, key_held_orientation, obj3->GetScale(), obj3->GetOrientation());
-
-    // Create starting particles for the keys
-    geom = resman_.GetResource("SphereParticles");
-    mat = resman_.GetResource("Particle");
-    text = resman_.GetResource("SparkleTexture");
-
-    SceneNode* particles1 = scene_.CreateNode("Sparkles1", geom, mat, text);
-    particles1->SetBlending(true);
-    SceneNode* particles2 = scene_.CreateNode("Sparkles2", geom, mat, text);
-    particles2->SetBlending(true);
-    SceneNode* particles3 = scene_.CreateNode("Sparkles3", geom, mat, text);
-    particles3->SetBlending(true);
-
-    obj1->SetParticles(particles1);
-    obj2->SetParticles(particles2);
-    obj3->SetParticles(particles3);*/
+    // -- Insects --
+    SummonInsects("Insect1", glm::vec3(0, 30, 0));
+    SummonInsects("Insect2", glm::vec3(600, 30, -100));
+    SummonInsects("Insect3", glm::vec3(1200, 30, 100));
 }
 
-void Game::SummonRuins(std::string name, glm::vec3 position, float rotation) {
-    SummonGasCan(name + "GasCan", position, rotation);
-    SummonDoor(name + "Door", position + glm::vec3(0, 0, 50), rotation);
-    SummonRuinWall(name + "Wall1", position + glm::vec3(22, 0, 50), rotation);
-    SummonRuinWall(name + "Wall2", position + glm::vec3(-22, 0, 50), rotation);
-    SummonRuinWall(name + "Wall3", position + glm::vec3(-40, 0, 0), rotation + 90);
+void Game::SummonRuins(std::string name, glm::vec3 position) {
+    SummonGasCan(name + "GasCan", position + glm::vec3(0, 0, 20), 0);
+    SummonDoor(name + "Door", position + glm::vec3(0, 0, 50), 0);
+    SummonRuinWall(name + "Wall1", position + glm::vec3(25, 0, 50), 0);
+    SummonRuinWall(name + "Wall2", position + glm::vec3(-25, 0, 50), 0);
+    SummonRuinWall(name + "Wall3", position + glm::vec3(-40, 0, 10), 90);
+    SummonRuinWall(name + "Wall4", position + glm::vec3(40, 0, 10),270);
+    SummonRuinWall(name + "Wall5", position + glm::vec3(-40, 0, 30), 90);
+    SummonRuinWall(name + "Wall6", position + glm::vec3(40, 0, 30), 270);
+    SummonRuinWall(name + "Wall7", position + glm::vec3(0, 0, 0), 180);
+    SummonRuinWall(name + "Wall8", position + glm::vec3(-22, 0, 0), 180);
+    SummonRuinWall(name + "Wall9", position + glm::vec3(22, 0, 0), 180);
+}
+
+void Game::SummonInsects(std::string name, glm::vec3 position) {
+    Resource* geom = resman_.GetResource("SphereParticles");
+    Resource* mat = resman_.GetResource("ParticleInsectMaterial");
+    Resource* text = resman_.GetResource("SparkleTexture");
+    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
+    node->SetPosition(position);
 }
 
 void Game::SummonDoor(std::string name, glm::vec3 position, float rotation) {
@@ -684,26 +570,55 @@ void Game::SummonDoor(std::string name, glm::vec3 position, float rotation) {
     door_->UpdateYPos(terrain_grid_, 0);
 }
 
+void Game::SummonKey(std::string name, glm::vec3 position) {
+    Resource* geom = resman_.GetResource("Key");
+    Resource* mat = resman_.GetResource("LitTextureShader");
+    Resource* text = resman_.GetResource("KeyTexture");
+
+    glm::vec3 key_held_pos = glm::vec3(-3, -1, 8);
+    glm::vec3 key_held_scale = glm::vec3(12, 12, 12);
+    glm::quat key_held_orientation = glm::angleAxis(glm::radians(-95.0f), glm::vec3(0, 1, 0));
+
+    InteractableNode* obj1 = scene_.CreateInteractableNode(name, geom, mat, text);
+    obj1->Translate(position);
+    obj1->Scale(glm::vec3(35, 35, 35));
+    obj1->SetPositioning(key_held_pos, key_held_scale, key_held_orientation, obj1->GetScale(), obj1->GetOrientation());
+
+    // Create starting particles for the keys
+    geom = resman_.GetResource("SphereParticles");
+    mat = resman_.GetResource("Particle");
+    text = resman_.GetResource("SparkleTexture");
+
+    SceneNode* particles1 = scene_.CreateNode(name + "Sparkles", geom, mat, text);
+    particles1->SetBlending(true);
+
+    obj1->SetParticles(particles1);
+}
+
 void Game::SummonGasCan(std::string name, glm::vec3 position, float rotation) {
     Resource* geom = resman_.GetResource("GasCan");
     Resource* mat = resman_.GetResource("LitTextureShader");
     Resource* text = resman_.GetResource("GasCanTex");
-    scene_.CreateInteractableNode(name, geom, mat, text);
-    scene_.GetNode(name)->Scale(glm::vec3(5, 5, 5));
-    scene_.GetNode(name)->Translate(glm::vec3(position));
-    scene_.GetNode(name)->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
-    scene_.GetNode(name)->UpdateYPos(terrain_grid_, 1);
+    SceneNode* node = scene_.CreateInteractableNode(name, geom, mat, text);
+    node->Scale(glm::vec3(5, 5, 5));
+    node->Translate(glm::vec3(position));
+    node->SetOrientation(glm::angleAxis(glm::radians(90.0f), glm::vec3(0, 0, 1)));
+    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+    node->UpdateYPos(terrain_grid_, 1);
 }
 
 void Game::SummonRuinWall(std::string name, glm::vec3 position, float rotation) {
     Resource* geom = resman_.GetResource("StoneWall");
 	Resource* mat = resman_.GetResource("LitTextureShader");
 	Resource* text = resman_.GetResource("RuinTex");
-	scene_.CreateNode(name, geom, mat, text);
-	scene_.GetNode(name)->Scale(glm::vec3(0.05, 0.05, 0.05));
-	scene_.GetNode(name)->Translate(glm::vec3(position));
-	scene_.GetNode(name)->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
-	scene_.GetNode(name)->UpdateYPos(terrain_grid_, 1);
+    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
+    node->Scale(glm::vec3(0.05, 0.05, 0.05));
+    node->Translate(glm::vec3(position));
+    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+    node->UpdateYPos(terrain_grid_, 1);
+
+    Entity entity(rotation == 90 || rotation == 270 ? 5.0f : 22.0f, 25.0f, rotation == 90 || rotation == 270 ? 22.0f : 5.0f, camera_.clampToGround(glm::vec3(position.x, 50, position.z), -3));
+    entities.push_back(entity);
 }
 
 void Game::SummonFence(std::string name, glm::vec3 position, float rotation) {
@@ -1011,9 +926,6 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
         else if (game->gamePhase_ == gameLost || game->gamePhase_ == gameWon) {
             // Quit game now that the game is over
             glfwSetWindowShouldClose(window, true);
-        }
-        else {
-            std::cout << game->camera_.GetPosition().x << " " << game->camera_.GetPosition().z << std::endl;
         }
     }
 

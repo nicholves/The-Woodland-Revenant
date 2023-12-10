@@ -55,6 +55,9 @@ namespace game {
             // Taken from assignment 7, wall is used for river and road geometry
             void CreateWall(std::string object_name, glm::vec3 color);
 
+            // Creates particles for some insects
+            void CreateInsectParticles(std::string object_name, int num_particles);
+
             // Create a plane, used for UI
             void CreatePlane(std::string object_name, int repeatsX = 1);
 
