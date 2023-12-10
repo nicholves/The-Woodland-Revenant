@@ -332,22 +332,6 @@ namespace game {
         view_matrix_ *= trans;
     }
 
-    bool Camera::getImmune() {
-        return isImmune;
-    }
-
-    float Camera::getTimer() {
-        return immuneTimer;
-    }
-
-    void Camera::setImmune(bool immune) {
-        isImmune = immune;
-    }
-
-    void Camera::setTimer(float timer) {
-        immuneTimer = timer;
-    }
-
     // Function to update the camera's bounding box
     void Camera::updateBoundingBox() {
         // Set the bounding box around the camera position

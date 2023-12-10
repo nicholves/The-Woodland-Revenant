@@ -6,6 +6,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <BASS/bass.h>
 
 #include "scene_graph.h"
 #include "resource_manager.h"
@@ -84,9 +85,10 @@ namespace game {
             // Camera abstraction
             Camera camera_;
 
-            // Flag to turn animation on/off
-            bool animating_;
-            
+            // sound effect channel
+            HCHANNEL oofChannel_;
+            HCHANNEL deathChannel_;
+
             // Flag to use screen space effects or not
             bool use_screen_space_effects_ = false;
             int screen_space_effect_index_ = 0;
@@ -123,8 +125,7 @@ namespace game {
             GamePhase gamePhase_ = title;
 
             //collision with ghost
-            void ghostContact();
-            void playerImmunity(float deltaTime);
+            bool ghostContact();
 
             //entity collisions
             void checkEntityCollision();

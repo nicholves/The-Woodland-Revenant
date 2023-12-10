@@ -41,12 +41,8 @@ namespace game {
         SetPosition(GetPosition() + movement);
 
         //check for player contact.    Change values to determine how large the range is for contact
-        if (toPlayer.x <= 15.0f && toPlayer.x >= -15.0f && toPlayer.z <= 15.0f && toPlayer.z >= -15.0f && contacted == false) {
-
-            //player is not immune
-            if (camera->getImmune() == false) {
-                contacted = true;
-            }
+        if (toPlayer.x <= 17.0f && toPlayer.x >= -17.0f && toPlayer.z <= 17.0f && toPlayer.z >= -17.0f && contacted == false) {
+            contacted = true;
         }
         else {
             contacted = false;

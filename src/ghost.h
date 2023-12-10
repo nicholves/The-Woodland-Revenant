@@ -37,7 +37,7 @@ namespace game {
     private:
 
         bool contacted = false; //boolean to see if in contact with player
-        float speed = 25.0;
+        float speed = 75.0;
 
     }; // class Ghost
 

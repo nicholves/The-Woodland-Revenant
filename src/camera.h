@@ -67,13 +67,6 @@ namespace game {
         void SetupShader(GLuint program);
         void SetupShaderSkybox(GLuint program);
 
-        //general get and set
-        bool getImmune();
-        float getTimer();
-
-        void setImmune(bool immune);
-        void setTimer(float timer);
-
         //bounding box
         void updateBoundingBox();
         BoundingBox getBBox();
@@ -93,9 +86,6 @@ namespace game {
 
         // Create view matrix from current camera parameters
         void SetupViewMatrix(void);
-
-        bool isImmune = false;
-        float immuneTimer = 0.0f;
 
         BoundingBox boundingBox;
         
