@@ -9,8 +9,6 @@
 #include "path_config.h"
 #include "instanced_object.h"
 
-#include <BASS/bass.h>
-
 #define GAMEPLAY_MUSIC_VOLUME 0.2f
 #define INITIAL_MENU_MUSIC_VOLUME 0.3f
 
@@ -30,9 +28,9 @@ float camera_near_clip_distance_g = 0.01f;
 float camera_far_clip_distance_g = 1000.0;
 float camera_fov_g = 60.0; // Field-of-view of camera (degrees)
 const glm::vec3 viewport_background_color_g(0.0, 0.0, 0.0);
-glm::vec3 camera_position_g(0.0, 0.0, 100.0);
-glm::vec3 camera_look_at_g(0.0, 0.0, 110.0);
-glm::vec3 camera_up_g(0.0, 1.0, 0.0);
+const glm::vec3 camera_position_g(0.0, 0.0, 100.0);
+const glm::vec3 camera_look_at_g(0.0, 0.0, 110.0);
+const glm::vec3 camera_up_g(0.0, 1.0, 0.0);
 
 // Materials 
 const std::string material_directory_g = MATERIAL_DIRECTORY;
@@ -46,7 +44,6 @@ void Game::Init(void){
     InitEventHandlers();
 
     // Set variables
-    animating_ = true;
     lastMousePos_ = glm::vec2(window_width_g / 2, window_height_g / 2);
     last_interacted_ = glfwGetTime();
 
@@ -366,6 +363,28 @@ void Game::SetupResources(void){
     terrain_grid_ = terrain;
     camera_.SetTerrainGrid(terrain);
     camera_.SetImpassableCells(resman_.GetImpassableCells(MATERIAL_DIRECTORY "/impassable.csv", terrain));
+
+    const char* filepath = AUDIO_DIRECTORY "/oof.wav";
+    HSAMPLE oofSample = BASS_SampleLoad(FALSE, filepath, 0, 0, 3, BASS_SAMPLE_OVER_POS);
+    if (oofSample == 0) {
+        MessageBox(NULL, "Failed to load sound file!", "Error", MB_OK | MB_ICONERROR);
+        BASS_Free();
+        throw ("ERROR: BASS FAILED TO LOAD SOUND FILE" + std::string(filepath));
+    }
+
+    oofChannel_ = BASS_SampleGetChannel(oofSample, FALSE);
+    BASS_ChannelSetAttribute(oofChannel_, BASS_ATTRIB_VOL, 0.5f);
+
+    const char* filepath2 = AUDIO_DIRECTORY "/death.wav";
+    HSAMPLE deathSample = BASS_SampleLoad(FALSE, filepath2, 0, 0, 3, BASS_SAMPLE_OVER_POS);
+    if (oofSample == 0) {
+        MessageBox(NULL, "Failed to load sound file!", "Error", MB_OK | MB_ICONERROR);
+        BASS_Free();
+        throw ("ERROR: BASS FAILED TO LOAD SOUND FILE" + std::string(filepath2));
+    }
+
+    deathChannel_ = BASS_SampleGetChannel(deathSample, FALSE);
+    BASS_ChannelSetAttribute(deathChannel_, BASS_ATTRIB_VOL, 0.5f);
 }
 
 
@@ -651,9 +670,6 @@ void Game::SetupScene(void){
     obj1->SetParticles(particles1);
     obj2->SetParticles(particles2);
     obj3->SetParticles(particles3);*/
-
-    
-    
 }
 
 void Game::SummonFence(std::string name, glm::vec3 position, float rotation) {
@@ -859,10 +875,11 @@ void Game::MainLoop(void){
                 BASS_ChannelStop(menuChannel);
         }
 
+        if (gamePhase_ == GamePhase::gameplay) {
+            checkKeys(deltaTime);
 
-        checkKeys(deltaTime);
-
-        scene_.Update(&camera_, deltaTime, gamePhase_);
+            scene_.Update(&camera_, deltaTime, gamePhase_);
+        }
 
         // Move invisible camera vertex to the camera's current position
         SceneNode* cam_vertex = scene_.GetNode("CameraVertex");
@@ -870,9 +887,26 @@ void Game::MainLoop(void){
         cam_vertex->SetOrientation(camera_.GetOrientation());
 
         //check if contact with player has been made
-        ghostContact();
-
-        playerImmunity(static_cast<float>(deltaTime));
+        if (ghostContact()) {
+            if (hp <= 0) {
+                gamePhase_ = GamePhase::gameLost;
+                camera_.SetView(camera_position_g, camera_look_at_g, camera_up_g);
+                camera_.SetPosition(glm::vec3(0, 50, 0)); // Initialize to UI pos
+                camera_.UpdateYPos();
+                // don't render sse on lose screen
+                use_screen_space_effects_ = false;
+            }
+            else if (hp == 2) {
+                use_screen_space_effects_ = true;
+                scene_.bloodFactor = 0.1f;
+                screen_space_effect_index_ = 6;
+            }
+            else if (hp == 1) {
+                use_screen_space_effects_ = true;
+                scene_.bloodFactor = 0.2f;
+                screen_space_effect_index_ = 6;
+            }
+        }
 
         //std::cout << camera_.GetPosition().x << " " << camera_.GetPosition().z << std::endl;
 
@@ -894,7 +928,7 @@ void Game::MainLoop(void){
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             }
             
-            scene_.DrawToTexture(&camera_);
+            scene_.DrawToTexture(&camera_, gamePhase_);
             scene_.DisplayTexture(resman_.GetResource(ssShaders[screen_space_effect_index_])->GetResource());
 
             if (screen_space_effect_index_ == 4) {
@@ -918,6 +952,8 @@ void Game::MainLoop(void){
 
     BASS_ChannelFree(menuChannel);
     BASS_ChannelFree(gameplayChannel);
+    BASS_ChannelFree(oofChannel_);
+    BASS_ChannelFree(deathChannel_);
     BASS_SampleFree(menuSample);
     BASS_SampleFree(gameplaySample);
     BASS_Free();
@@ -1241,48 +1277,54 @@ SceneNode* Game::CreateLeaf(const std::string& name) {
 
 
 //collision with ghost
-void Game::ghostContact() {
+bool Game::ghostContact() {
+    const std::pair<float, float> possibleSpawns[] = {
+        std::pair<float, float>(-199.0f, -235.0f),
+        std::pair<float, float>(1620.0f, -235.0f),
+        std::pair<float, float>(1622.0f, 1611.0f),
+        std::pair<float, float>(-225.0f, 1630.0f)
+    };
+
+    
 
     //player contacted
     if (ghost->getContacted() == true) {
         hp -= 1;
-        //printf("Hp = %d", hp);
 
-        //do something when hp has run out
-        if (hp <= 0) {
-
+        if (hp > 0) {
+            BASS_ChannelPlay(oofChannel_, FALSE);
+        }
+        else {
+            BASS_ChannelPlay(deathChannel_, FALSE);
         }
 
-        //printf("warping num: %d", test);
-        // Generate random X and Z coordinates for the ghost to warp to after contact
-        float randomX = float(std::rand()) / float(RAND_MAX) * 800.0f - 5.0f; // Adjust the range as needed
-        float randomZ = float(std::rand()) / float(RAND_MAX) * 600.0f - 5.0f; // Adjust the range as needed
+        glm::vec3 playerPos = camera_.GetPosition();
+
+        float farthestDistance = 0;
+        size_t positionIndex = 0;
+        for (size_t i = 0; i < 4; ++i) {
+            const auto& pair = possibleSpawns[i];
+            glm::vec3 potentialGhostSpawn(pair.first, 35.0f, pair.second);
+
+            if (glm::length(potentialGhostSpawn - playerPos) > farthestDistance) {
+                farthestDistance = glm::length(potentialGhostSpawn - playerPos);
+                positionIndex = i;
+            }
+        }
+
+        glm::vec3 ghostSpawnPoint(possibleSpawns[positionIndex].first, 35, possibleSpawns[positionIndex].second);
 
         //warp ghost to random position
-        ghost->SetPosition(glm::vec3(randomX, 35, randomZ));
+        ghost->SetPosition(ghostSpawnPoint);
 
         //set contact to false
         ghost->setContacted(false);
 
-        camera_.setImmune(true);
-        camera_.setTimer(3.0f);
+        return true;
     }
+
+    return false;
 }
-
-
-void Game::playerImmunity(float deltaTime) {
-    //player immunity
-    if (camera_.getImmune() == true) {
-        float time = camera_.getTimer() - deltaTime;
-        camera_.setTimer(time);
-
-        if (camera_.getTimer() <= 0.0f) {
-            // Immunity has expired after 3 seconds
-            camera_.setImmune(false);
-        }
-    }
-}
-
 
 void Game::checkEntityCollision() {
 

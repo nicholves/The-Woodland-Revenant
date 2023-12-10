@@ -15,7 +15,7 @@ namespace game {
     int SceneGraph::blurrSamples = 40;
 
     // this should be between 0 and 1. Describes how bloody the screen gets. Bigger = more blood.
-    float SceneGraph::bloodFactor = 0.2f;
+    float SceneGraph::bloodFactor = 0.1f;
 
     // Lower number means smaller pixels
     float SceneGraph::pixelSpacing = 0.004f;
@@ -229,7 +229,7 @@ namespace game {
     }
 
 
-    void SceneGraph::DrawToTexture(Camera* camera) {
+    void SceneGraph::DrawToTexture(Camera* camera, GamePhase gamePhase) {
 
         // Save current viewport
         GLint viewport[4];
@@ -250,9 +250,25 @@ namespace game {
             background_color_[2], 0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        if (gamePhase == title) {
+            GetNode("MainMenu")->Draw(camera);
+            return;
+        }
+        else if (gamePhase == gameLost) {
+            GetNode("LoseScreen")->Draw(camera);
+            return;
+        }
+        else if (gamePhase == gameWon) {
+            GetNode("WinScreen")->Draw(camera);
+            return;
+        }
+
         // Draw all scene nodes
         for (size_t i = 0; i < node_.size(); i++) {
             if (node_[i]->GetName() == "skybox") continue;
+            if (node_[i]->GetName() == "MainMenu") continue;
+            if (node_[i]->GetName() == "LoseScreen") continue;
+            if (node_[i]->GetName() == "WinScreen") continue;
             node_[i]->Draw(camera);
         }
 
