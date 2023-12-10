@@ -187,8 +187,13 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/stoneWallBent.obj");
     resman_.LoadResource(Mesh, "StoneWallBent", filename.c_str());
 
+    // Tree
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/tree1.obj");
     resman_.LoadResource(Mesh, "Tree1", filename.c_str());
+
+    // Tree 2
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/laubbaum.obj");
+    resman_.LoadResource(Mesh, "Tree2", filename.c_str());
 
     //SphereParticles
     resman_.CreateSphereParticles("SphereParticles", 20);
@@ -244,6 +249,9 @@ void Game::SetupResources(void){
 
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/tree_tex1.png");
     resman_.LoadResource(Texture, "TreeTexture1", filename.c_str());
+
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/texture_laubbaum.png");
+    resman_.LoadResource(Texture, "TreeTexture2", filename.c_str());
 
     // Moon Texture
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/moon_texture.jpg");
@@ -449,10 +457,16 @@ void Game::SetupScene(void){
         // cabin
         // ruins
     };
-    SummonInstancedObjects("TreeInstance1", "Tree1", "TreeTexture1", 200, glm::vec3(3, 3, 3), posesToIgnore, 100);
-    SummonInstancedObjects("RockInstance1", "Rock_1", "Rock_1Texture", 50, glm::vec3(0.2f, 0.2f, 0.2f), posesToIgnore, 101);
-    SummonInstancedObjects("RockInstance2", "Rock_2", "Rock_2Texture", 50, glm::vec3(1, 1, 1), posesToIgnore, 102);
-    SummonInstancedObjects("RockInstance3", "Rock_3", "Rock_3Texture", 50, glm::vec3(2, 2, 2), posesToIgnore, 103, glm::vec3(0,0,-70));
+    SummonInstancedObjects("TreeInstance1", "Tree1", "TreeTexture1", 100, glm::vec3(3, 3, 3), posesToIgnore, 100);
+    SummonInstancedObjects("TreeInstance2", "Tree2", "TreeTexture2", 100, glm::vec3(9, 9, 9), posesToIgnore, 107);
+
+    const std::vector<boundingArea> rockPosesToIgnore{
+        // road and everything north of it
+        boundingArea{-300, 1700, -200, 1700},
+    };
+    SummonInstancedObjects("RockInstance1", "Rock_1", "Rock_1Texture", 50, glm::vec3(0.2f, 0.2f, 0.2f), rockPosesToIgnore, 101);
+    SummonInstancedObjects("RockInstance2", "Rock_2", "Rock_2Texture", 50, glm::vec3(1, 1, 1), rockPosesToIgnore, 102);
+    SummonInstancedObjects("RockInstance3", "Rock_3", "Rock_3Texture", 50, glm::vec3(2, 2, 2), rockPosesToIgnore, 103, glm::vec3(0,0,-70));
 
     // Only summon on top right of map
     const std::vector<boundingArea> gravestonePosesToIgnore{
@@ -484,6 +498,15 @@ void Game::SetupScene(void){
     for (int i = 0; i < 40; ++i) {
 		SummonFence("Fence" + std::to_string(i+3), glm::vec3(-160 + 20*i, 0, -120));
 	}
+
+    /*
+    geom = resman_.GetResource("StoneWallBent");
+    mat = resman_.GetResource("LitTextureShader");
+    text = resman_.GetResource("RuinTex");
+    sWallBent_ = scene_.CreateNode("StoneWallBent", geom, mat, text);
+    sWallBent_->Scale(glm::vec3(0.2, 0.2, 0.2));
+    sWallBent_->Translate(glm::vec3(-200, 30, -200));
+    sWallBent_->UpdateYPos(terrain_grid_, 0);*/
 
     // Tree Border
     /*for (int i = 0; i < 10; ++i) {
