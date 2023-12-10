@@ -192,6 +192,10 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/laubbaum.obj");
     resman_.LoadResource(Mesh, "Tree2", filename.c_str());
 
+    // Log
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/log.obj");
+    resman_.LoadResource(Mesh, "Log", filename.c_str());
+
     //SphereParticles
     resman_.CreateSphereParticles("SphereParticles", 20);
 
@@ -249,6 +253,10 @@ void Game::SetupResources(void){
 
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/texture_laubbaum.png");
     resman_.LoadResource(Texture, "TreeTexture2", filename.c_str());
+
+    // Log Texture
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/log_tex.png");
+    resman_.LoadResource(Texture, "LogTexture", filename.c_str());
 
     // Moon Texture
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/moon_texture.jpg");
@@ -519,6 +527,17 @@ void Game::SetupScene(void){
 	}
 
     SummonRuins("Ruins", glm::vec3(-100, 0, -200), 0);
+
+    //log summon version and interactable node version
+    //SummonLog("Log", glm::vec3(0, 0, 125), 2);
+    geom = resman_.GetResource("Log");
+    mat = resman_.GetResource("LitTextureShader");
+    text = resman_.GetResource("LogTexture");
+    InteractableNode* log2 = scene_.CreateInteractableNode("Log2", geom, mat, text);
+    log2->Scale(glm::vec3(0.05, 0.05, 0.05));
+    log2->Translate(glm::vec3(0, 0, 100));
+    log2->UpdateYPos(terrain_grid_, 5);
+
 
     // Tree Border
     /*for (int i = 0; i < 10; ++i) {
@@ -856,6 +875,22 @@ void Game::SummonPlane(std::string name, std::string texture, glm::vec3 position
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 0, 1)));
     node->UpdateYPos(terrain_grid_, -6);
 }
+
+void Game::SummonLog(std::string name, glm::vec3 position, float rotation) {
+    Resource* geom = resman_.GetResource("Log");
+    Resource* mat = resman_.GetResource("LitTextureShader");
+    Resource* text = resman_.GetResource("LogTexture");
+    SceneNode* node = scene_.CreateNode(name, geom, mat, text);
+    node->Scale(glm::vec3(0.05, 0.05, 0.05));
+    node->Translate(position);
+    node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+    node->UpdateYPos(terrain_grid_, 5);
+
+    //Entity entity(10.0f, 25.0f, 10.0f, camera_.clampToGround(glm::vec3(position.x - 10, 50, position.y), -3));
+    //entities.push_back(entity);
+}
+
+
 
 void Game::MainLoop(void){
     glfwSwapInterval(0);

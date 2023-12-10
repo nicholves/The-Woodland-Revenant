@@ -71,6 +71,8 @@ namespace game {
             SceneNode* door_;
             SceneNode* sWall_;
             SceneNode* sWallBent_;
+            SceneNode* log;
+            //InteractableNode* log2;
 
             //entities vector
             std::vector<Entity> entities;
@@ -146,6 +148,7 @@ namespace game {
             void SummonDoor(std::string name, glm::vec3 position, float rotation = 0);
             void SummonGasCan(std::string name, glm::vec3 position, float rotation = 0);
             void SummonRuinWall(std::string name, glm::vec3 position, float rotation = 0);
+            void SummonLog(std::string name, glm::vec3 position, float rotation = 0);
 
     }; // class Game
 
