@@ -542,7 +542,7 @@ void Game::SetupScene(void){
     SummonCabin("Cabin", glm::vec3(1424, 0, 1063));
 
     // -- Key --
-    SummonKey("Key", glm::vec3(1472, 30, 1094));
+    SummonKey("Key", glm::vec3(1490, 30, 1160));
 
     // -- Signs --
     SummonSign("Sign1", glm::vec3(-150, 0, -80), 210);
@@ -800,6 +800,11 @@ void Game::SummonCabin(std::string name, glm::vec3 position, float rotation) {
     node->Translate(position);
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
     node->UpdateYPos(terrain_grid_, 0);
+
+    Entity entity(32.0f, 50.0f, 45.0f, camera_.clampToGround(glm::vec3(position.x+44, 50, position.z+28), -3));
+    entities.push_back(entity);
+    Entity entity2(15.0, 50.0f, 17.0f, camera_.clampToGround(glm::vec3(position.x-5, 50, position.z+29), -3));
+    entities.push_back(entity2);
 }
 
 void Game::SummonSign(std::string name, glm::vec3 position, float rotation) {
@@ -1000,6 +1005,8 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
             // Start game
             game->gamePhase_ = gameplay;
             game->camera_.SetPosition(glm::vec3(-190, 50, -120));
+            //to be near cabin: start position below
+            //game->camera_.SetPosition(glm::vec3(1300, 50, 900));
             game->camera_.UpdateYPos();
         }
         else if (game->gamePhase_ == gameLost || game->gamePhase_ == gameWon) {
