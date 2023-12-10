@@ -359,4 +359,44 @@ namespace game {
         return boundingBox;
     }
 
+
+    void Camera::CreateRiverPath() {
+        // 1: Calculate proper index in the impassible and terrain grids (x1/2 and z1/2, as used in camera.cpp)
+        // 2: Using the indices, clear a path through the impassible grid and elevate the y-pos so the player "walks" over the log
+        // 3: Place log geometry at proper location in the world with respect to the player (after calling this function)
+
+        constexpr float sizeOfQuad = 0.1f;
+        constexpr int coord_offset = 300;
+
+        const int z1 = 20;
+        const int z2 = 26;
+
+        const float y_pos = 0.7;
+
+        // Convert x-coord to index
+        int x1 = static_cast<int>(glm::floor((position_.x + coord_offset) * sizeOfQuad));
+        
+        // Create a path in the impassable cells
+        impassable_cells_[x1 / 2][z1] = 0;
+        impassable_cells_[x1 / 2][z2] = 0;
+
+        impassable_cells_[(x1 / 2) + 1][z1] = 0;
+        impassable_cells_[(x1 / 2) + 1][z2] = 0;
+
+        impassable_cells_[(x1 / 2) - 1][z1] = 0;
+        impassable_cells_[(x1 / 2) - 1][z2] = 0;
+
+        for (int i = z1 + 1; i <= z2; ++i) {
+
+            // Create barrier along the path
+            impassable_cells_[(x1 / 2) + 1][i] = 1;
+            impassable_cells_[(x1 / 2) - 1][i] = 1;
+
+            // Elevate y-pos
+            terrain_grid_[i][(x1 / 2)] = y_pos;
+            terrain_grid_[i][(x1 / 2) + 1] = y_pos;
+            terrain_grid_[i][(x1 / 2) - 1] = y_pos;
+        }
+    }
+
 } // namespace game

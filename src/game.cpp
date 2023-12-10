@@ -983,7 +983,8 @@ void Game::checkKeys(double deltaTime) {
     bool isAKeyPressed = glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS;
     bool isDKeyPressed = glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS;
     bool isFKeyPressed = glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS;
-    bool isGKeyPressed = glfwGetKey(window_, GLFW_KEY_G) == GLFW_PRESS; // Debug: Print camera x and z
+    bool isGKeyPressed = glfwGetKey(window_, GLFW_KEY_G) == GLFW_PRESS; // Debug: Print camera coordinates
+    bool isHKeyPressed = glfwGetKey(window_, GLFW_KEY_H) == GLFW_PRESS; // Debug: Allow player to traverse river at their position
 
     bool isUpKeyPressed = glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS;
     bool isDownKeyPressed = glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS;
@@ -1013,9 +1014,17 @@ void Game::checkKeys(double deltaTime) {
     }
     if (isGKeyPressed) {
         std::cout << camera_.GetPosition().x << std::endl;
+        std::cout << camera_.GetPosition().y << std::endl;
         std::cout << camera_.GetPosition().z << std::endl;
     }
+    if (isHKeyPressed) {
+        camera_.CreateRiverPath();
 
+        // TODO: Place log geometry
+
+
+
+    }
 
     // Handle interaction
     if (isEKeyPressed) {
