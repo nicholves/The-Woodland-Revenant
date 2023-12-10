@@ -146,7 +146,7 @@ void Game::SetupResources(void){
     resman_.LoadResource(Mesh, "Rock_3", filename.c_str());
 
     //Tree
-    resman_.CreateCylinder("BranchObject", 4.0, 0.5, 10, 10);
+    resman_.CreateCylinder("BranchObject", 4.0, 0.2, 10, 10);
 
     // UI & Wall
     resman_.CreatePlane("UI");
@@ -483,9 +483,9 @@ void Game::SetupScene(void){
         // road and everything north of it
         boundingArea{-300, 1700, -200, 1700},
     };
-    SummonInstancedObjects("RockInstance1", "Rock_1", "Rock_1Texture", 50, glm::vec3(0.2f, 0.2f, 0.2f), rockPosesToIgnore, 101);
-    SummonInstancedObjects("RockInstance2", "Rock_2", "Rock_2Texture", 50, glm::vec3(1, 1, 1), rockPosesToIgnore, 102);
-    SummonInstancedObjects("RockInstance3", "Rock_3", "Rock_3Texture", 50, glm::vec3(2, 2, 2), rockPosesToIgnore, 103, glm::vec3(0,0,-70));
+    SummonInstancedObjects("RockInstance1", "Rock_1", "Rock_1Texture", 100, glm::vec3(0.2f, 0.2f, 0.2f), rockPosesToIgnore, 101);
+    SummonInstancedObjects("RockInstance2", "Rock_2", "Rock_2Texture", 100, glm::vec3(1, 1, 1), rockPosesToIgnore, 102);
+    SummonInstancedObjects("RockInstance3", "Rock_3", "Rock_3Texture", 100, glm::vec3(2, 2, 2), rockPosesToIgnore, 103, glm::vec3(0,0,-70));
 
     // Only summon on top right of map
     const std::vector<boundingArea> gravestonePosesToIgnore{
@@ -518,14 +518,7 @@ void Game::SetupScene(void){
 		SummonFence("Fence" + std::to_string(i+3), glm::vec3(-160 + 20*i, 0, -120));
 	}
 
-    /*
-    geom = resman_.GetResource("StoneWallBent");
-    mat = resman_.GetResource("LitTextureShader");
-    text = resman_.GetResource("RuinTex");
-    sWallBent_ = scene_.CreateNode("StoneWallBent", geom, mat, text);
-    sWallBent_->Scale(glm::vec3(0.2, 0.2, 0.2));
-    sWallBent_->Translate(glm::vec3(-200, 30, -200));
-    sWallBent_->UpdateYPos(terrain_grid_, 0);*/
+    SummonRuins("Ruins", glm::vec3(-100, 0, -200), 0);
 
     // Tree Border
     /*for (int i = 0; i < 10; ++i) {
@@ -670,6 +663,47 @@ void Game::SetupScene(void){
     obj1->SetParticles(particles1);
     obj2->SetParticles(particles2);
     obj3->SetParticles(particles3);*/
+}
+
+void Game::SummonRuins(std::string name, glm::vec3 position, float rotation) {
+    SummonGasCan(name + "GasCan", position, rotation);
+    SummonDoor(name + "Door", position + glm::vec3(0, 0, 50), rotation);
+    SummonRuinWall(name + "Wall1", position + glm::vec3(22, 0, 50), rotation);
+    SummonRuinWall(name + "Wall2", position + glm::vec3(-22, 0, 50), rotation);
+    SummonRuinWall(name + "Wall3", position + glm::vec3(-40, 0, 0), rotation + 90);
+}
+
+void Game::SummonDoor(std::string name, glm::vec3 position, float rotation) {
+    Resource* geom = resman_.GetResource("Door");
+    Resource* mat = resman_.GetResource("LitTextureShader");
+    Resource* text = resman_.GetResource("DoorTex");
+    door_ = scene_.CreateNode("Door", geom, mat, text);
+    door_->Scale(glm::vec3(0.1, 0.1, 0.1));
+    door_->Translate(glm::vec3(position));
+    door_->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+    door_->UpdateYPos(terrain_grid_, 0);
+}
+
+void Game::SummonGasCan(std::string name, glm::vec3 position, float rotation) {
+    Resource* geom = resman_.GetResource("GasCan");
+    Resource* mat = resman_.GetResource("LitTextureShader");
+    Resource* text = resman_.GetResource("GasCanTex");
+    scene_.CreateInteractableNode(name, geom, mat, text);
+    scene_.GetNode(name)->Scale(glm::vec3(5, 5, 5));
+    scene_.GetNode(name)->Translate(glm::vec3(position));
+    scene_.GetNode(name)->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+    scene_.GetNode(name)->UpdateYPos(terrain_grid_, 1);
+}
+
+void Game::SummonRuinWall(std::string name, glm::vec3 position, float rotation) {
+    Resource* geom = resman_.GetResource("StoneWall");
+	Resource* mat = resman_.GetResource("LitTextureShader");
+	Resource* text = resman_.GetResource("RuinTex");
+	scene_.CreateNode(name, geom, mat, text);
+	scene_.GetNode(name)->Scale(glm::vec3(0.05, 0.05, 0.05));
+	scene_.GetNode(name)->Translate(glm::vec3(position));
+	scene_.GetNode(name)->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
+	scene_.GetNode(name)->UpdateYPos(terrain_grid_, 1);
 }
 
 void Game::SummonFence(std::string name, glm::vec3 position, float rotation) {
