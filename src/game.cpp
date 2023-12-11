@@ -493,8 +493,6 @@ void Game::SetupScene(void){
         boundingArea{-300, 1700, -200, -100},
         // river
         boundingArea{-300, 1700, 90, 250},
-        // cabin
-        // ruins
     };
 
     std::vector<glm::vec3> filledPositions;
@@ -506,10 +504,10 @@ void Game::SetupScene(void){
     SummonInstancedObjects("TreeInstance2", "Tree2", "TreeTexture2", 444, glm::vec3(9, 9, 9), tree2Scale, posesToIgnore, 107, filledPositions);
 
     const std::vector<boundingArea> rockPosesToIgnore{
-        // road and everything north of it
-        boundingArea{-300, 1700, -200, -100},
-        // river
-        boundingArea{-300, 1700, 90, 250},
+        // top right of map
+        boundingArea{-300, 800, -200, 1700},
+        // top of map
+        boundingArea{-300, 1700, 100, 1700},
     };
 
     glm::vec3 rock1Scale(10.0f, 50.0f, 7.5f);
@@ -522,13 +520,9 @@ void Game::SetupScene(void){
     // Only summon on top right of map
     const std::vector<boundingArea> gravestonePosesToIgnore{
         // left of map
-        boundingArea{-300, 400, -300, 1700},
+        boundingArea{400, 1700, -300, 1700},
         // bottom of map
-        boundingArea{-300, 1700, 250, 1700},
-        // road
-        boundingArea{-300, 1700, -200, -100},
-        // river
-        boundingArea{-300, 1700, 90, 250},
+        boundingArea{-300, 1700, -300, 250},
     };
     glm::vec3 graveStoneScale(8.0f, 50.0f, 7.5f);
     SummonInstancedObjects("GraveInstance1", "Gravestone", "GravestoneTexture", 444, glm::vec3(30, 30, 30), graveStoneScale, gravestonePosesToIgnore, 104, filledPositions);
