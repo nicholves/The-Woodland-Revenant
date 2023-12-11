@@ -1173,8 +1173,9 @@ void Game::OnInteract() {
             }
 
             if (chosen_interactable) {
-                if (chosen_interactable->GetParticles())
+                if (chosen_interactable->GetParticles()) {
                     scene_.DeleteNode(chosen_interactable->GetParticles()->GetName());
+                }
 
                 held_item_ = chosen_interactable;
                 held_item_->SetParent(scene_.GetNode("CameraVertex"));

@@ -48,6 +48,7 @@ namespace game {
         // Other attributes
         scale_ = glm::vec3(1.0, 1.0, 1.0);
         blending_ = false;
+        name_ = name;
 
         glGenVertexArrays(1, &VAO);
         setupVertexAttributes(material_);

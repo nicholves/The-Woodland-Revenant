@@ -29,9 +29,9 @@ add_compile_definitions(CMAKE_PROJ_DIRECTORY="${CMAKE_SOURCE_DIR}/..")
 add_compile_definitions(CMAKE_SOURCE_DIRECTORY="${CMAKE_SOURCE_DIR}")
 
 # Other libraries needed
-set(LIBRARY_PATH C:\Users\nicho\Libraries)
+#set(LIBRARY_PATH C:\Users\nicho\Libraries)
 #set(LIBRARY_PATH C:/Users/hikel/Desktop/University/Fall\ 2023/COMP\ 3501A/Libraries)
-#set(LIBRARY_PATH C:/Users/kevin/OneDrive/Carleton/YEAR3/FALL/COMP3501/Libraries)
+set(LIBRARY_PATH C:/Users/kevin/OneDrive/Carleton/YEAR3/FALL/COMP3501/Libraries)
 #set(LIBRARY_PATH C:\Libraries)
 #set(LIBRARY_PATH C:/Program\ Files/Libraries/Libraries)
 include_directories(${LIBRARY_PATH}/include)
