@@ -561,14 +561,28 @@ void Game::SetupScene(void){
     SummonInsects("Insect3", glm::vec3(1200, 30, 100));
 
     //log summon version and interactable node version
-    //SummonLog("Log", glm::vec3(0, 0, 125), 2);
+    SummonLog("RegularLog", glm::vec3(0, 0, 125), 2);
     geom = resman_.GetResource("Log");
     mat = resman_.GetResource("LitTextureShader");
     text = resman_.GetResource("LogTexture");
-    InteractableNode* log2 = scene_.CreateInteractableNode("Log2", geom, mat, text);
+
+    InteractableNode* log2 = scene_.CreateInteractableNode("InteractableLog", geom, mat, text);
     log2->Scale(glm::vec3(0.05, 0.05, 0.05));
     log2->Translate(glm::vec3(0, 0, 100));
     log2->UpdateYPos(terrain_grid_, 5);
+
+    glm::vec3 log_held_pos = glm::vec3(-8, 0, 8);
+    glm::vec3 log_held_scale = glm::vec3(0.05, 0.05, 0.05);
+    glm::quat log_held_orientation = glm::angleAxis(0.0f, glm::vec3(0, 1, 0));
+    log2->SetPositioning(log_held_pos, log_held_scale, log_held_orientation, log2->GetScale(), log2->GetOrientation());
+
+    geom = resman_.GetResource("SphereParticles");
+    mat = resman_.GetResource("Particle");
+    text = resman_.GetResource("SparkleTexture");
+    SceneNode* log_particles = scene_.CreateNode(log2->GetName() + "Sparkles", geom, mat, text);
+    log_particles->Scale(glm::vec3(30,30,30));
+    log_particles->SetBlending(true);
+    log2->SetParticles(log_particles);
 }
 
 void Game::SummonRuins(std::string name, glm::vec3 position) {
@@ -624,6 +638,7 @@ void Game::SummonKey(std::string name, glm::vec3 position) {
     text = resman_.GetResource("SparkleTexture");
 
     SceneNode* particles1 = scene_.CreateNode(name + "Sparkles", geom, mat, text);
+    particles1->Scale(glm::vec3(30, 30, 30));
     particles1->SetBlending(true);
 
     obj1->SetParticles(particles1);
@@ -1132,6 +1147,7 @@ void Game::OnInteract() {
             Resource* mat = resman_.GetResource("Particle");
             Resource* text = resman_.GetResource("SparkleTexture");
             SceneNode* new_particles = scene_.CreateNode(held_item_->GetName() + "Sparkles", geom, mat, text);
+            new_particles->Scale(glm::vec3(30, 30, 30));
             new_particles->SetBlending(true);
 
             held_item_->SetParticles(new_particles);
