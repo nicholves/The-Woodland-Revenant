@@ -29,9 +29,9 @@ add_compile_definitions(CMAKE_PROJ_DIRECTORY="${CMAKE_SOURCE_DIR}/..")
 add_compile_definitions(CMAKE_SOURCE_DIRECTORY="${CMAKE_SOURCE_DIR}")
 
 # Other libraries needed
-#set(LIBRARY_PATH C:\Users\nicho\Libraries)
+set(LIBRARY_PATH C:\Users\nicho\Libraries)
 #set(LIBRARY_PATH C:/Users/hikel/Desktop/University/Fall\ 2023/COMP\ 3501A/Libraries)
-set(LIBRARY_PATH C:/Users/kevin/OneDrive/Carleton/YEAR3/FALL/COMP3501/Libraries)
+#set(LIBRARY_PATH C:/Users/kevin/OneDrive/Carleton/YEAR3/FALL/COMP3501/Libraries)
 #set(LIBRARY_PATH C:\Libraries)
 #set(LIBRARY_PATH C:/Program\ Files/Libraries/Libraries)
 include_directories(${LIBRARY_PATH}/include)
@@ -60,5 +60,9 @@ if(WIN32)
     # This will use the proper libraries in debug mode in Visual Studio
     set_target_properties(${PROJ_NAME} PROPERTIES DEBUG_POSTFIX _d)
 endif(WIN32)
+
+if(EXISTS "${LIBRARY_PATH}/lib/bass.lib" AND EXISTS "${LIBRARY_PATH}/include/BASS/bass.h")
+    add_compile_definitions(USE_SOUND)
+endif()
 
 configure_file(${CMAKE_SOURCE_DIR}/dlls/bass.dll ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
