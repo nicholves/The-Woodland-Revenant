@@ -962,6 +962,14 @@ void Game::MainLoop(void){
             scene_.Update(&camera_, deltaTime, gamePhase_);
         }
 
+        if (gamePhase_ == GamePhase::gameWon) {
+            camera_.SetView(camera_position_g, camera_look_at_g, camera_up_g);
+            camera_.SetPosition(glm::vec3(0, 50, 0)); // Initialize to UI pos
+            camera_.UpdateYPos();
+            // don't render sse on lose screen
+            use_screen_space_effects_ = false;
+        }
+
         // Move invisible camera vertex to the camera's current position
         SceneNode* cam_vertex = scene_.GetNode("CameraVertex");
         cam_vertex->SetPosition(camera_.GetPosition() - glm::vec3(0,3.5,0));
