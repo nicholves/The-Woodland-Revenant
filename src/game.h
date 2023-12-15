@@ -6,7 +6,9 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#ifdef USE_SOUND
 #include <BASS/bass.h>
+#endif
 
 #include "scene_graph.h"
 #include "resource_manager.h"
@@ -87,9 +89,11 @@ namespace game {
             // Camera abstraction
             Camera camera_;
 
+#ifdef USE_SOUND
             // sound effect channel
             HCHANNEL oofChannel_;
             HCHANNEL deathChannel_;
+#endif
 
             // Flag to use screen space effects or not
             bool use_screen_space_effects_ = false;

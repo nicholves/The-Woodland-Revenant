@@ -49,10 +49,12 @@ void Game::Init(void){
     lastMousePos_ = glm::vec2(window_width_g / 2, window_height_g / 2);
     last_interacted_ = glfwGetTime();
 
+#ifdef USE_SOUND
     if (!BASS_Init(-1, 44100, 0, 0, NULL)) {
         MessageBox(NULL, "BASS initialization failed!", "Error", MB_OK | MB_ICONERROR);
         throw ("ERROR: BASS LIBRARY FAILED TO INITIALIZE");
     }
+#endif
 }
 
        
@@ -384,6 +386,7 @@ void Game::SetupResources(void){
     camera_.SetTerrainGrid(terrain);
     camera_.SetImpassableCells(resman_.GetImpassableCells(MATERIAL_DIRECTORY "/impassable.csv", terrain));
 
+#ifdef USE_SOUND
     const char* filepath = AUDIO_DIRECTORY "/oof.wav";
     HSAMPLE oofSample = BASS_SampleLoad(FALSE, filepath, 0, 0, 3, BASS_SAMPLE_OVER_POS);
     if (oofSample == 0) {
@@ -405,6 +408,7 @@ void Game::SetupResources(void){
 
     deathChannel_ = BASS_SampleGetChannel(deathSample, FALSE);
     BASS_ChannelSetAttribute(deathChannel_, BASS_ATTRIB_VOL, 0.5f);
+#endif
 }
 
 
@@ -904,6 +908,7 @@ void Game::MainLoop(void){
                                "BloodyShader"
                                };
 
+#ifdef USE_SOUND
     const char* filepath = AUDIO_DIRECTORY "/Agoraphobia.mp3";
     HSAMPLE gameplaySample = BASS_SampleLoad(FALSE, filepath, 0, 0, 3, BASS_SAMPLE_OVER_POS);
     if (gameplaySample == 0) {
@@ -926,18 +931,22 @@ void Game::MainLoop(void){
     float menuMusicVolume = INITIAL_MENU_MUSIC_VOLUME;
     HCHANNEL menuChannel = BASS_SampleGetChannel(menuSample, FALSE);
     BASS_ChannelSetAttribute(menuChannel, BASS_ATTRIB_VOL, menuMusicVolume);
+#endif
 
     // Loop while the user did not close the window
     double lastTime = glfwGetTime();
     use_screen_space_effects_ = true;
     while (!glfwWindowShouldClose(window_)){
+#ifdef USE_SOUND
         if (BASS_ChannelIsActive(menuChannel) != BASS_ACTIVE_PLAYING && gamePhase_ == GamePhase::title)
             BASS_ChannelPlay(menuChannel, FALSE);
+#endif
 
         double currTime = glfwGetTime();
         double deltaTime = currTime - lastTime;
         lastTime = currTime;
 
+#ifdef USE_SOUND
         if (gamePhase_ != GamePhase::title && BASS_ChannelIsActive(menuChannel) == BASS_ACTIVE_PLAYING) {
             menuMusicVolume -= static_cast<float>(deltaTime) * (INITIAL_MENU_MUSIC_VOLUME / 6.0f);
             if (menuMusicVolume > 0.0f)
@@ -945,6 +954,7 @@ void Game::MainLoop(void){
             else
                 BASS_ChannelStop(menuChannel);
         }
+#endif
 
         if (gamePhase_ == GamePhase::gameplay) {
             checkKeys(deltaTime);
@@ -1021,10 +1031,13 @@ void Game::MainLoop(void){
         // Enable writing to depth buffer
         glDepthMask(GL_TRUE);
 
+#ifdef USE_SOUND
         if (BASS_ChannelIsActive(gameplayChannel) != BASS_ACTIVE_PLAYING && gamePhase_ == GamePhase::gameplay && BASS_ChannelIsActive(menuChannel) != BASS_ACTIVE_PLAYING)
             BASS_ChannelPlay(gameplayChannel, FALSE);
+#endif
     }
 
+#ifdef USE_SOUND
     BASS_ChannelFree(menuChannel);
     BASS_ChannelFree(gameplayChannel);
     BASS_ChannelFree(oofChannel_);
@@ -1032,6 +1045,7 @@ void Game::MainLoop(void){
     BASS_SampleFree(menuSample);
     BASS_SampleFree(gameplaySample);
     BASS_Free();
+#endif
 }
 
 
@@ -1437,12 +1451,14 @@ bool Game::ghostContact() {
     if (ghost->getContacted() == true) {
         hp -= 1;
 
+#ifdef USE_SOUND
         if (hp > 0) {
             BASS_ChannelPlay(oofChannel_, FALSE);
         }
         else {
             BASS_ChannelPlay(deathChannel_, FALSE);
         }
+#endif
 
         glm::vec3 playerPos = camera_.GetPosition();
 
