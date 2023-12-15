@@ -73,7 +73,7 @@ namespace game {
         BoundingBox getBBox();
 
         // Creates a path in the terrain_grid_ and impasssable_cells_ that the player can move through over the river
-        void CreateRiverPath();
+        int CreateRiverPath();
 
     private:
         glm::vec3 position_; // Position of camera

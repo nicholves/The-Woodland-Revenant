@@ -355,10 +355,10 @@ namespace game {
     }
 
 
-    void Camera::CreateRiverPath() {
+    int Camera::CreateRiverPath() {
         // 1: Calculate proper index in the impassible and terrain grids (x1/2 and z1/2, as used in camera.cpp)
         // 2: Using the indices, clear a path through the impassible grid and elevate the y-pos so the player "walks" over the log
-        // 3: Place log geometry at proper location in the world with respect to the player (after calling this function)
+        // 3: Return the real x position, which is where the log will be placed
 
         constexpr float sizeOfQuad = 0.1f;
         constexpr int coord_offset = 300;
@@ -392,6 +392,12 @@ namespace game {
             terrain_grid_[i][(x1 / 2) + 1] = y_pos;
             terrain_grid_[i][(x1 / 2) - 1] = y_pos;
         }
+
+        // Return real x-coord (doesn't seem to be quite right)
+        int x2 = static_cast<int>(glm::floor(position_.x * sizeOfQuad)) / sizeOfQuad;
+        int x3 = static_cast<int>(glm::ceil(position_.x * sizeOfQuad)) / sizeOfQuad;
+
+        return (x2 + x3)/2;
     }
 
 } // namespace game

@@ -537,6 +537,7 @@ void Game::SetupScene(void){
 
     // -- Key --
     SummonKey("Key", glm::vec3(1490, 30, 1160));
+    //SummonKey("Key", glm::vec3(-200, 30, -120));
 
     // -- Signs --
     SummonSign("Sign1", glm::vec3(-150, 0, -80), 210);
@@ -561,7 +562,7 @@ void Game::SetupScene(void){
     SummonInsects("Insect3", glm::vec3(1200, 30, 100));
 
     //log summon version and interactable node version
-    SummonLog("RegularLog", glm::vec3(0, 0, 125), 2);
+    SummonLog("RegularLog", glm::vec3(0, 1000, 0), 2); // Summon far away, teleport to position later
     geom = resman_.GetResource("Log");
     mat = resman_.GetResource("LitTextureShader");
     text = resman_.GetResource("LogTexture");
@@ -583,10 +584,23 @@ void Game::SetupScene(void){
     log_particles->Scale(glm::vec3(30,30,30));
     log_particles->SetBlending(true);
     log2->SetParticles(log_particles);
+
+    // Create sparkles that indicate where the player should interact to end the game
+    geom = resman_.GetResource("CameraVertex");
+    mat = resman_.GetResource("ObjectMaterial");
+    InteractableNode* end_node = scene_.CreateInteractableNode("EndVertex", geom, mat);
+
+    geom = resman_.GetResource("SphereParticles");
+    mat = resman_.GetResource("Particle");
+    text = resman_.GetResource("SparkleTexture");
+    SceneNode* end_particles = scene_.CreateNode(end_node->GetName() + "Sparkles", geom, mat, text);
+    end_particles->Scale(glm::vec3(30, 30, 30));
+    end_particles->SetBlending(true);
+    end_node->SetParticles(end_particles);
+    end_node->SetPosition(glm::vec3(0, 1000, 0));
 }
 
 void Game::SummonRuins(std::string name, glm::vec3 position) {
-    SummonGasCan(name + "GasCan", position + glm::vec3(0, 0, 20), 0);
     SummonDoor(name + "Door", position + glm::vec3(0, 0, 50), 0);
     SummonRuinWall(name + "Wall1", position + glm::vec3(25, 0, 50), 0);
     SummonRuinWall(name + "Wall2", position + glm::vec3(-25, 0, 50), 0);
@@ -597,6 +611,7 @@ void Game::SummonRuins(std::string name, glm::vec3 position) {
     SummonRuinWall(name + "Wall7", position + glm::vec3(0, 0, 0), 180);
     SummonRuinWall(name + "Wall8", position + glm::vec3(-22, 0, 0), 180);
     SummonRuinWall(name + "Wall9", position + glm::vec3(22, 0, 0), 180);
+    SummonGasCan(name + "GasCan", position + glm::vec3(0, 0, 20), 0);
 }
 
 void Game::SummonInsects(std::string name, glm::vec3 position) {
@@ -611,7 +626,7 @@ void Game::SummonDoor(std::string name, glm::vec3 position, float rotation) {
     Resource* geom = resman_.GetResource("Door");
     Resource* mat = resman_.GetResource("LitTextureShader");
     Resource* text = resman_.GetResource("DoorTex");
-    door_ = scene_.CreateNode("Door", geom, mat, text);
+    door_ = scene_.CreateNode(name, geom, mat, text);
     door_->Scale(glm::vec3(0.1, 0.1, 0.1));
     door_->Translate(glm::vec3(position));
     door_->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
@@ -648,12 +663,30 @@ void Game::SummonGasCan(std::string name, glm::vec3 position, float rotation) {
     Resource* geom = resman_.GetResource("GasCan");
     Resource* mat = resman_.GetResource("LitTextureShader");
     Resource* text = resman_.GetResource("GasCanTex");
-    SceneNode* node = scene_.CreateInteractableNode(name, geom, mat, text);
+    InteractableNode* node = scene_.CreateInteractableNode(name, geom, mat, text);
     node->Scale(glm::vec3(5, 5, 5));
     node->Translate(glm::vec3(position));
     node->SetOrientation(glm::angleAxis(glm::radians(90.0f), glm::vec3(0, 0, 1)));
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
     node->UpdateYPos(terrain_grid_, 1);
+
+    glm::vec3 gas_held_pos = glm::vec3(-3, -5, 12);
+    glm::vec3 gas_held_scale = glm::vec3(4, 4, 4);
+    glm::quat gas_held_orientation = glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 1, 0)) * glm::angleAxis(glm::radians(-90.0f), glm::vec3(1, 0, 0));
+
+    node->SetPositioning(gas_held_pos, gas_held_scale, gas_held_orientation, node->GetScale(), node->GetOrientation());
+
+    // Create starting particles for the gas can
+    geom = resman_.GetResource("SphereParticles");
+    mat = resman_.GetResource("Particle");
+    text = resman_.GetResource("SparkleTexture");
+
+    SceneNode* particles = scene_.CreateNode(name + "Sparkles", geom, mat, text);
+    particles->Scale(glm::vec3(30, 30, 30));
+    particles->SetBlending(true);
+    particles->SetOrientation(glm::angleAxis(glm::radians(-90.0f), glm::vec3(0, 0, 1)));
+
+    node->SetParticles(particles);
 }
 
 void Game::SummonRuinWall(std::string name, glm::vec3 position, float rotation) {
@@ -849,10 +882,10 @@ void Game::SummonLog(std::string name, glm::vec3 position, float rotation) {
     Resource* mat = resman_.GetResource("LitTextureShader");
     Resource* text = resman_.GetResource("LogTexture");
     SceneNode* node = scene_.CreateNode(name, geom, mat, text);
-    node->Scale(glm::vec3(0.05, 0.05, 0.05));
+    node->Scale(glm::vec3(0.05, 0.05, 0.06));
     node->Translate(position);
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
-    node->UpdateYPos(terrain_grid_, 5);
+    //node->UpdateYPos(terrain_grid_, 5);
 
     //Entity entity(10.0f, 25.0f, 10.0f, camera_.clampToGround(glm::vec3(position.x - 10, 50, position.y), -3));
     //entities.push_back(entity);
@@ -1114,8 +1147,11 @@ void Game::checkKeys(double deltaTime) {
     }
     if (isGKeyPressed) {
         std::cout << camera_.GetPosition().x << std::endl;
-        std::cout << camera_.GetPosition().y << std::endl;
-        std::cout << camera_.GetPosition().z << std::endl;
+        int x1 = static_cast<int>(glm::floor((camera_.GetPosition().x + 300) * 0.1f));
+        std::cout << x1 << std::endl;
+        
+        /*std::cout << camera_.GetPosition().y << std::endl;
+        std::cout << camera_.GetPosition().z << std::endl;*/
     }
     if (isHKeyPressed) {
         camera_.CreateRiverPath();
@@ -1143,6 +1179,61 @@ void Game::OnInteract() {
         if (held_item_) { // Drop currently held item
             //std::cout << "Dropping held item" << std::endl;
 
+            if (held_item_->GetName() == "InteractableLog") {
+                // 1. Check if near the river
+                // 2. If yes, teleport interactablelog far away, place normal log at correct position, create traversable path
+                // 3. Otherwise, treat as any other interactable
+
+                int MAX_DIST_FROM_RIVER = 10;
+                int RIVER_POS = 90; // river lies along 90 in the z-axis
+
+                if (camera_.GetPosition().z >= RIVER_POS - MAX_DIST_FROM_RIVER) {
+                    SceneNode* log = scene_.GetNode("RegularLog");
+
+                    held_item_->SetParent(NULL);
+                    held_item_->SetPosition(glm::vec3(0, 1000, 0));
+                    held_item_ = NULL;
+
+                    log->SetPosition(glm::vec3(camera_.CreateRiverPath(), 11, RIVER_POS + 80));
+
+                    return;
+                }
+            }
+            else if (held_item_->GetName() == "Key") {
+                // 1. Check if near door
+                // 2. If yes, teleport key far away, open door (maybe just instantly change orientation)
+                // 3. Otherwise, treat as any other interactable
+
+                int MAX_DIST_FROM_DOOR = 40;
+                SceneNode* door = scene_.GetNode("RuinsDoor");
+
+                if (glm::length((door->GetPosition() - camera_.GetPosition())) <= MAX_DIST_FROM_DOOR) {
+
+                    held_item_->SetParent(NULL);
+                    held_item_->SetPosition(glm::vec3(0, 1000, 0));
+                    held_item_ = NULL;
+
+                    door->SetOrientation(door->GetOrientation() * glm::angleAxis(glm::pi<float>() / 2, glm::vec3(0, 1, 0)));
+                    door->Translate(glm::vec3(-5,0,-5));
+
+                    return;
+                }
+            }
+            else if (held_item_->GetName() == "RuinsGasCan") {
+                // 1. Check if near end node
+                // 2. If yes, end game
+                // 3. Otherwise, treat as any other interactable
+
+                int MAX_DIST_FROM_END = 40;
+                SceneNode* end_node = scene_.GetNode("EndVertex");
+
+                if (glm::length((end_node->GetPosition() - camera_.GetPosition())) <= MAX_DIST_FROM_END) {
+                    void* ptr = glfwGetWindowUserPointer(window_);
+                    Game* game = (Game*)ptr;
+                    game->gamePhase_ = gameWon;
+                }
+            }
+
             Resource* geom = resman_.GetResource("SphereParticles");
             Resource* mat = resman_.GetResource("Particle");
             Resource* text = resman_.GetResource("SparkleTexture");
@@ -1155,6 +1246,7 @@ void Game::OnInteract() {
             held_item_->SetPosition(camera_.GetPosition() + 10.0f*camera_.GetForward() - glm::vec3(0, 6, 0));
             held_item_->SetOrientation(held_item_->GetWorldOrientation());
             held_item_->SetScale(held_item_->GetWorldScale());
+            held_item_->UpdateYPos(terrain_grid_,2);
 
             held_item_ = NULL;
         }
@@ -1169,20 +1261,29 @@ void Game::OnInteract() {
                 if (chosen_interactable) {
                     float dist_to_chosen = glm::length(camera_.GetPosition() - chosen_interactable->GetPosition());
                     float dist_to_new = glm::length(camera_.GetPosition() - nodes[i]->GetPosition());
-                    if (dist_to_new < dist_to_chosen) {
+                    if (dist_to_new < dist_to_chosen && nodes[i]->GetName() != "EndVertex") {
                         chosen_interactable = nodes[i];
                     }
                 }
                 else {
                     float dist_to_new = glm::length(camera_.GetPosition() - nodes[i]->GetPosition());
                     //std::cout << dist_to_new << std::endl;
-                    if (dist_to_new < INTERACT_RADIUS) {
+                    if (dist_to_new < INTERACT_RADIUS && nodes[i]->GetName() != "EndVertex") {
                         chosen_interactable = nodes[i];
                     }
                 }
             }
 
             if (chosen_interactable) {
+
+                if (chosen_interactable->GetName() == "RuinsGasCan") {
+                    // If the player picks up the gas can, teleport the end node onto the car
+                    // so that the gas can can be used properly
+
+                    SceneNode* end_node = scene_.GetNode("EndVertex");
+                    end_node->SetPosition(glm::vec3(-200, 30, -125));
+                }
+
                 if (chosen_interactable->GetParticles()) {
                     scene_.DeleteNode(chosen_interactable->GetParticles()->GetName());
                 }
