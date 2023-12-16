@@ -573,7 +573,7 @@ void Game::SetupScene(void){
 
     InteractableNode* log2 = scene_.CreateInteractableNode("InteractableLog", geom, mat, text);
     log2->Scale(glm::vec3(0.05, 0.05, 0.05));
-    log2->Translate(glm::vec3(0, 0, 100));
+    log2->Translate(glm::vec3(1381, 0, 50));
     log2->UpdateYPos(terrain_grid_, 5);
 
     glm::vec3 log_held_pos = glm::vec3(-8, 0, 8);
