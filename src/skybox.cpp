@@ -55,7 +55,7 @@ namespace game {
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     }
 
-    glm::mat4 Skybox::CalculateTransform(float current_time) const {
+    glm::mat4 Skybox::CalculateTransform(float current_time, bool base) const {
         glm::mat4 scaling = glm::scale(glm::mat4(1.0), scale_);
         glm::mat4 transf = scaling * glm::mat4();
 

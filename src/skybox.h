@@ -18,7 +18,7 @@ namespace game {
 	private:
 		virtual void SetupShader(GLuint program) override;
 
-		virtual glm::mat4 Skybox::CalculateTransform(float current_time) const override;
+		virtual glm::mat4 Skybox::CalculateTransform(float current_time, bool base=false) const override;
 	};
 
 

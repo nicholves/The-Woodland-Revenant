@@ -70,7 +70,7 @@ namespace game {
         void SetOrbitRotation(const glm::quat);
         void SetWindAffected(const bool);
 
-        virtual glm::mat4 CalculateTransform(float) const;
+        virtual glm::mat4 CalculateTransform(float, bool = false) const;
 
     protected:
         void setupVertexAttributes(GLuint program);

@@ -831,7 +831,6 @@ void Game::SummonInstancedObjects(std::string name, std::string geometry, std::s
 void Game::SummonTree(std::string name, glm::vec3 position, float rotation) {
     SetupTree(name);
     SceneNode* node = scene_.GetNode(name + "_branch0");
-    node->Scale(glm::vec3(5, 5, 5));
     node->Translate(position);
     node->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
     node->UpdateYPos(terrain_grid_, 8);
@@ -945,6 +944,8 @@ void Game::MainLoop(void){
         double currTime = glfwGetTime();
         double deltaTime = currTime - lastTime;
         lastTime = currTime;
+
+        std::cout.flush();
 
 #ifdef USE_SOUND
         if (gamePhase_ != GamePhase::title && BASS_ChannelIsActive(menuChannel) == BASS_ACTIVE_PLAYING) {
@@ -1356,10 +1357,11 @@ void Game::SetupTree(const std::string& tree_name) {
         SceneNode* branch = CreateBranch(name);
         SceneNode* parent = scene_.GetNode(parents[i]);
         branch->SetParent(parent);
+        branch->SetScale(glm::vec3(5, 5, 5));
         names[i] = name;
 
         if (i != 0) {
-            branch->SetPosition(glm::vec3(0, 3.5f, 0));
+            branch->SetPosition(glm::vec3(0, 3.5f * parent->GetScale().y, 0));
         }
 
 
@@ -1372,7 +1374,7 @@ void Game::SetupTree(const std::string& tree_name) {
 
             if (i != 0) {
                 // Translate so orbiting around the bottom of the branch
-                branch->SetOrbitTranslation(glm::vec3(0, 2, 0));
+                branch->SetOrbitTranslation(glm::vec3(0, 2 * parent->GetScale().y, 0));
                 // Orbit to the left
                 branch->SetOrbitRotation(glm::normalize(glm::angleAxis(glm::pi<float>() / 8, glm::vec3(0, 0, 1))));
                 branch->SetWindAffected(true); // Only this part is affected by wind
@@ -1385,7 +1387,7 @@ void Game::SetupTree(const std::string& tree_name) {
 
             if (i != 0) {
                 // Translate so orbiting around the bottom of the branch
-                branch->SetOrbitTranslation(glm::vec3(0, 2, 0));
+                branch->SetOrbitTranslation(glm::vec3(0, 2 * parent->GetScale().y, 0));
                 // Orbit to the right
                 branch->SetOrbitRotation(glm::normalize(glm::angleAxis(glm::pi<float>() / 8, glm::vec3(0, 0, -1))));
             }
