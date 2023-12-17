@@ -948,8 +948,6 @@ void Game::MainLoop(void){
         double deltaTime = currTime - lastTime;
         lastTime = currTime;
 
-        std::cout.flush();
-
 #ifdef USE_SOUND
         if (gamePhase_ != GamePhase::title && BASS_ChannelIsActive(menuChannel) == BASS_ACTIVE_PLAYING) {
             menuMusicVolume -= static_cast<float>(deltaTime) * (INITIAL_MENU_MUSIC_VOLUME / 6.0f);
@@ -1142,8 +1140,6 @@ void Game::checkKeys(double deltaTime) {
     bool isAKeyPressed = glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS;
     bool isDKeyPressed = glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS;
     bool isFKeyPressed = glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS;
-    bool isGKeyPressed = glfwGetKey(window_, GLFW_KEY_G) == GLFW_PRESS; // Debug: Print camera coordinates
-    bool isHKeyPressed = glfwGetKey(window_, GLFW_KEY_H) == GLFW_PRESS; // Debug: Allow player to traverse river at their position
 
     bool isUpKeyPressed = glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS;
     bool isDownKeyPressed = glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS;
@@ -1171,22 +1167,6 @@ void Game::checkKeys(double deltaTime) {
         camera_.Translate(camera_.GetSide() * trans_factor);
         camera_.updateBoundingBox();
     }
-    if (isGKeyPressed) {
-        std::cout << camera_.GetPosition().x << std::endl;
-        int x1 = static_cast<int>(glm::floor((camera_.GetPosition().x + 300) * 0.1f));
-        std::cout << x1 << std::endl;
-        
-        /*std::cout << camera_.GetPosition().y << std::endl;
-        std::cout << camera_.GetPosition().z << std::endl;*/
-    }
-    if (isHKeyPressed) {
-        camera_.CreateRiverPath();
-
-        // TODO: Place log geometry
-
-
-
-    }
 
     // Handle interaction
     if (isEKeyPressed) {
@@ -1203,8 +1183,6 @@ void Game::OnInteract() {
     if (curr_time >= last_interacted_ + INTERACT_COOLDOWN) {
 
         if (held_item_) { // Drop currently held item
-            //std::cout << "Dropping held item" << std::endl;
-
             if (held_item_->GetName() == "InteractableLog") {
                 // 1. Check if near the river
                 // 2. If yes, teleport interactablelog far away, place normal log at correct position, create traversable path
@@ -1285,8 +1263,6 @@ void Game::OnInteract() {
             held_item_ = NULL;
         }
         else { // Find nearest valid interactable
-            //std::cout << "Attempting to pick up an item" << std::endl;
-
             InteractableNode* chosen_interactable = NULL;
 
             std::vector<InteractableNode*> nodes = scene_.GetInteractableNodes();
@@ -1301,7 +1277,6 @@ void Game::OnInteract() {
                 }
                 else {
                     float dist_to_new = glm::length(camera_.GetPosition() - nodes[i]->GetPosition());
-                    //std::cout << dist_to_new << std::endl;
                     if (dist_to_new < INTERACT_RADIUS && nodes[i]->GetName() != "EndVertex") {
                         chosen_interactable = nodes[i];
                     }
@@ -1327,10 +1302,6 @@ void Game::OnInteract() {
                 held_item_->SetPosition(held_item_->GetHeldPos());
                 held_item_->SetScale(held_item_->GetHeldScale());
                 held_item_->SetOrientation(held_item_->GetHeldOrientation());
-                //std::cout << "held_item_ pos: " + std::to_string(held_item_->GetPosition().x) + " " + std::to_string(held_item_->GetPosition().y) + " " + std::to_string(held_item_->GetPosition().z) << std::endl;
-            }
-            else {
-                //std::cout << "No valid interactable found near player" << std::endl;
             }
         }
 
