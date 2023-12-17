@@ -13,7 +13,6 @@
 #include "scene_graph.h"
 #include "resource_manager.h"
 #include "camera.h"
-#include "asteroid.h"
 #include "scene_graph.h"
 
 #include "ghost.h"
