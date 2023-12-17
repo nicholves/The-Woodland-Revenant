@@ -34,6 +34,8 @@ namespace game {
         bool checkPlayerCollision(Camera* camera) const;
         void setPos(const glm::vec3& pos);
 
+        glm::vec3 getPos();
+
         // Update geometry configuration
         void Update(void);
 

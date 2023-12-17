@@ -49,6 +49,10 @@ namespace game {
         position_ = pos;
     }
 
+    glm::vec3 Entity::getPos() {
+        return position_;
+    }
+
 
     void Entity::Update(void) {
         //update bounding box

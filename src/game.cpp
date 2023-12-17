@@ -635,6 +635,9 @@ void Game::SummonDoor(std::string name, glm::vec3 position, float rotation) {
     door_->Translate(glm::vec3(position));
     door_->Rotate(glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0)));
     door_->UpdateYPos(terrain_grid_, 0);
+
+    Entity entity(rotation == 90 || rotation == 270 ? 5.0f : 22.0f, 25.0f, rotation == 90 || rotation == 270 ? 22.0f : 5.0f, camera_.clampToGround(glm::vec3(position.x, 50, position.z), -3));
+    entities.push_back(entity);
 }
 
 void Game::SummonKey(std::string name, glm::vec3 position) {
@@ -1232,6 +1235,14 @@ void Game::OnInteract() {
 
                 if (glm::length((door->GetPosition() - camera_.GetPosition())) <= MAX_DIST_FROM_DOOR) {
 
+                    for (int i = 0; i < entities.size(); ++i) {
+                        // Most reliable way to find the collision entity that represents the door
+                        if ((entities[i].getPos().x == door->GetPosition().x) && (entities[i].getPos().z == door->GetPosition().z)) {
+                            entities.erase(entities.begin() + i);
+                            break;
+                        }
+                    }
+     
                     held_item_->SetParent(NULL);
                     held_item_->SetPosition(glm::vec3(0, 1000, 0));
                     held_item_ = NULL;
