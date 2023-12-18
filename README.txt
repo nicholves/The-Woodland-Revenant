@@ -17,3 +17,6 @@ Gravestone texture: https://3.bp.blogspot.com/-jAaQUnpqX5g/VQFqfLzWdnI/AAAAAAAAH
 Water texture: https://stock.adobe.com/search?k=seamless+water+texture&asset_id=236281683
 Asphalt texture: https://opengameart.org/content/asphalt-road-texture-free
 Key, gravestone, fence models from https://www.kenney.nl/
+Tree model: https://opengameart.org/content/tree-5
+Grass texture: https://ambientcg.com/view?id=Grass001
+Rock wall (border) texture: https://ambientcg.com/view?id=Rock051
